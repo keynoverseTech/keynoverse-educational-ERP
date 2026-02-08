@@ -51,10 +51,10 @@ const MultipleImports: React.FC = () => {
     // }
     setFile(selectedFile);
     // Simulate parsing
-    parseFile(selectedFile);
+    parseFile();
   };
 
-  const parseFile = (_file: File) => {
+  const parseFile = () => {
     // Mock parsing logic
     setTimeout(() => {
       const mockData: ImportedApplicant[] = [

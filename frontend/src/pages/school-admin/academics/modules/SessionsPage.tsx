@@ -139,7 +139,7 @@ export const SessionsPage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                 <select 
                   value={currentSession.status || 'Upcoming'}
-                  onChange={e => setCurrentSession({...currentSession, status: e.target.value as any})}
+                  onChange={e => setCurrentSession({...currentSession, status: e.target.value as Session['status']})}
                   className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="Upcoming">Upcoming</option>

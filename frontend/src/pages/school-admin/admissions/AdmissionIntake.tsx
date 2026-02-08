@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calendar, 
   Clock, 
@@ -62,7 +62,10 @@ const initialIntakes: Intake[] = [
 const AdmissionIntake: React.FC = () => {
   // --- State ---
   const [intakes, setIntakes] = useState<Intake[]>(initialIntakes);
-  const [activeIntake, setActiveIntake] = useState<Intake | null>(null);
+  
+  const activeIntake = useMemo(() => 
+    intakes.find(i => i.status === 'Open' || i.status === 'Paused') || null
+  , [intakes]);
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,12 +81,6 @@ const AdmissionIntake: React.FC = () => {
 
   // Derived State for Countdown
   const [timeLeft, setTimeLeft] = useState<string>('');
-
-  // Check for active intake on load
-  useEffect(() => {
-    const active = intakes.find(i => i.status === 'Open' || i.status === 'Paused');
-    setActiveIntake(active || null);
-  }, [intakes]);
 
   // Countdown Timer Logic
   useEffect(() => {
@@ -128,7 +125,6 @@ const AdmissionIntake: React.FC = () => {
     };
 
     setIntakes([newIntake, ...intakes]);
-    setActiveIntake(newIntake);
     setIsModalOpen(false);
   };
 
@@ -138,7 +134,6 @@ const AdmissionIntake: React.FC = () => {
       i.id === activeIntake.id ? { ...i, status: 'Closed' as const } : i
     );
     setIntakes(updatedIntakes);
-    setActiveIntake(null);
   };
 
   const handlePauseIntake = () => {
@@ -148,8 +143,6 @@ const AdmissionIntake: React.FC = () => {
       i.id === activeIntake.id ? { ...i, status: newStatus } : i
     );
     setIntakes(updatedIntakes);
-    // Optimistic update for smoother UI
-    setActiveIntake({ ...activeIntake, status: newStatus }); 
   };
 
   // --- Render Helpers ---

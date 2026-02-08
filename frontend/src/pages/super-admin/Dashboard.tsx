@@ -465,7 +465,7 @@ const SuperAdminDashboard: React.FC = () => {
 
 // Helper Components
 const StatCard: React.FC<{
-  icon: any;
+  icon: React.ElementType;
   iconColor: string;
   iconBg: string;
   value: string;
@@ -473,7 +473,7 @@ const StatCard: React.FC<{
   trend?: string;
   trendUp?: boolean;
   badge?: string;
-  chartData?: any[];
+  chartData?: { value: number }[];
   chartColor?: string;
 }> = ({ icon: Icon, iconColor, iconBg, value, label, trend, trendUp, badge, chartData, chartColor }) => (
   <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
@@ -512,7 +512,7 @@ const StatCard: React.FC<{
 );
 
 const ActivityItem: React.FC<{
-  icon: any;
+  icon: React.ElementType;
   iconColor: string;
   iconBg: string;
   title: string;

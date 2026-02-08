@@ -132,7 +132,7 @@ const SchoolAdminDashboard: React.FC = () => {
             </div>
             <div className="flex items-end gap-4 h-[300px] pb-4">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Skeleton key={i} className="w-full rounded-t-lg" style={{ height: `${Math.random() * 60 + 40}%` }} />
+                <Skeleton key={i} className="w-full rounded-t-lg" style={{ height: `${((i * 17) % 60) + 40}%` }} />
               ))}
             </div>
           </div>
@@ -537,7 +537,7 @@ const SchoolAdminDashboard: React.FC = () => {
 
 // Helper Components (Reused for consistent styling)
 const StatCard: React.FC<{
-  icon: any;
+  icon: React.ElementType;
   iconColor: string;
   iconBg: string;
   value: string;
@@ -570,7 +570,7 @@ const StatCard: React.FC<{
 );
 
 const ActivityItem: React.FC<{
-  icon: any;
+  icon: React.ElementType;
   iconColor: string;
   iconBg: string;
   title: string;

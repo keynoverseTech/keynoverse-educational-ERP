@@ -320,7 +320,7 @@ const StatusCard: React.FC<{
   title: string;
   value: string;
   subtext: string;
-  icon: any;
+  icon: React.ElementType;
   color: 'blue' | 'emerald' | 'orange' | 'purple';
   subtextTrend?: 'up' | 'down';
   progress?: number;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, AlertCircle, Calendar, Settings } from 'lucide-react';
+import { Save, Calendar } from 'lucide-react';
 
 interface CreditLimit {
   level: number;
@@ -35,7 +35,7 @@ const CourseRegistrationConfig: React.FC = () => {
     allowCrossDepartmentCourses: false
   });
 
-  const handleLimitChange = (index: number, field: keyof CreditLimit, value: any) => {
+  const handleLimitChange = (index: number, field: keyof CreditLimit, value: number | string) => {
     const newLimits = [...creditLimits];
     newLimits[index] = { ...newLimits[index], [field]: value };
     setCreditLimits(newLimits);

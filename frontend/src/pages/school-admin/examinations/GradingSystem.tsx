@@ -50,7 +50,7 @@ const GradingSystem: React.FC = () => {
     setGradingScales(gradingScales.filter((s) => s.id !== id));
   };
 
-  const handleScaleChange = (id: string, field: keyof GradeScale, value: any) => {
+  const handleScaleChange = (id: string, field: keyof GradeScale, value: string | number) => {
     setGradingScales(
       gradingScales.map((s) => (s.id === id ? { ...s, [field]: value } : s))
     );

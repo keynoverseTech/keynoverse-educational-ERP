@@ -194,7 +194,7 @@ const OfficerAssignment = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Exam Role</label>
                 <select 
                   value={newOfficer.role}
-                  onChange={(e) => setNewOfficer({...newOfficer, role: e.target.value as any})}
+                  onChange={(e) => setNewOfficer({...newOfficer, role: e.target.value as Officer['role']})}
                   className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option>Invigilator</option>

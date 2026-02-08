@@ -76,7 +76,7 @@ const ResultWorkflowContent = () => {
         if (b.status === 'Submitted') nextStatus = 'Dept. Approved';
         else if (b.status === 'Dept. Approved') nextStatus = 'Faculty Approved';
         else if (b.status === 'Faculty Approved') nextStatus = 'Senate Approved';
-        return { ...b, status: nextStatus as any };
+        return { ...b, status: nextStatus as ResultBatch['status'] };
       }
       return b;
     }));

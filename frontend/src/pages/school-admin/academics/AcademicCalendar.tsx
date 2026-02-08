@@ -245,7 +245,7 @@ export default function AcademicCalendar() {
                 <select 
                   className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   value={currentEvent.type || 'lecture'}
-                  onChange={e => setCurrentEvent({...currentEvent, type: e.target.value as any})}
+                  onChange={e => setCurrentEvent({...currentEvent, type: e.target.value as CalendarEvent['type']})}
                 >
                   {eventTypes.map(t => (
                     <option key={t.value} value={t.value}>{t.label}</option>

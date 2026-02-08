@@ -12,7 +12,6 @@ import {
   CheckCircle, 
   XCircle,
   Edit,
-  Save,
   Plus,
   Trash2,
   Briefcase
@@ -119,7 +118,6 @@ export default function StaffProfile() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'roles' | 'courses' | 'security'>('overview');
-  const [isEditing, setIsEditing] = useState(false);
   const [showCourseModal, setShowCourseModal] = useState(false);
 
   // --- Actions ---
@@ -345,25 +343,29 @@ export default function StaffProfile() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar Tabs */}
         <div className="lg:col-span-1 space-y-2">
-          {[
-            { id: 'overview', label: 'Overview', icon: User },
-            { id: 'roles', label: 'Roles & Permissions', icon: Shield },
-            { id: 'courses', label: 'Academic Courses', icon: BookOpen },
-            { id: 'security', label: 'Portal Access', icon: Key },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                activeTab === tab.id 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
-            >
-              <tab.icon size={18} />
-              {tab.label}
-            </button>
-          ))}
+          {(['overview', 'roles', 'courses', 'security'] as const).map(tabId => {
+            const tabInfo = {
+              overview: { label: 'Overview', icon: User },
+              roles: { label: 'Roles & Permissions', icon: Shield },
+              courses: { label: 'Academic Courses', icon: BookOpen },
+              security: { label: 'Portal Access', icon: Key },
+            }[tabId];
+            
+            return (
+              <button
+                key={tabId}
+                onClick={() => setActiveTab(tabId)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === tabId 
+                    ? 'bg-blue-600 text-white shadow-md' 
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                <tabInfo.icon size={18} />
+                {tabInfo.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Content */}

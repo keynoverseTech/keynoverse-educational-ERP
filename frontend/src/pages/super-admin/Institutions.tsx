@@ -456,11 +456,11 @@ const InstitutionStatCard: React.FC<{
   title: string;
   value: string;
   subtext: string;
-  icon: any;
+  icon: React.ElementType;
   color: 'blue' | 'emerald' | 'orange' | 'red';
   subtextTrend?: 'up' | 'down';
   subtextColor?: string;
-  chartData?: any[];
+  chartData?: { value: number }[];
 }> = ({ title, value, subtext, icon: Icon, color, subtextTrend, subtextColor, chartData }) => {
   const colorStyles = {
     blue: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',

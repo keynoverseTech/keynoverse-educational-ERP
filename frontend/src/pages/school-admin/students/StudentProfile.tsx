@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   Search, 
@@ -182,17 +182,16 @@ export default function StudentProfile() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'academics' | 'security'>('overview');
-
-  useEffect(() => {
+  
+  // Initialize from location state if available
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(() => {
     if (location.state?.studentId) {
-      const student = MOCK_STUDENTS.find(s => s.id === location.state.studentId);
-      if (student) {
-        setSelectedStudent(student);
-      }
+      return MOCK_STUDENTS.find(s => s.id === location.state.studentId) || null;
     }
-  }, [location.state]);
+    return null;
+  });
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'academics' | 'security'>('overview');
 
   const handleBack = () => {
     if (location.state?.fromList) {
@@ -389,7 +388,7 @@ export default function StudentProfile() {
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'overview' | 'academics' | 'security')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                 activeTab === tab.id 
                   ? 'bg-blue-600 text-white shadow-md' 

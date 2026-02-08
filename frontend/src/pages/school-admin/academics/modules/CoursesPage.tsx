@@ -127,24 +127,6 @@ export const CoursesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<Partial<Course>>({});
 
-  // Helper to toggle prerequisites
-  const togglePrerequisite = (courseId: string) => {
-    const currentPrereqs = currentCourse.prerequisites || [];
-    const exists = currentPrereqs.find(p => p.courseId === courseId);
-    
-    if (exists) {
-      setCurrentCourse({
-        ...currentCourse,
-        prerequisites: currentPrereqs.filter(p => p.courseId !== courseId)
-      });
-    } else {
-      setCurrentCourse({
-        ...currentCourse,
-        prerequisites: [...currentPrereqs, { courseId, minGrade: 'C' }] // Default min grade C
-      });
-    }
-  };
-
   // --- Derived State (Dependent Dropdowns) ---
   
   const availableDepartments = useMemo(() => {

@@ -155,7 +155,7 @@ const ExamCycleSetup = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Semester</label>
                 <select 
                   value={newCycle.semester}
-                  onChange={(e) => setNewCycle({...newCycle, semester: e.target.value as any})}
+                  onChange={(e) => setNewCycle({...newCycle, semester: e.target.value as ExamCycle['semester']})}
                   className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option>First</option>
@@ -166,7 +166,7 @@ const ExamCycleSetup = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Exam Type</label>
                 <select 
                   value={newCycle.type}
-                  onChange={(e) => setNewCycle({...newCycle, type: e.target.value as any})}
+                  onChange={(e) => setNewCycle({...newCycle, type: e.target.value as ExamCycle['type']})}
                   className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option>Mid-Semester (CA)</option>

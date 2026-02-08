@@ -259,7 +259,7 @@ const Users: React.FC = () => {
 const StatsCard: React.FC<{
   title: string;
   value: string;
-  icon: any;
+  icon: React.ElementType;
   color: 'indigo' | 'emerald' | 'blue' | 'orange';
   subtext: string;
   trend: 'up' | 'down';

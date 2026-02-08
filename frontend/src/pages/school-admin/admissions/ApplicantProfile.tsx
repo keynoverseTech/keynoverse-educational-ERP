@@ -82,6 +82,20 @@ const getMockApplicant = (id: string): Applicant => ({
   }
 });
 
+const StatusBadge = ({ status }: { status: string }) => {
+  const styles = {
+    Admitted: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    Eligible: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+    Rejected: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+  };
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800'}`}>
+      {status}
+    </span>
+  );
+};
+
 const ApplicantProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -116,20 +130,6 @@ const ApplicantProfile: React.FC = () => {
       setIsProcessing(false);
       setShowConfirmModal({ show: false, action: null });
     }, 1500);
-  };
-
-  const StatusBadge = ({ status }: { status: string }) => {
-    const styles = {
-      Admitted: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-      Eligible: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-      Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-      Rejected: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-    };
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800'}`}>
-        {status}
-      </span>
-    );
   };
 
   return (

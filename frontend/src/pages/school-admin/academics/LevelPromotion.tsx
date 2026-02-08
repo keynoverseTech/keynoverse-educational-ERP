@@ -267,7 +267,7 @@ const LevelPromotion: React.FC = () => {
           {['Eligible', 'Probation', 'Withdrawn', 'Outstanding'].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab as 'Eligible' | 'Probation' | 'Withdrawn' | 'Outstanding')}
               className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 whitespace-nowrap transition-colors ${
                 activeTab === tab
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'

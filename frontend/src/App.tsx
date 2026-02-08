@@ -21,8 +21,8 @@ import DashboardLayout from './layouts/DashboardLayout';
 import AuthSelection from './pages/auth/AuthSelection';
 import SuperAdminLogin from './pages/auth/SuperAdminLogin';
 import SchoolAdminLogin from './pages/auth/SchoolAdminLogin';
-import BasicReports from './pages/school-admin/BasicReports';
-import Settings from './pages/school-admin/Settings';
+import BasicReports from './pages/school-admin/reports/BasicReports';
+import Settings from './pages/school-admin/settings-modules/Settings';
 
 // Super Admin Pages
 import SuperAdminDashboard from './pages/super-admin/Dashboard';
@@ -147,7 +147,19 @@ const schoolAdminItems = [
       { name: 'Configuration', path: '/school-admin/examinations/assessment-config' },
     ]
   },
-  { name: 'Basic Reports', path: '/school-admin/reports', icon: FileText },
+  { 
+    name: 'Reports', 
+    path: '/school-admin/reports', 
+    icon: FileText,
+    subItems: [
+      { name: 'Report Dashboard', path: '/school-admin/reports' },
+      { name: 'Admission Reports', path: '/school-admin/reports?tab=admissions' },
+      { name: 'Student Reports', path: '/school-admin/reports?tab=students' },
+      { name: 'Academic Performance', path: '/school-admin/reports?tab=academics' },
+      { name: 'Examination Reports', path: '/school-admin/reports?tab=exams' },
+      { name: 'Financial Reports', path: '/school-admin/reports?tab=finance' }
+    ]
+  },
   { name: 'Settings', path: '/school-admin/settings', icon: SettingsIcon }
 ];
 
