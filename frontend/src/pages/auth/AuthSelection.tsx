@@ -34,45 +34,85 @@ const AuthSelection: React.FC = () => {
                 </div>
 
                 {/* Cards Container */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full">
                     
                     {/* Super Admin Card */}
                     <button 
                         onClick={() => navigate('/auth/super-admin')}
-                        className="group relative flex flex-col items-center text-center p-10 rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] animate-fade-in-up"
+                        className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] animate-fade-in-up"
                         style={{ animationDelay: '100ms' }}
                     >
-                        <div className="p-5 rounded-full bg-blue-500/10 text-blue-400 mb-6 group-hover:bg-blue-500/20 group-hover:scale-110 transition-all duration-300">
-                            <Shield className="w-10 h-10" />
+                        <div className="p-4 rounded-full bg-blue-500/10 text-blue-400 mb-4 group-hover:bg-blue-500/20 group-hover:scale-110 transition-all duration-300">
+                            <Shield className="w-8 h-8" />
                         </div>
                         
-                        <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">Super Admin</h3>
-                        <p className="text-slate-400 mb-8 leading-relaxed max-w-xs mx-auto">
-                            Full system control, institution management, and global configurations.
+                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Super Admin</h3>
+                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                            System control & global configs.
                         </p>
 
-                        <div className="flex items-center gap-2 text-sm font-semibold text-blue-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
-                            Access Portal <ArrowRight className="w-4 h-4" />
+                        <div className="mt-auto flex items-center gap-2 text-xs font-semibold text-blue-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
+                            Access Portal <ArrowRight className="w-3 h-3" />
                         </div>
                     </button>
 
                     {/* School Admin Card */}
                     <button 
                         onClick={() => navigate('/auth/school-admin')}
-                        className="group relative flex flex-col items-center text-center p-10 rounded-3xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)] animate-fade-in-up"
+                        className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)] animate-fade-in-up"
                         style={{ animationDelay: '200ms' }}
                     >
-                        <div className="p-5 rounded-full bg-emerald-500/10 text-emerald-400 mb-6 group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-300">
-                            <School className="w-10 h-10" />
+                        <div className="p-4 rounded-full bg-emerald-500/10 text-emerald-400 mb-4 group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-300">
+                            <School className="w-8 h-8" />
                         </div>
                         
-                        <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">School Admin</h3>
-                        <p className="text-slate-400 mb-8 leading-relaxed max-w-xs mx-auto">
-                            Manage staff, students, courses, and day-to-day school operations.
+                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">School Admin</h3>
+                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                            Manage school operations.
                         </p>
 
-                        <div className="flex items-center gap-2 text-sm font-semibold text-emerald-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
-                            Access Portal <ArrowRight className="w-4 h-4" />
+                        <div className="mt-auto flex items-center gap-2 text-xs font-semibold text-emerald-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
+                            Access Portal <ArrowRight className="w-3 h-3" />
+                        </div>
+                    </button>
+
+                    {/* Staff Portal Card */}
+                    <button 
+                        onClick={() => navigate('/staff/dashboard')}
+                        className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)] animate-fade-in-up"
+                        style={{ animationDelay: '300ms' }}
+                    >
+                        <div className="p-4 rounded-full bg-purple-500/10 text-purple-400 mb-4 group-hover:bg-purple-500/20 group-hover:scale-110 transition-all duration-300">
+                            <School className="w-8 h-8" />
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">Staff Portal</h3>
+                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                            Classes, grading & schedule.
+                        </p>
+
+                        <div className="mt-auto flex items-center gap-2 text-xs font-semibold text-purple-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
+                            Access Portal <ArrowRight className="w-3 h-3" />
+                        </div>
+                    </button>
+
+                    {/* Student Portal Card */}
+                    <button 
+                        onClick={() => navigate('/student/dashboard')}
+                        className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-orange-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] animate-fade-in-up"
+                        style={{ animationDelay: '400ms' }}
+                    >
+                        <div className="p-4 rounded-full bg-orange-500/10 text-orange-400 mb-4 group-hover:bg-orange-500/20 group-hover:scale-110 transition-all duration-300">
+                            <School className="w-8 h-8" />
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">Student Portal</h3>
+                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                            Courses, results & fees.
+                        </p>
+
+                        <div className="mt-auto flex items-center gap-2 text-xs font-semibold text-orange-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
+                            Access Portal <ArrowRight className="w-3 h-3" />
                         </div>
                     </button>
 

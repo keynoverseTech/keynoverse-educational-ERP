@@ -2,12 +2,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import { 
   LayoutDashboard, 
   Building2, 
-  Users, 
   BookOpen, 
   UserPlus,
   ClipboardCheck,
   GraduationCap,
-  Briefcase
+  Briefcase,
+  Calendar,
+  Users,
+  FileText,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import './App.css';
 
@@ -18,6 +21,8 @@ import DashboardLayout from './layouts/DashboardLayout';
 import AuthSelection from './pages/auth/AuthSelection';
 import SuperAdminLogin from './pages/auth/SuperAdminLogin';
 import SchoolAdminLogin from './pages/auth/SchoolAdminLogin';
+import BasicReports from './pages/school-admin/BasicReports';
+import Settings from './pages/school-admin/Settings';
 
 // Super Admin Pages
 import SuperAdminDashboard from './pages/super-admin/Dashboard';
@@ -31,29 +36,48 @@ import SystemLogs from './pages/super-admin/SystemLogs';
 
 // School Admin Pages
 import SchoolAdminDashboard from './pages/school-admin/Dashboard';
+import StudentPortalDashboard from './pages/student-portal/Dashboard';
+import StaffPortalDashboard from './pages/staff-portal/Dashboard';
 // Admissions
+import AdmissionsDashboard from './pages/school-admin/admissions/AdmissionsDashboard';
+import ApplicantProfile from './pages/school-admin/admissions/ApplicantProfile';
 import ConfigureAdmissions from './pages/school-admin/admissions/ConfigureAdmissions';
 import CreateAdmission from './pages/school-admin/admissions/CreateAdmission';
 import MultipleImports from './pages/school-admin/admissions/MultipleImports';
+import AdmissionIntake from './pages/school-admin/admissions/AdmissionIntake';
 // Academics
 import ConfigureAcademic from './pages/school-admin/academics/ConfigureAcademic';
+import { AcademicDashboard } from './pages/school-admin/academics/AcademicDashboard';
+import { SessionsPage } from './pages/school-admin/academics/modules/SessionsPage';
+import { SemestersPage } from './pages/school-admin/academics/modules/SemestersPage';
+import { FacultiesPage } from './pages/school-admin/academics/modules/FacultiesPage';
+import { DepartmentsPage } from './pages/school-admin/academics/modules/DepartmentsPage';
+import { ProgrammesPage } from './pages/school-admin/academics/modules/ProgrammesPage';
+import { LevelsPage } from './pages/school-admin/academics/modules/LevelsPage';
+import { CoursesPage } from './pages/school-admin/academics/modules/CoursesPage';
+import CourseRegistrationConfig from './pages/school-admin/academics/modules/CourseRegistrationConfig';
+import RegistrationApprovals from './pages/school-admin/academics/RegistrationApprovals';
 import CourseManagement from './pages/school-admin/Courses'; // Reusing existing
 import CourseRegistration from './pages/school-admin/academics/CourseRegistration';
 import AcademicCalendar from './pages/school-admin/academics/AcademicCalendar';
+import LevelPromotion from './pages/school-admin/academics/LevelPromotion';
 // Examinations
 import AssessmentConfiguration from './pages/school-admin/examinations/AssessmentConfiguration';
-import ExamCreation from './pages/school-admin/Exams'; // Reusing existing
-import ResultsEntry from './pages/school-admin/examinations/ResultsEntry';
+import ExaminationDashboard from './pages/school-admin/examinations/ExaminationDashboard';
+import ExamCycleSetup from './pages/school-admin/examinations/ExamCycleSetup';
+import TimetableScheduling from './pages/school-admin/examinations/TimetableScheduling';
+import ScoreUpload from './pages/school-admin/examinations/ScoreUpload';
+import ResultProcessing from './pages/school-admin/examinations/ResultProcessing';
 import ResultPublication from './pages/school-admin/examinations/ResultPublication';
 // Students
-import StudentList from './pages/school-admin/Students'; // Reusing existing
 import StudentProfile from './pages/school-admin/students/StudentProfile';
-// Teachers
-import TeacherList from './pages/school-admin/teachers/TeacherList';
-import TeacherProfile from './pages/school-admin/teachers/TeacherProfile';
+import StudentList from './pages/school-admin/students/StudentList';
+import CreateStudent from './pages/school-admin/students/CreateStudent';
 // Staff
-import StaffList from './pages/school-admin/Staff'; // Reusing existing
 import StaffProfile from './pages/school-admin/staff/StaffProfile';
+import StaffList from './pages/school-admin/staff/StaffList';
+import CreateStaff from './pages/school-admin/staff/CreateStaff';
+import StaffGrading from './pages/staff-portal/StaffGrading';
 
 const superAdminItems = [
   { name: 'Overview', path: '/super-admin/dashboard', icon: LayoutDashboard },
@@ -70,58 +94,78 @@ const superAdminItems = [
 const schoolAdminItems = [
   { name: 'Overview', path: '/school-admin/dashboard', icon: LayoutDashboard },
   { 
-    name: 'Admissions', 
-    icon: UserPlus,
-    subItems: [
-      { name: 'Configure Admissions', path: '/school-admin/admissions/configure' },
-      { name: 'Create Admission', path: '/school-admin/admissions/create' },
-      { name: 'Multiple Imports', path: '/school-admin/admissions/imports' }
-    ]
-  },
-  { 
     name: 'Academics', 
     icon: BookOpen,
     subItems: [
+      { name: 'Dashboard', path: '/school-admin/academics/dashboard' },
       { name: 'Configure Academic', path: '/school-admin/academics/configure' },
       { name: 'Course Management', path: '/school-admin/academics/courses' },
       { name: 'Course Registration', path: '/school-admin/academics/registration' },
+      { name: 'Level Promotion', path: '/school-admin/academics/promotion' },
       { name: 'Academic Calendar', path: '/school-admin/academics/calendar' }
     ]
   },
   { 
-    name: 'Examination', 
-    icon: ClipboardCheck,
+    name: 'Admissions', 
+    icon: UserPlus,
     subItems: [
-      { name: 'Assessment Config', path: '/school-admin/examinations/assessment-config' },
-      { name: 'Exam Creation', path: '/school-admin/examinations/exam-creation' },
-      { name: 'Results Entry', path: '/school-admin/examinations/results-entry' },
-      { name: 'Result Publication', path: '/school-admin/examinations/result-publication' }
-    ]
-  },
-  { 
-    name: 'Student Management', 
-    icon: GraduationCap,
-    subItems: [
-      { name: 'Student List', path: '/school-admin/students/list' },
-      { name: 'Student Profile', path: '/school-admin/students/profile' }
-    ]
-  },
-  { 
-    name: 'Teacher Management', 
-    icon: Users,
-    subItems: [
-      { name: 'Teacher List', path: '/school-admin/teachers/list' },
-      { name: 'Teacher Profile', path: '/school-admin/teachers/profile' }
+      { name: 'Dashboard', path: '/school-admin/admissions/dashboard' },
+      { name: 'Configure Admissions', path: '/school-admin/admissions/configure' },
+      { name: 'Intake Management', path: '/school-admin/admissions/intake' },
+      { name: 'Create Admission', path: '/school-admin/admissions/create' },
+      { name: 'Multiple Imports', path: '/school-admin/admissions/imports' }
     ]
   },
   { 
     name: 'Staff Management', 
     icon: Briefcase,
     subItems: [
-      { name: 'Staff List', path: '/school-admin/staff/list' },
-      { name: 'Staff Profile', path: '/school-admin/staff/profile' }
+      { name: 'All Staff', path: '/school-admin/staff/list' },
+      { name: 'Staff Profile', path: '/school-admin/staff/profile' },
+      { name: 'Add Staff', path: '/school-admin/staff/create' }
     ]
-  }
+  },
+  { 
+    name: 'Student Management', 
+    icon: GraduationCap,
+    subItems: [
+      { name: 'All Students', path: '/school-admin/students/list' },
+      { name: 'Student Profile', path: '/school-admin/students/profile' },
+      { name: 'Add Student', path: '/school-admin/students/create' }
+    ]
+  },
+  { 
+    name: 'Examinations', 
+    icon: ClipboardCheck,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/examinations/dashboard' },
+      { name: 'Exam Cycle', path: '/school-admin/examinations/cycle' },
+      { name: 'Timetable', path: '/school-admin/examinations/timetable' },
+      { name: 'Score Upload', path: '/school-admin/examinations/scores' },
+      { name: 'Result Processing', path: '/school-admin/examinations/processing' },
+      { name: 'Publication', path: '/school-admin/examinations/publication' },
+      { name: 'Configuration', path: '/school-admin/examinations/assessment-config' },
+    ]
+  },
+  { name: 'Basic Reports', path: '/school-admin/reports', icon: FileText },
+  { name: 'Settings', path: '/school-admin/settings', icon: SettingsIcon }
+];
+
+const studentItems = [
+  { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
+  { name: 'My Courses', path: '/student/courses', icon: BookOpen },
+  { name: 'Results', path: '/student/results', icon: ClipboardCheck },
+  { name: 'Timetable', path: '/student/timetable', icon: Calendar },
+  { name: 'Fees', path: '/student/fees', icon: Briefcase }, // Using Briefcase as generic icon for now
+  { name: 'Profile', path: '/student/profile', icon: Users },
+];
+
+const staffItems = [
+  { name: 'Dashboard', path: '/staff/dashboard', icon: LayoutDashboard },
+  { name: 'My Classes', path: '/staff/classes', icon: Users },
+  { name: 'Grading', path: '/staff/grading', icon: ClipboardCheck },
+  { name: 'Timetable', path: '/staff/timetable', icon: Calendar },
+  { name: 'Profile', path: '/staff/profile', icon: Briefcase },
 ];
 
 function App() {
@@ -168,33 +212,89 @@ function App() {
           <Route path="/school-admin/dashboard" element={<SchoolAdminDashboard />} />
           
           {/* Admissions */}
+          <Route path="/school-admin/admissions/dashboard" element={<AdmissionsDashboard />} />
+          <Route path="/school-admin/admissions/intake" element={<AdmissionIntake />} />
+          <Route path="/school-admin/admissions/profile/:id" element={<ApplicantProfile />} />
           <Route path="/school-admin/admissions/configure" element={<ConfigureAdmissions />} />
           <Route path="/school-admin/admissions/create" element={<CreateAdmission />} />
           <Route path="/school-admin/admissions/imports" element={<MultipleImports />} />
 
           {/* Academics */}
+          <Route path="/school-admin/academics/dashboard" element={<AcademicDashboard />} />
           <Route path="/school-admin/academics/configure" element={<ConfigureAcademic />} />
-          <Route path="/school-admin/academics/courses" element={<CourseManagement />} />
+          <Route path="/school-admin/academics/sessions" element={<SessionsPage />} />
+          <Route path="/school-admin/academics/semesters" element={<SemestersPage />} />
+          <Route path="/school-admin/academics/faculties" element={<FacultiesPage />} />
+          <Route path="/school-admin/academics/departments" element={<DepartmentsPage />} />
+          <Route path="/school-admin/academics/programmes" element={<ProgrammesPage />} />
+          <Route path="/school-admin/academics/levels" element={<LevelsPage />} />
+          <Route path="/school-admin/academics/courses" element={<CoursesPage />} />
+          <Route path="/school-admin/academics/registration-config" element={<CourseRegistrationConfig />} />
+           <Route path="/school-admin/academics/registration-approvals" element={<RegistrationApprovals />} />
+           <Route path="/school-admin/academics/courses-management" element={<CourseManagement />} />
           <Route path="/school-admin/academics/registration" element={<CourseRegistration />} />
+          <Route path="/school-admin/academics/promotion" element={<LevelPromotion />} />
           <Route path="/school-admin/academics/calendar" element={<AcademicCalendar />} />
 
           {/* Examinations */}
+          <Route path="/school-admin/examinations/dashboard" element={<ExaminationDashboard />} />
+          <Route path="/school-admin/examinations/cycle" element={<ExamCycleSetup />} />
+          <Route path="/school-admin/examinations/timetable" element={<TimetableScheduling />} />
+          <Route path="/school-admin/examinations/scores" element={<ScoreUpload />} />
+          <Route path="/school-admin/examinations/processing" element={<ResultProcessing />} />
+          <Route path="/school-admin/examinations/publication" element={<ResultPublication />} />
           <Route path="/school-admin/examinations/assessment-config" element={<AssessmentConfiguration />} />
-          <Route path="/school-admin/examinations/exam-creation" element={<ExamCreation />} />
-          <Route path="/school-admin/examinations/results-entry" element={<ResultsEntry />} />
-          <Route path="/school-admin/examinations/result-publication" element={<ResultPublication />} />
 
           {/* Student Management */}
           <Route path="/school-admin/students/list" element={<StudentList />} />
           <Route path="/school-admin/students/profile" element={<StudentProfile />} />
-
-          {/* Teacher Management */}
-          <Route path="/school-admin/teachers/list" element={<TeacherList />} />
-          <Route path="/school-admin/teachers/profile" element={<TeacherProfile />} />
+          <Route path="/school-admin/students/create" element={<CreateStudent />} />
 
           {/* Staff Management */}
           <Route path="/school-admin/staff/list" element={<StaffList />} />
           <Route path="/school-admin/staff/profile" element={<StaffProfile />} />
+          <Route path="/school-admin/staff/create" element={<CreateStaff />} />
+
+          {/* Other Pages */}
+          <Route path="/school-admin/reports" element={<BasicReports />} />
+          <Route path="/school-admin/settings" element={<Settings />} />
+
+        </Route>
+
+        {/* Student Portal Routes */}
+        <Route element={
+          <DashboardLayout 
+            sidebarItems={studentItems}
+            role="Student"
+            roleSubtitle="Undergraduate"
+            userInitials="SJ"
+            sidebarTitle="Student Portal"
+            sidebarLogo={<GraduationCap className="w-5 h-5 fill-current" />}
+          >
+            <Outlet />
+          </DashboardLayout>
+        }>
+          <Route path="/student/dashboard" element={<StudentPortalDashboard />} />
+          {/* Add other student routes here as placeholders for now */}
+        </Route>
+
+        {/* Staff Portal Routes */}
+        <Route element={
+          <DashboardLayout 
+            sidebarItems={staffItems}
+            role="Staff"
+            roleSubtitle="Academic Staff"
+            userInitials="DS"
+            sidebarTitle="Staff Portal"
+            sidebarLogo={<Briefcase className="w-5 h-5 fill-current" />}
+          >
+            <Outlet />
+          </DashboardLayout>
+        }>
+          <Route path="/staff/dashboard" element={<StaffPortalDashboard />} />
+          <Route path="/staff/grading" element={<StaffGrading />} />
+          <Route path="/staff/score-upload" element={<ScoreUpload />} />
+          {/* Add other staff routes here as placeholders for now */}
         </Route>
 
       </Routes>

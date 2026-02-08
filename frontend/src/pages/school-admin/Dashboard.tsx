@@ -27,12 +27,11 @@ const attendanceData = [
 ];
 
 const performanceData = [
-  { name: 'Grade 7', value: 82 },
-  { name: 'Grade 8', value: 78 },
-  { name: 'Grade 9', value: 85 },
-  { name: 'Grade 10', value: 76 },
-  { name: 'Grade 11', value: 88 },
-  { name: 'Grade 12', value: 92 },
+  { name: '100 Lvl', value: 82 },
+  { name: '200 Lvl', value: 78 },
+  { name: '300 Lvl', value: 85 },
+  { name: '400 Lvl', value: 76 },
+  { name: '500 Lvl', value: 88 },
 ];
 
 const resourceUsageData = [
@@ -44,9 +43,25 @@ const resourceUsageData = [
 ];
 
 const recentAdmissions = [
-  { id: 1, name: 'Emma Thompson', grade: 'Grade 9', date: '12 Jan 2024', status: 'Enrolled', statusColor: 'text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400' },
-  { id: 2, name: 'Liam Johnson', grade: 'Grade 10', date: '11 Jan 2024', status: 'Pending', statusColor: 'text-orange-600 bg-orange-50 dark:bg-orange-900/30 dark:text-orange-400' },
-  { id: 3, name: 'Sophia Williams', grade: 'Grade 8', date: '10 Jan 2024', status: 'Enrolled', statusColor: 'text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400' },
+  { id: 1, name: 'Emma Thompson', grade: '100 Level', date: '12 Jan 2024', status: 'Enrolled', statusColor: 'text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400' },
+  { id: 2, name: 'Liam Johnson', grade: '200 Level', date: '11 Jan 2024', status: 'Pending', statusColor: 'text-orange-600 bg-orange-50 dark:bg-orange-900/30 dark:text-orange-400' },
+  { id: 3, name: 'Sophia Williams', grade: '100 Level', date: '10 Jan 2024', status: 'Enrolled', statusColor: 'text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400' },
+];
+
+const semesterStatus = {
+  session: '2023/2024',
+  semester: 'First Semester',
+  status: 'In Progress',
+  currentWeek: 12,
+  totalWeeks: 15,
+  startDate: 'Jan 08, 2024',
+  endDate: 'Apr 26, 2024'
+};
+
+const upcomingEvents = [
+  { id: 1, title: 'Mid-Semester Break', date: 'Feb 20 - Feb 22', type: 'Holiday', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  { id: 2, title: 'Matriculation Ceremony', date: 'Mar 05', type: 'Event', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  { id: 3, title: 'First Semester Exams', date: 'Apr 15 - Apr 26', type: 'Academic', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
 ];
 
 const SchoolAdminDashboard: React.FC = () => {
@@ -244,6 +259,79 @@ const SchoolAdminDashboard: React.FC = () => {
           label="Avg. Attendance" 
           badge="Excellent" 
         />
+      </div>
+
+      {/* Academic Overview Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Semester Status */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <BookOpen size={20} className="text-blue-600" />
+              Semester Status
+            </h3>
+            <span className="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full text-xs font-bold uppercase">
+              {semesterStatus.status}
+            </span>
+          </div>
+          
+          <div className="space-y-6">
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Current Session</p>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white">{semesterStatus.session}</h4>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Semester</p>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white">{semesterStatus.semester}</h4>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span className="font-medium text-gray-700 dark:text-gray-300">Week {semesterStatus.currentWeek} of {semesterStatus.totalWeeks}</span>
+                <span className="text-gray-500">{Math.round((semesterStatus.currentWeek / semesterStatus.totalWeeks) * 100)}% Completed</span>
+              </div>
+              <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3">
+                <div 
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-1000" 
+                  style={{ width: `${(semesterStatus.currentWeek / semesterStatus.totalWeeks) * 100}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <span>Start: {semesterStatus.startDate}</span>
+                <span>End: {semesterStatus.endDate}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* School Calendar Preview */}
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Calendar size={20} className="text-orange-600" />
+              School Calendar
+            </h3>
+            <button className="text-sm text-blue-600 font-medium hover:underline">View Full Calendar</button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {upcomingEvents.map(event => (
+              <div key={event.id} className="p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow bg-gray-50 dark:bg-gray-800/50">
+                <div className={`inline-block px-2 py-1 rounded-md text-xs font-bold mb-3 ${event.color}`}>
+                  {event.type}
+                </div>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-1">{event.title}</h4>
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <Clock size={14} />
+                  {event.date}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Charts Row */}
