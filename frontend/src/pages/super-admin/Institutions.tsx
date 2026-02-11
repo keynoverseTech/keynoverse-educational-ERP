@@ -93,7 +93,7 @@ const sparklineData = {
 
 const Institutions: React.FC = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -122,10 +122,6 @@ const Institutions: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-3">
-          <Link to="/super-admin/new-registration" className="flex items-center gap-2 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-colors shadow-lg shadow-blue-600/20">
-            <Plus size={18} />
-            <span>Register New Institution</span>
-          </Link>
           <button className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-lg transition-colors relative">
             <Bell size={18} />
             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
@@ -137,17 +133,17 @@ const Institutions: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {loading ? (
           Array(4).fill(0).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-[#151e32] p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-              <div className="flex justify-between items-start mb-3">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-9 w-9 rounded-lg" />
+            <div key={i} className="bg-white dark:bg-[#151e32] p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-40">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-12 w-12 rounded-lg" />
+                <Skeleton className="h-10 w-24" />
               </div>
-              <div className="flex items-end justify-between">
-                <div>
-                  <Skeleton className="h-8 w-16 mb-1" />
-                  <Skeleton className="h-4 w-24" />
+              <div>
+                <Skeleton className="h-3 w-24 mb-2" />
+                <div className="flex items-baseline gap-2">
+                  <Skeleton className="h-8 w-16" />
+                  <Skeleton className="h-4 w-12" />
                 </div>
-                <Skeleton className="w-20 h-12" />
               </div>
             </div>
           ))
@@ -193,9 +189,9 @@ const Institutions: React.FC = () => {
       </div>
 
       {/* Notification Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-5 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-5 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+          <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
             <Bell className="text-white" size={24} />
           </div>
           <div>
@@ -205,14 +201,14 @@ const Institutions: React.FC = () => {
         </div>
         <Link 
           to="/super-admin/applications"
-          className="px-5 py-2 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap"
+          className="px-5 py-2 bg-white text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
         >
           View Applications
         </Link>
       </div>
 
       {/* Filters & Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Filters Header */}
         <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
@@ -340,35 +336,24 @@ const Institutions: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {loading ? (
               Array(6).fill(0).map((_, i) => (
-                <div key={i} className="bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm">
-                  <div className="flex justify-between items-start mb-4">
-                    <Skeleton className="w-14 h-14 rounded-2xl" />
-                    <Skeleton className="h-6 w-20 rounded-full" />
+                <div key={i} className="bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-800 rounded-2xl p-0 shadow-sm overflow-hidden flex flex-col h-[320px]">
+                  <div className="h-24 bg-gray-100 dark:bg-gray-800/50 animate-pulse" />
+                  <div className="px-6 -mt-10 flex justify-between items-end">
+                    <Skeleton className="w-20 h-20 rounded-2xl border-4 border-white dark:border-[#151e32]" />
+                    <Skeleton className="h-6 w-24 rounded-full mb-2" />
                   </div>
-                  <Skeleton className="h-6 w-3/4 mb-1" />
-                  <Skeleton className="h-3 w-1/3 mb-5" />
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="w-8 h-8 rounded-full" />
-                      <div className="space-y-1">
-                        <Skeleton className="h-3 w-10" />
-                        <Skeleton className="h-4 w-24" />
-                      </div>
+                  <div className="p-6 pt-4 space-y-4">
+                    <div className="space-y-2">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-4 w-1/3" />
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="w-8 h-8 rounded-full" />
-                      <div className="space-y-1">
-                        <Skeleton className="h-3 w-12" />
-                        <Skeleton className="h-4 w-20" />
-                      </div>
+                    <div className="space-y-3 pt-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-full" />
                     </div>
-                  </div>
-                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                    <Skeleton className="h-4 w-16" />
                   </div>
                 </div>
               ))
@@ -377,48 +362,64 @@ const Institutions: React.FC = () => {
                 <div 
                   key={inst.id} 
                   onClick={() => navigate(`/super-admin/institutions/${inst.id}`)}
-                  className="bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-800 rounded-2xl p-5 hover:shadow-md transition-all cursor-pointer group flex flex-col"
+                  className="bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col h-full overflow-hidden relative"
                 >
-                  {/* ... Existing Card Content ... */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`w-14 h-14 rounded-2xl ${inst.logoColor} flex items-center justify-center text-white font-bold text-xl shadow-md`}>
-                      {inst.logo}
-                    </div>
-                    <StatusBadge status={inst.status} />
+                  {/* Decorative Background Header */}
+                  <div className={`h-24 w-full ${inst.logoColor} opacity-10 relative overflow-hidden`}>
+                     <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
+                     <div className="absolute left-10 top-10 w-20 h-20 bg-black/5 rounded-full blur-xl"></div>
                   </div>
-                  
-                  <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
-                    {inst.name}
-                  </h3>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 font-mono mb-5">ID: {inst.id}</div>
-                  
-                  <div className="space-y-3 mb-6 flex-grow">
-                    <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                        <Building2 size={14} className="text-gray-500 dark:text-gray-400" />
+
+                  <div className="px-6 relative flex flex-col flex-grow">
+                    {/* Floating Logo & Status */}
+                    <div className="flex justify-between items-end -mt-10 mb-4">
+                      <div className={`w-20 h-20 rounded-2xl ${inst.logoColor} flex items-center justify-center text-white font-bold text-3xl shadow-lg ring-4 ring-white dark:ring-[#151e32] group-hover:scale-105 transition-transform duration-300`}>
+                        {inst.logo}
                       </div>
-                      <div>
-                        <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Admin</div>
-                        <div className="font-medium text-gray-900 dark:text-white">{inst.adminName}</div>
+                      <StatusBadge status={inst.status} />
+                    </div>
+
+                    {/* Content */}
+                    <div className="mb-6">
+                      <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                        {inst.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">{inst.id}</span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{inst.joinedDate}</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800/50 group-hover:border-blue-100 dark:group-hover:border-blue-900/30 transition-colors">
+                          <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Admin</div>
+                          <div className="text-sm font-bold text-gray-900 dark:text-white truncate flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                            {inst.adminName}
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800/50 group-hover:border-purple-100 dark:group-hover:border-purple-900/30 transition-colors">
+                          <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-1">Location</div>
+                          <div className="text-sm font-bold text-gray-900 dark:text-white truncate flex items-center gap-1.5">
+                             <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+                            {inst.location}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-                       <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                        <MapPin size={14} className="text-gray-500 dark:text-gray-400" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Location</div>
-                        <div className="font-medium text-gray-900 dark:text-white">{inst.location}</div>
+
+                    {/* Footer Actions */}
+                    <div className="mt-auto pb-6 pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                      <SubscriptionBadge type={inst.subscription} />
+                      <div className="flex items-center gap-2">
+                        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                          <Bell size={16} />
+                        </button>
+                        <button className="px-3 py-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-1">
+                          Manage <ChevronRight size={12} />
+                        </button>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                    <SubscriptionBadge type={inst.subscription} />
-                    <span className="text-xs font-bold text-gray-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                      View Details <ChevronRight size={12} />
-                    </span>
                   </div>
                 </div>
               ))
@@ -463,48 +464,46 @@ const InstitutionStatCard: React.FC<{
   chartData?: { value: number }[];
 }> = ({ title, value, subtext, icon: Icon, color, subtextTrend, subtextColor, chartData }) => {
   const colorStyles = {
-    blue: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
-    orange: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
-    red: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
+    blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+    emerald: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
+    orange: 'bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+    red: 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400',
   };
 
   const barColors = {
     blue: '#3b82f6',
     emerald: '#10b981',
-    orange: '#f97316',
+    orange: '#f59e0b', // amber-500
     red: '#ef4444',
   };
 
   return (
-    <div className="bg-white dark:bg-[#151e32] p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400">{title}</h3>
-        <div className={`p-2 rounded-lg ${colorStyles[color]}`}>
-          <Icon size={18} />
+    <div className="bg-white dark:bg-[#151e32] p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+      <div className="flex items-center justify-between">
+        <div className={`p-3 rounded-lg ${colorStyles[color]}`}>
+          <Icon size={24} />
         </div>
-      </div>
-      <div className="flex items-end justify-between">
-        <div>
-          <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1">{value}</div>
-          <div className="flex items-center gap-1.5">
-            {subtextTrend === 'up' && <span className="text-emerald-500">↑</span>}
-            <span className={`text-xs font-bold ${subtextColor || (subtextTrend === 'up' ? 'text-emerald-500' : 'text-gray-500 dark:text-gray-400')}`}>
-              {subtext}
-            </span>
-          </div>
-        </div>
-        
-        {/* Mini Bar Chart */}
         {chartData && (
-          <div className="w-20 h-12 pb-1">
+          <div className="h-10 w-24">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <Bar dataKey="value" fill={barColors[color]} radius={[2, 2, 0, 0]} />
+                <Bar dataKey="value" fill={barColors[color]} radius={[2, 2, 2, 2]} barSize={4} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         )}
+      </div>
+      <div>
+        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{title}</p>
+        <div className="flex items-baseline gap-2">
+          <span className="text-3xl font-extrabold text-gray-900 dark:text-white">{value}</span>
+          <div className="flex items-center gap-1">
+            {subtextTrend === 'up' && <span className="text-emerald-500 text-xs">↑</span>}
+            <span className={`text-xs font-bold ${subtextColor || (subtextTrend === 'up' ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded' : 'text-gray-500 dark:text-gray-400')}`}>
+              {subtext}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

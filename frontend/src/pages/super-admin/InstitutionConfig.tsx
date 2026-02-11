@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Skeleton } from '../../../components/ui/Skeleton';
+import { Skeleton } from '../../components/ui/Skeleton';
 import { 
   GraduationCap, 
   UserPlus, 
@@ -16,10 +16,10 @@ import {
   XCircle,
   Lock,
   Search,
-  MoreVertical,
-  CreditCard,
-  Mail,
-  Phone
+  Globe,
+  Sliders,
+  Construction,
+  Power
 } from 'lucide-react';
 
 interface Module {
@@ -29,8 +29,8 @@ interface Module {
   icon: React.ElementType;
   color: string;
   active: boolean;
-  critical: boolean; // Requires confirmation to disable
-  locked: boolean;   // Cannot be disabled (e.g., Settings)
+  critical: boolean; 
+  locked: boolean;   
 }
 
 interface AuditLog {
@@ -41,7 +41,7 @@ interface AuditLog {
   user: string;
 }
 
-const ERPModules: React.FC = () => {
+const GlobalModules: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [modules, setModules] = useState<Module[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -49,7 +49,7 @@ const ERPModules: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    // Simulate fetching data
+    // Simulate fetching global data
     const timer = setTimeout(() => {
       setModules([
         {
@@ -169,7 +169,7 @@ const ERPModules: React.FC = () => {
           moduleTitle: m.title,
           action: newState ? 'enabled' : 'disabled',
           timestamp: new Date().toLocaleTimeString(),
-          user: 'Super Admin'
+          user: 'System Admin'
         };
         setAuditLogs(prevLogs => [newLog, ...prevLogs].slice(0, 10)); // Keep last 10
         return { ...m, active: newState };
@@ -191,15 +191,15 @@ const ERPModules: React.FC = () => {
       {confirmDialog.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center gap-4 mb-4 text-amber-500">
-              <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+            <div className="flex items-center gap-4 mb-4 text-red-500">
+              <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
                 <AlertTriangle size={24} />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Disable Critical Module?</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Disable Global Module?</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm leading-relaxed">
-              You are about to disable <span className="font-bold text-gray-900 dark:text-white">{modules.find(m => m.id === confirmDialog.moduleId)?.title}</span>. 
-              This will immediately revoke access for all school admins and may disrupt ongoing operations.
+              You are about to disable <span className="font-bold text-gray-900 dark:text-white">{modules.find(m => m.id === confirmDialog.moduleId)?.title}</span> for <span className="font-bold text-red-600 dark:text-red-400">ALL INSTITUTIONS</span>. 
+              This will immediately revoke access for every school in the system.
             </p>
             <div className="flex justify-end gap-3">
               <button 
@@ -212,7 +212,7 @@ const ERPModules: React.FC = () => {
                 onClick={() => confirmDialog.moduleId && toggleModule(confirmDialog.moduleId)}
                 className="px-4 py-2 rounded-xl text-sm font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 transition-all"
               >
-                Yes, Disable Module
+                Yes, Disable Globally
               </button>
             </div>
           </div>
@@ -236,12 +236,12 @@ const ERPModules: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-                Module Control
-                <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wide">
-                  Super Admin
+                System-Wide Control
+                <span className="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-[10px] font-bold uppercase tracking-wide flex items-center gap-1">
+                  <Globe size={10} /> Global
                 </span>
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage global module availability for this institution.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage module availability across the entire platform.</p>
             </div>
             
             <div className="relative">
@@ -348,16 +348,16 @@ const ERPModules: React.FC = () => {
           <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
             <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <History size={16} className="text-blue-500" />
-              Recent Activity
+              Global Activity
             </h3>
             <span className="text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-1 rounded-full">
-              Live
+              System
             </span>
           </div>
-          <div className="p-0 max-h-[300px] overflow-y-auto">
+          <div className="p-0 max-h-[400px] overflow-y-auto">
             {auditLogs.length === 0 ? (
               <div className="p-8 text-center text-gray-400 text-xs">
-                No recent changes recorded.
+                No recent global changes.
               </div>
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -367,7 +367,7 @@ const ERPModules: React.FC = () => {
                       <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${log.action === 'enabled' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                       <div>
                         <p className="text-xs text-gray-900 dark:text-white">
-                          <span className="font-bold">{log.moduleTitle}</span> was {log.action}.
+                          <span className="font-bold">{log.moduleTitle}</span> was {log.action} globally.
                         </p>
                         <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
                           {log.timestamp} • by {log.user}
@@ -381,74 +381,16 @@ const ERPModules: React.FC = () => {
           </div>
         </div>
 
-        {/* Subscription Summary (Preserved) */}
-        <div className="bg-white dark:bg-[#151e32] rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-            <h3 className="font-bold text-gray-900 dark:text-white">Subscription</h3>
-            <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-              <MoreVertical size={16} />
-            </button>
-          </div>
-
-          <div className="p-4">
-            <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl p-4 mb-5 border border-blue-100 dark:border-blue-900/20">
-              <div className="flex items-start justify-between mb-2">
-                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Current Plan</span>
-                <div className="bg-blue-500 rounded-full p-0.5">
-                  <CheckCircle2 size={12} className="text-white" />
-                </div>
-              </div>
-              <h4 className="text-xl font-black text-gray-900 dark:text-white mb-1">Enterprise Yearly</h4>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Renews on <span className="text-gray-900 dark:text-white font-bold">Oct 12, 2024</span></p>
-            </div>
-
-            <div className="flex items-center gap-3 mb-5 p-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
-              <div className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                <CreditCard size={18} className="text-gray-600 dark:text-gray-400" />
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Payment Method</div>
-                <div className="text-sm font-bold text-gray-900 dark:text-white">Mastercard •••• 4242</div>
-              </div>
-            </div>
-
-            <button className="w-full py-2.5 bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">
-              Manage Billing
-            </button>
-          </div>
-        </div>
-
-        {/* Primary Contact (Preserved) */}
-        <div className="bg-white dark:bg-[#151e32] rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <h3 className="font-bold text-gray-900 dark:text-white">Primary Contact</h3>
-          </div>
-          
-          <div className="p-4">
-            <div className="flex items-center gap-4 mb-5">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/20">
-                SJ
-              </div>
-              <div>
-                <div className="font-bold text-gray-900 dark:text-white text-base">Sarah Jenkins</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Admin Administrator</div>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <a href="mailto:s.jenkins@gha.edu" className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
-                <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  <Mail size={16} />
-                </div>
-                <span className="text-gray-600 dark:text-gray-300 font-medium">s.jenkins@gha.edu</span>
-              </a>
-              <a href="tel:+15550123456" className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
-                <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  <Phone size={16} />
-                </div>
-                <span className="text-gray-600 dark:text-gray-300 font-medium">+1 (555) 012-3456</span>
-              </a>
-            </div>
+        {/* Global Stats or Info */}
+        <div className="bg-blue-600 rounded-xl border border-blue-500 overflow-hidden shadow-lg text-white p-6 relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+          <h3 className="font-bold text-lg mb-2 relative z-10">Global Impact</h3>
+          <p className="text-blue-100 text-sm mb-4 relative z-10">
+            Disabling modules here affects all 156 registered institutions immediately.
+          </p>
+          <div className="flex items-center gap-2 text-xs font-bold bg-white/20 w-fit px-3 py-1 rounded-lg relative z-10">
+            <Globe size={14} />
+            System Wide
           </div>
         </div>
       </div>
@@ -456,4 +398,162 @@ const ERPModules: React.FC = () => {
   );
 };
 
-export default ERPModules;
+const MaintenanceMode: React.FC = () => {
+  const [enabled, setEnabled] = useState(false);
+  const [message, setMessage] = useState('We are currently undergoing scheduled maintenance. Please check back later.');
+  const [allowSuperAdmin, setAllowSuperAdmin] = useState(true);
+
+  return (
+    <div className="max-w-4xl">
+      <div className="bg-white dark:bg-[#151e32] rounded-2xl border border-gray-200 dark:border-gray-800 p-8 shadow-sm">
+        
+        {/* Header */}
+        <div className="flex items-start gap-6 mb-8">
+          <div className={`p-4 rounded-2xl ${enabled ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'} transition-colors duration-300`}>
+            <Construction size={32} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">System Maintenance Mode</h3>
+            <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
+              When enabled, all users (except those allowed) will see a maintenance screen instead of the application. 
+              Use this during scheduled updates or critical fixes.
+            </p>
+          </div>
+          
+          <button
+            onClick={() => setEnabled(!enabled)}
+            className={`
+              relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-blue-500/20
+              ${enabled ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-700'}
+            `}
+          >
+            <span className="sr-only">Enable Maintenance Mode</span>
+            <span
+              className={`
+                inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-md
+                ${enabled ? 'translate-x-7' : 'translate-x-1'}
+              `}
+            />
+          </button>
+        </div>
+
+        {/* Configuration */}
+        <div className={`space-y-6 transition-all duration-300 ${enabled ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+          
+          {/* Message Input */}
+          <div>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+              Maintenance Message
+            </label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={3}
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+              placeholder="Enter the message users will see..."
+            />
+          </div>
+
+          {/* Settings */}
+          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-5 border border-gray-200 dark:border-gray-700/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+                  <Lock size={18} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">Super Admin Bypass</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Allow Super Admins to access the system while in maintenance mode.</p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer"
+                  checked={allowSuperAdmin}
+                  onChange={() => setAllowSuperAdmin(!allowSuperAdmin)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Status */}
+        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`w-2.5 h-2.5 rounded-full ${enabled ? 'bg-orange-500 animate-pulse' : 'bg-gray-300'}`} />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              Status: <span className={enabled ? 'text-orange-600 dark:text-orange-400 font-bold' : 'text-gray-900 dark:text-white font-bold'}>
+                {enabled ? 'Active' : 'Inactive'}
+              </span>
+            </span>
+          </div>
+          {enabled && (
+            <button className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-orange-600/20 transition-all">
+              Update Settings
+            </button>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+const InstitutionConfig: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('modules');
+
+  const tabs = [
+    { id: 'modules', label: 'Global Modules', icon: Layout },
+    { id: 'maintenance', label: 'Maintenance Mode', icon: Construction },
+    { id: 'general', label: 'General Settings', icon: Sliders },
+  ];
+
+  return (
+    <div className="p-6 max-w-[1600px] mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Institution Configuration</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">Manage global settings and default configurations for all institutions.</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-1 mb-6 bg-gray-100 dark:bg-gray-900/50 p-1 rounded-xl w-fit border border-gray-200 dark:border-gray-800/50">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200
+              ${activeTab === tab.id 
+                ? 'bg-white dark:bg-[#151e32] text-gray-900 dark:text-white shadow-sm' 
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }
+            `}
+          >
+            <tab.icon size={16} />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+        {activeTab === 'modules' && <GlobalModules />}
+        {activeTab === 'maintenance' && <MaintenanceMode />}
+        {activeTab === 'general' && (
+          <div className="bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+              <Sliders size={32} />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">General Settings</h3>
+            <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+              Global configuration options for default timezones, currency, and language settings will be available here.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default InstitutionConfig;

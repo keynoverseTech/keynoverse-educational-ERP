@@ -7,8 +7,6 @@ import {
   GraduationCap, 
   Layers, 
   BookOpen, 
-  Users, 
-  UserPlus,
   Settings,
   ArrowRight,
   CheckCircle,
@@ -69,20 +67,6 @@ export default function ConfigureAcademic() {
       color: 'bg-orange-600'
     },
     { 
-      title: 'Staff Management', 
-      desc: 'Manage lecturers, HODs, and administrative staff.', 
-      icon: Users, 
-      path: '/school-admin/staff/list', // Linking to existing page
-      color: 'bg-pink-600'
-    },
-    { 
-      title: 'Student Management', 
-      desc: 'Manage student enrollments and profiles.', 
-      icon: UserPlus, 
-      path: '/school-admin/students/list', // Linking to existing page
-      color: 'bg-rose-600'
-    },
-    { 
       title: 'Course Registration Config', 
       desc: 'Manage credit limits, deadlines, and approval workflows.', 
       icon: FileText, 
@@ -97,25 +81,11 @@ export default function ConfigureAcademic() {
       color: 'bg-teal-600'
     },
     { 
-      title: 'Grading System', 
-      desc: 'Configure grading scales and CGPA policies.', 
-      icon: GraduationCap, 
-      path: '/school-admin/examinations/grading',
-      color: 'bg-purple-600'
-    },
-    { 
-      title: 'Exam Creation', 
-      desc: 'Schedule exams and manage venues.', 
+      title: 'Lectures Timetable', 
+      desc: 'Schedule and manage weekly lectures for students.', 
       icon: Calendar, 
-      path: '/school-admin/examinations/create',
-      color: 'bg-indigo-600'
-    },
-    { 
-      title: 'Exam Timetable', 
-      desc: 'View and manage exam timetables.', 
-      icon: Clock, 
-      path: '/school-admin/examinations/timetable',
-      color: 'bg-cyan-600'
+      path: '/school-admin/academics/lectures-timetable',
+      color: 'bg-violet-600'
     }
   ];
 

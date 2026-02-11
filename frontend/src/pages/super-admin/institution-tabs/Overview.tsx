@@ -15,11 +15,39 @@ import {
   LayoutGrid,
   History,
   Calendar,
-  Briefcase
+  Briefcase,
+  Eye,
+  X,
+  Activity,
+  Database,
+  BarChart3,
+  FileSignature,
+  Layout,
+  User,
+  School
 } from 'lucide-react';
+
+interface ModuleStat {
+  label: string;
+  value: string;
+  trend?: string;
+  trendUp?: boolean;
+}
+
+interface ModuleData {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  color: string;
+  active: boolean;
+  stats: ModuleStat[];
+  lastSync: string;
+}
 
 const Overview: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const [selectedModule, setSelectedModule] = useState<ModuleData | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -71,54 +99,132 @@ const Overview: React.FC = () => {
     }
   ];
 
-  const modules = [
+  const modules: ModuleData[] = [
     {
-      id: 'student-info',
-      title: 'Student Info System',
-      description: 'Core records and profiles',
+      id: 'academics',
+      title: 'Academics',
+      description: 'Course management, grading systems, and curriculum planning.',
       icon: GraduationCap,
       color: 'bg-blue-600',
-      active: true
+      active: true,
+      lastSync: '10 mins ago',
+      stats: [
+        { label: 'Active Sessions', value: '2', trend: 'Current' },
+        { label: 'Departments', value: '12' },
+        { label: 'Total Courses', value: '145', trend: '+5%', trendUp: true }
+      ]
     },
     {
-      id: 'finance',
-      title: 'Finance & Billing',
-      description: 'Invoicing and payments',
-      icon: Wallet,
+      id: 'admissions',
+      title: 'Admissions',
+      description: 'Applicant tracking, enrollment workflows, and entrance exams.',
+      icon: UserPlus,
       color: 'bg-emerald-600',
-      active: true
+      active: true,
+      lastSync: '5 mins ago',
+      stats: [
+        { label: 'Applications', value: '1,240', trend: '+15%', trendUp: true },
+        { label: 'Pending Review', value: '45' },
+        { label: 'Admitted', value: '850', trend: '68%' }
+      ]
     },
     {
-      id: 'lms',
-      title: 'LMS & E-Learning',
-      description: 'Courses and quizzes',
-      icon: BookOpen,
+      id: 'examinations',
+      title: 'Examinations',
+      description: 'Exam scheduling, hall management, and result processing.',
+      icon: FileSignature,
       color: 'bg-purple-600',
-      active: true
+      active: true,
+      lastSync: '1 hour ago',
+      stats: [
+        { label: 'Scheduled Exams', value: '24' },
+        { label: 'Results Published', value: '98%', trend: '+2%', trendUp: true },
+        { label: 'Pending Approval', value: '5' }
+      ]
     },
     {
-      id: 'hr',
-      title: 'HR & Payroll',
-      description: 'Staff management',
-      icon: Users,
+      id: 'reports',
+      title: 'Reports & Analytics',
+      description: 'Comprehensive reporting dashboard and data visualization.',
+      icon: BarChart3,
       color: 'bg-orange-600',
-      active: true
+      active: true,
+      lastSync: 'Just now',
+      stats: [
+        { label: 'Daily Reports', value: '15' },
+        { label: 'Generated', value: '1,205' },
+        { label: 'Downloads', value: '450' }
+      ]
     },
     {
-      id: 'transport',
-      title: 'Transport',
-      description: 'Fleet and routes',
-      icon: Bus,
+      id: 'staff_portal',
+      title: 'Staff Portal',
+      description: 'Self-service portal for faculty and administrative staff.',
+      icon: Layout,
+      color: 'bg-teal-600',
+      active: true,
+      lastSync: '2 mins ago',
+      stats: [
+        { label: 'Active Users', value: '210', trend: '85%' },
+        { label: 'Logins Today', value: '185' },
+        { label: 'Requests', value: '12' }
+      ]
+    },
+    {
+      id: 'student_portal',
+      title: 'Student Portal',
+      description: 'Access to grades, courses, and fees for students.',
+      icon: User,
       color: 'bg-indigo-600',
-      active: false
+      active: true,
+      lastSync: '1 min ago',
+      stats: [
+        { label: 'Active Users', value: '3,200', trend: '92%' },
+        { label: 'Logins Today', value: '2,850' },
+        { label: 'Course Reg.', value: 'Complete' }
+      ]
     },
     {
-      id: 'library',
-      title: 'Library',
-      description: 'Book inventory',
-      icon: Library,
+      id: 'settings',
+      title: 'Settings',
+      description: 'Global system configuration and preferences.',
+      icon: Settings,
+      color: 'bg-gray-600',
+      active: true,
+      lastSync: '3 days ago',
+      stats: [
+        { label: 'Configs Changed', value: '5' },
+        { label: 'System Version', value: 'v2.4.0' },
+        { label: 'Backups', value: 'Daily' }
+      ]
+    },
+    {
+      id: 'staff',
+      title: 'Staff Management',
+      description: 'HR records, payroll, and leave management.',
+      icon: Users,
       color: 'bg-pink-600',
-      active: false
+      active: true,
+      lastSync: '4 hours ago',
+      stats: [
+        { label: 'Total Staff', value: '245' },
+        { label: 'On Leave', value: '8' },
+        { label: 'New Hires', value: '3', trend: 'This Month' }
+      ]
+    },
+    {
+      id: 'student',
+      title: 'Student Management',
+      description: 'Student profiles, discipline records, and alumni tracking.',
+      icon: School,
+      color: 'bg-cyan-600',
+      active: true,
+      lastSync: '10 mins ago',
+      stats: [
+        { label: 'Total Students', value: '3,842', trend: '+12%', trendUp: true },
+        { label: 'Active', value: '3,810' },
+        { label: 'Alumni', value: '1,250' }
+      ]
     }
   ];
 
@@ -264,11 +370,22 @@ const Overview: React.FC = () => {
                 </div>
                 <h3 className="font-bold text-gray-900 dark:text-white mb-1.5 text-base">{module.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 flex-grow leading-relaxed">{module.description}</p>
-                <div className="flex items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-800 mt-auto">
-                  <span className={`w-2 h-2 rounded-full ${module.active ? 'bg-emerald-500' : 'bg-gray-400'}`}></span>
-                  <span className={`text-xs font-bold ${module.active ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-500'}`}>
-                    {module.active ? 'Active' : 'Inactive'}
-                  </span>
+                <div className="flex items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-800 mt-auto justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${module.active ? 'bg-emerald-500' : 'bg-gray-400'}`}></span>
+                    <span className={`text-xs font-bold ${module.active ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-500'}`}>
+                      {module.active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  {module.active && (
+                    <button 
+                      onClick={() => setSelectedModule(module)}
+                      className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                      title="View Details"
+                    >
+                      <Eye size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -311,6 +428,75 @@ const Overview: React.FC = () => {
         </div>
       </div>
       </>
+      )}
+      {/* Module Details Modal */}
+      {selectedModule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200">
+            <div className={`p-6 ${selectedModule.color} relative overflow-hidden`}>
+              <div className="absolute top-0 right-0 p-32 bg-white/10 rounded-full transform translate-x-10 -translate-y-10 blur-2xl"></div>
+              <div className="relative z-10 flex justify-between items-start">
+                <div className="p-3 bg-white/20 backdrop-blur-md rounded-xl inline-flex text-white mb-4">
+                  <selectedModule.icon size={28} />
+                </div>
+                <button 
+                  onClick={() => setSelectedModule(null)}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <h2 className="text-2xl font-bold text-white relative z-10">{selectedModule.title}</h2>
+              <p className="text-blue-100 relative z-10 text-sm mt-1">{selectedModule.description}</p>
+            </div>
+            
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <Activity size={16} />
+                  <span>Last synced: <span className="font-medium text-gray-900 dark:text-white">{selectedModule.lastSync}</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-500">Live System</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 mb-6">
+                {selectedModule.stats.map((stat, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
+                    </div>
+                    {stat.trend && (
+                      <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg ${
+                        stat.trendUp 
+                          ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                          : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        <BarChart3 size={14} />
+                        {stat.trend}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <button className="flex-1 py-2.5 px-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">
+                  View Logs
+                </button>
+                <button className="flex-1 py-2.5 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors text-sm shadow-lg shadow-blue-500/20">
+                  Configure Module
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

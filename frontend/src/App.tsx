@@ -31,6 +31,7 @@ import NewRegistration from './pages/super-admin/NewRegistration';
 import Applications from './pages/super-admin/Applications';
 import ApplicationDetails from './pages/super-admin/ApplicationDetails';
 import InstitutionDetails from './pages/super-admin/InstitutionDetails';
+import InstitutionConfig from './pages/super-admin/InstitutionConfig';
 import SubAdmins from './pages/super-admin/SubAdmins';
 import SystemLogs from './pages/super-admin/SystemLogs';
 
@@ -59,6 +60,7 @@ import CourseRegistrationConfig from './pages/school-admin/academics/modules/Cou
 import RegistrationApprovals from './pages/school-admin/academics/RegistrationApprovals';
 import CourseManagement from './pages/school-admin/Courses'; // Reusing existing
 import CourseRegistration from './pages/school-admin/academics/CourseRegistration';
+import LecturesTimetable from './pages/school-admin/academics/LecturesTimetable';
 import AcademicCalendar from './pages/school-admin/academics/AcademicCalendar';
 import LevelPromotion from './pages/school-admin/academics/LevelPromotion';
 // Examinations
@@ -82,11 +84,17 @@ import StaffGrading from './pages/staff-portal/StaffGrading';
 const superAdminItems = [
   { name: 'Overview', path: '/super-admin/dashboard', icon: LayoutDashboard },
   { 
+    name: 'Registrations', 
+    path: '/super-admin/applications',
+    icon: ClipboardCheck 
+  },
+  { 
     name: 'Institutions', 
+    path: '/super-admin/institutions',
     icon: Building2,
     subItems: [
       { name: 'All Institutions', path: '/super-admin/institutions' },
-      { name: 'Registrations', path: '/super-admin/applications' }
+      { name: 'Configuration', path: '/super-admin/config' }
     ]
   },
 ];
@@ -121,8 +129,7 @@ const schoolAdminItems = [
     icon: Briefcase,
     subItems: [
       { name: 'All Staff', path: '/school-admin/staff/list' },
-      { name: 'Staff Profile', path: '/school-admin/staff/profile' },
-      { name: 'Add Staff', path: '/school-admin/staff/create' }
+      { name: 'Staff Profile', path: '/school-admin/staff/profile' }
     ]
   },
   { 
@@ -130,8 +137,7 @@ const schoolAdminItems = [
     icon: GraduationCap,
     subItems: [
       { name: 'All Students', path: '/school-admin/students/list' },
-      { name: 'Student Profile', path: '/school-admin/students/profile' },
-      { name: 'Add Student', path: '/school-admin/students/create' }
+      { name: 'Student Profile', path: '/school-admin/students/profile' }
     ]
   },
   { 
@@ -160,7 +166,11 @@ const schoolAdminItems = [
       { name: 'Financial Reports', path: '/school-admin/reports?tab=finance' }
     ]
   },
-  { name: 'Settings', path: '/school-admin/settings', icon: SettingsIcon }
+  { 
+    name: 'Settings', 
+    path: '/school-admin/settings',
+    icon: SettingsIcon
+  }
 ];
 
 const studentItems = [
@@ -202,6 +212,7 @@ function App() {
           <Route path="/super-admin/applications" element={<Applications />} />
           <Route path="/super-admin/sub-admins" element={<SubAdmins />} />
           <Route path="/super-admin/system-logs" element={<SystemLogs />} />
+          <Route path="/super-admin/config" element={<InstitutionConfig />} />
         </Route>
 
         {/* Super Admin Application Details (Full Page) */}
@@ -244,6 +255,7 @@ function App() {
           <Route path="/school-admin/academics/registration-config" element={<CourseRegistrationConfig />} />
            <Route path="/school-admin/academics/registration-approvals" element={<RegistrationApprovals />} />
            <Route path="/school-admin/academics/courses-management" element={<CourseManagement />} />
+          <Route path="/school-admin/academics/lectures-timetable" element={<LecturesTimetable />} />
           <Route path="/school-admin/academics/registration" element={<CourseRegistration />} />
           <Route path="/school-admin/academics/promotion" element={<LevelPromotion />} />
           <Route path="/school-admin/academics/calendar" element={<AcademicCalendar />} />

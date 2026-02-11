@@ -68,10 +68,10 @@ const Sidebar: React.FC<SidebarProps> = ({ items, isOpen, onClose, title = "Keyn
         bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 flex flex-col
         fixed top-0 left-0 h-[111.12vh] z-30 transition-all duration-300 ease-in-out
         lg:sticky lg:top-0 lg:h-[111.12vh]
-        ${isOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden'}
+        ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden'}
       `}>
         {/* Logo Section */}
-        <div className="p-6 flex items-center justify-between">
+        <div className="p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
                 {logo || <Hexagon className="w-5 h-5 fill-current" />}
@@ -87,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ items, isOpen, onClose, title = "Keyn
         </div>
 
         {/* Main Menu Label */}
-        <div className="px-6 py-2">
+        <div className="px-5 py-2">
           <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Main Menu</p>
         </div>
 

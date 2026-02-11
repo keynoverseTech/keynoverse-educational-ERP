@@ -1,8 +1,19 @@
-import { useState } from 'react';
-import { Calendar, Clock, MapPin, Search, Download, Plus, AlertCircle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Calendar, Clock, MapPin, Search, Download, Plus, AlertCircle, ChevronDown } from 'lucide-react';
+
+interface ExamCycle {
+  id: string;
+  session: string;
+  semester: 'First' | 'Second';
+  type: 'Mid-Semester' | 'Final Exam';
+  startDate: string;
+  endDate: string;
+  status: 'Draft' | 'Active' | 'Completed';
+}
 
 interface ExamSchedule {
   id: string;
+  cycleId: string;
   courseCode: string;
   courseTitle: string;
   date: string;
@@ -15,9 +26,47 @@ interface ExamSchedule {
 }
 
 const TimetableScheduling = () => {
+  // Mock Cycles Data (Shared concept with ExamCycleSetup)
+  const [cycles] = useState<ExamCycle[]>([
+    { 
+      id: '1', 
+      session: '2024/2025', 
+      semester: 'First', 
+      type: 'Final Exam', 
+      startDate: '2025-05-12',
+      endDate: '2025-05-30',
+      status: 'Active' 
+    },
+    { 
+      id: '2', 
+      session: '2024/2025', 
+      semester: 'First', 
+      type: 'Mid-Semester', 
+      startDate: '2025-03-10',
+      endDate: '2025-03-15',
+      status: 'Completed' 
+    },
+    { 
+      id: '3', 
+      session: '2023/2024', 
+      semester: 'Second', 
+      type: 'Final Exam', 
+      startDate: '2024-05-10',
+      endDate: '2024-05-25',
+      status: 'Completed' 
+    },
+  ]);
+
+  const [selectedCycleId, setSelectedCycleId] = useState<string>(cycles[0].id);
+
+  const selectedCycle = useMemo(() => 
+    cycles.find(c => c.id === selectedCycleId) || cycles[0]
+  , [cycles, selectedCycleId]);
+
   const [schedules, setSchedules] = useState<ExamSchedule[]>([
     {
       id: '1',
+      cycleId: '1',
       courseCode: 'CSC 301',
       courseTitle: 'Operating Systems',
       date: '2025-05-12',
@@ -30,6 +79,7 @@ const TimetableScheduling = () => {
     },
     {
       id: '2',
+      cycleId: '1',
       courseCode: 'MTH 201',
       courseTitle: 'Linear Algebra',
       date: '2025-05-12',
@@ -39,8 +89,25 @@ const TimetableScheduling = () => {
       invigilatorsCount: 2,
       studentsCount: 85,
       status: 'Conflict'
+    },
+    {
+      id: '3',
+      cycleId: '2', // Belongs to different cycle
+      courseCode: 'PHY 101',
+      courseTitle: 'General Physics',
+      date: '2025-03-10',
+      startTime: '10:00',
+      endTime: '12:00',
+      venue: 'Science Hall 1',
+      invigilatorsCount: 3,
+      studentsCount: 200,
+      status: 'Scheduled'
     }
   ]);
+
+  const filteredSchedules = useMemo(() => 
+    schedules.filter(s => s.cycleId === selectedCycleId)
+  , [schedules, selectedCycleId]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSchedule, setNewSchedule] = useState<Partial<ExamSchedule> & { faculty?: string, department?: string, invigilators?: string }>({
@@ -76,6 +143,7 @@ const TimetableScheduling = () => {
 
     const schedule: ExamSchedule = {
       id: (schedules.length + 1).toString(),
+      cycleId: selectedCycleId,
       courseCode: newSchedule.courseCode!.split(' - ')[0] || newSchedule.courseCode!,
       courseTitle: newSchedule.courseCode!.split(' - ')[1] || 'New Exam',
       date: newSchedule.date!,
@@ -112,7 +180,37 @@ const TimetableScheduling = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Exam Timetable Scheduling</h1>
-          <p className="text-gray-500 dark:text-gray-400">Schedule exams, assign venues, and manage conflicts.</p>
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="relative inline-block w-64">
+              <select
+                value={selectedCycleId}
+                onChange={(e) => setSelectedCycleId(e.target.value)}
+                className="appearance-none w-full pl-4 pr-10 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+              >
+                {cycles.map(cycle => (
+                  <option key={cycle.id} value={cycle.id}>
+                    {cycle.session} - {cycle.semester} ({cycle.type})
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${
+                selectedCycle.status === 'Active' ? 'bg-green-100 text-green-700 border-green-200' : 
+                selectedCycle.status === 'Completed' ? 'bg-gray-100 text-gray-700 border-gray-200' : 
+                'bg-yellow-100 text-yellow-700 border-yellow-200'
+              }`}>
+                {selectedCycle.status}
+              </span>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                <span className="font-medium text-gray-700 dark:text-gray-300 mr-2">
+                  {selectedCycle.startDate} to {selectedCycle.endDate}
+                </span>
+                Schedule exams, assign venues, and manage conflicts.
+              </p>
+            </div>
+          </div>
         </div>
         <div className="flex gap-2">
           <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50">
@@ -162,7 +260,7 @@ const TimetableScheduling = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {schedules.map((exam) => (
+            {filteredSchedules.map((exam) => (
               <tr key={exam.id}>
                 <td className="px-6 py-4">
                   <div className="font-medium text-gray-900 dark:text-white">{exam.courseCode}</div>

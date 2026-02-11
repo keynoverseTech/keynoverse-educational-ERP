@@ -12,7 +12,10 @@ import {
   Download, 
   Send,
   CheckCircle2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  X,
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -21,6 +24,12 @@ const ApplicationDetails: React.FC = () => {
   const navigate = useNavigate();
   const [reviewNote, setReviewNote] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  // Action States
+  const [appStatus, setAppStatus] = useState<'PENDING APPROVAL' | 'APPROVED' | 'REJECTED' | 'NEEDS CLARIFICATION'>('PENDING APPROVAL');
+  const [modalOpen, setModalOpen] = useState<'none' | 'approve' | 'reject' | 'info'>('none');
+  const [actionReason, setActionReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Sync dark mode state from local storage on mount (since this page is outside DashboardLayout)
   useEffect(() => {
@@ -37,6 +46,35 @@ const ApplicationDetails: React.FC = () => {
     }, 1500);
     return () => clearTimeout(timer);
   }, []);
+
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800' };
+      case 'REJECTED':
+        return { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-800' };
+      case 'NEEDS CLARIFICATION':
+        return { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800' };
+      default:
+        return { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' };
+    }
+  };
+
+  const handleAction = () => {
+    setIsSubmitting(true);
+    // Simulate API call
+    setTimeout(() => {
+      if (modalOpen === 'approve') setAppStatus('APPROVED');
+      if (modalOpen === 'reject') setAppStatus('REJECTED');
+      if (modalOpen === 'info') setAppStatus('NEEDS CLARIFICATION');
+      
+      setIsSubmitting(false);
+      setModalOpen('none');
+      setActionReason('');
+    }, 1000);
+  };
+
+  const currentStyles = getStatusStyles(appStatus);
 
   // Mock Data matched to the image
   const application = {
@@ -82,7 +120,115 @@ const ApplicationDetails: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0B1120] text-gray-600 dark:text-gray-300 p-6 md:p-8 font-sans">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B1120] text-gray-600 dark:text-gray-300 p-6 md:p-8 font-sans relative">
+      
+      {/* Action Modals */}
+      {modalOpen !== 'none' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-gray-200 dark:border-gray-700">
+            
+            {/* Modal Header */}
+            <div className="mb-6">
+              {modalOpen === 'approve' && (
+                <div className="flex items-center gap-4 text-emerald-600 dark:text-emerald-500">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Approve Application</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">This will grant the institution full access.</p>
+                  </div>
+                </div>
+              )}
+              {modalOpen === 'reject' && (
+                <div className="flex items-center gap-4 text-red-600 dark:text-red-500">
+                  <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
+                    <AlertTriangle size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Reject Application</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">The institution will be notified of the rejection.</p>
+                  </div>
+                </div>
+              )}
+              {modalOpen === 'info' && (
+                <div className="flex items-center gap-4 text-blue-600 dark:text-blue-500">
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                    <Info size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Request Information</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Ask the applicant for missing or unclear details.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Content */}
+            <div className="space-y-4">
+              {modalOpen !== 'approve' && (
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                    {modalOpen === 'reject' ? 'Reason for Rejection' : 'Message to Applicant'}
+                  </label>
+                  <textarea
+                    value={actionReason}
+                    onChange={(e) => setActionReason(e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                    placeholder={modalOpen === 'reject' ? 'e.g. Invalid documents provided...' : 'e.g. Please upload a clearer copy of...'}
+                  />
+                </div>
+              )}
+              
+              {modalOpen === 'approve' && (
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                  Are you sure you want to approve <span className="font-bold text-gray-900 dark:text-white">{application.institution}</span>? 
+                  An automated email with login credentials will be sent to <span className="font-bold">{application.contact.email}</span>.
+                </p>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex justify-end gap-3 mt-8">
+              <button 
+                onClick={() => {
+                  setModalOpen('none');
+                  setActionReason('');
+                }}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleAction}
+                disabled={isSubmitting || (modalOpen !== 'approve' && !actionReason.trim())}
+                className={`
+                  px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-all flex items-center gap-2
+                  ${isSubmitting ? 'opacity-70 cursor-wait' : 'hover:scale-105 active:scale-95'}
+                  ${modalOpen === 'approve' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' : ''}
+                  ${modalOpen === 'reject' ? 'bg-red-600 hover:bg-red-700 shadow-red-600/20' : ''}
+                  ${modalOpen === 'info' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : ''}
+                  ${(modalOpen !== 'approve' && !actionReason.trim()) ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+              >
+                {isSubmitting ? (
+                  <>Processing...</>
+                ) : (
+                  <>
+                    {modalOpen === 'approve' && 'Confirm Approval'}
+                    {modalOpen === 'reject' && 'Reject Application'}
+                    {modalOpen === 'info' && 'Send Request'}
+                  </>
+                )}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto space-y-6">
         {loading ? (
           <>
@@ -238,8 +384,8 @@ const ApplicationDetails: React.FC = () => {
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
                     {application.institution}
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${application.statusBg} ${application.statusColor}`}>
-                      {application.status}
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${currentStyles.bg} ${currentStyles.color}`}>
+                      {appStatus}
                     </span>
                   </h1>
                   <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 flex items-center gap-2">
@@ -251,18 +397,50 @@ const ApplicationDetails: React.FC = () => {
                </div>
             </div>
 
-            <div className="flex items-center gap-3 self-start lg:self-center">
-              <button className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm font-bold">
-                Request Info
-              </button>
-              <button className="px-4 py-2 bg-transparent border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-bold">
-                Reject
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-bold shadow-lg shadow-blue-500/20 dark:shadow-blue-900/20">
-                <CheckCircle2 size={16} />
-                <span>Approve Application</span>
-              </button>
-            </div>
+            {appStatus === 'PENDING APPROVAL' ? (
+              <div className="flex items-center gap-3 self-start lg:self-center">
+                <button 
+                  onClick={() => setModalOpen('info')}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm font-bold"
+                >
+                  Request Info
+                </button>
+                <button 
+                  onClick={() => setModalOpen('reject')}
+                  className="px-4 py-2 bg-transparent border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm font-bold"
+                >
+                  Reject
+                </button>
+                <button 
+                  onClick={() => setModalOpen('approve')}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-bold shadow-lg shadow-blue-500/20 dark:shadow-blue-900/20"
+                >
+                  <CheckCircle2 size={16} />
+                  <span>Approve Application</span>
+                </button>
+              </div>
+            ) : (
+              <div className="self-start lg:self-center">
+                {appStatus === 'APPROVED' && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm font-bold">
+                    <CheckCircle2 size={16} />
+                    Application Approved
+                  </div>
+                )}
+                {appStatus === 'REJECTED' && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm font-bold">
+                    <X size={16} />
+                    Application Rejected
+                  </div>
+                )}
+                {appStatus === 'NEEDS CLARIFICATION' && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg text-sm font-bold">
+                    <Info size={16} />
+                    Info Requested
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

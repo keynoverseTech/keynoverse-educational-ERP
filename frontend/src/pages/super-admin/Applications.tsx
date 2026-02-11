@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { 
   Search, 
+  Plus,
   Filter, 
   ChevronLeft, 
   ChevronRight, 
@@ -12,7 +13,7 @@ import {
   TrendingUp,
   MoreHorizontal
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 
 // Mock Data
@@ -25,6 +26,12 @@ const chartData = [
   { name: 'Sat', value: 15 },
   { name: 'Sun', value: 10 },
 ];
+
+const sparklineData = {
+  newApps: [ { value: 5 }, { value: 8 }, { value: 6 }, { value: 10 }, { value: 12 }, { value: 15 }, { value: 12 } ],
+  pending: [ { value: 40 }, { value: 35 }, { value: 45 }, { value: 42 }, { value: 40 }, { value: 42 }, { value: 42 } ],
+  approved: [ { value: 10 }, { value: 12 }, { value: 15 }, { value: 14 }, { value: 16 }, { value: 20 }, { value: 18 } ]
+};
 
 const applicationsData = [
   {
@@ -184,131 +191,151 @@ const Applications: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with Status Bar */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-              <span>Admin</span>
-              <ChevronRight size={14} />
-              <span className="text-blue-600 dark:text-blue-400">Queue</span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">New Registrations</h1>
-            <p className="text-gray-600 dark:text-gray-400 font-medium mt-1">
-              Overview of incoming institution applications.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-              <History size={18} />
-              <span>Audit Log</span>
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20">
-              <ClipboardList size={18} />
-              <span>Generate Report</span>
-            </button>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">New Registrations</h1>
+          <p className="text-gray-600 dark:text-gray-400 font-medium mt-1">
+            Overview of incoming institution applications.
+          </p>
         </div>
+        <div className="flex items-center gap-3">
+          <Link to="/super-admin/new-registration" className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20">
+            <Plus size={18} />
+            <span>Register New Institution</span>
+          </Link>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+            <ClipboardList size={18} />
+            <span>Generate Report</span>
+          </button>
+        </div>
+      </div>
 
-        {/* Status Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-          {loading ? (
-            <>
-              <div className="flex items-center gap-4 px-2">
-                <Skeleton className="h-12 w-12 rounded-lg" />
-                <div>
-                  <Skeleton className="h-3 w-24 mb-2" />
-                  <div className="flex items-baseline gap-2">
-                    <Skeleton className="h-8 w-12" />
-                    <Skeleton className="h-4 w-10" />
-                  </div>
+      {/* Status Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {loading ? (
+          <>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-lg" />
+              <div>
+                <Skeleton className="h-3 w-24 mb-2" />
+                <div className="flex items-baseline gap-2">
+                  <Skeleton className="h-8 w-12" />
+                  <Skeleton className="h-4 w-10" />
                 </div>
               </div>
-              <div className="flex items-center gap-4 px-2 md:border-l border-gray-200 dark:border-gray-700">
-                <Skeleton className="h-12 w-12 rounded-lg" />
-                <div>
-                  <Skeleton className="h-3 w-24 mb-2" />
-                  <div className="flex items-baseline gap-2">
-                    <Skeleton className="h-8 w-12" />
-                    <Skeleton className="h-4 w-10" />
-                  </div>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-lg" />
+              <div>
+                <Skeleton className="h-3 w-24 mb-2" />
+                <div className="flex items-baseline gap-2">
+                  <Skeleton className="h-8 w-12" />
+                  <Skeleton className="h-4 w-10" />
                 </div>
               </div>
-              <div className="flex items-center gap-4 px-2 md:border-l border-gray-200 dark:border-gray-700">
-                <Skeleton className="h-12 w-12 rounded-lg" />
-                <div>
-                  <Skeleton className="h-3 w-24 mb-2" />
-                  <div className="flex items-baseline gap-2">
-                    <Skeleton className="h-8 w-12" />
-                    <Skeleton className="h-4 w-10" />
-                  </div>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-lg" />
+              <div>
+                <Skeleton className="h-3 w-24 mb-2" />
+                <div className="flex items-baseline gap-2">
+                  <Skeleton className="h-8 w-12" />
+                  <Skeleton className="h-4 w-10" />
                 </div>
               </div>
-              <div className="flex flex-col justify-center px-2 md:border-l border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between mb-2">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-3 w-3" />
-                </div>
-                <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-center">
+              <div className="flex items-center justify-between mb-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-3 w-3" />
               </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-4 px-2">
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+              <div className="flex items-center justify-between">
                 <div className="p-3 rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
                   <ClipboardList size={24} />
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">New Applications</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-extrabold text-gray-900 dark:text-white">12</span>
-                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">+4</span>
-                  </div>
+                <div className="h-10 w-24">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={sparklineData.newApps}>
+                      <Bar dataKey="value" fill="#3b82f6" radius={[2, 2, 2, 2]} barSize={4} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-4 px-2 md:border-l border-gray-200 dark:border-gray-700">
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Applications</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-extrabold text-gray-900 dark:text-white">12</span>
+                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">+4</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+              <div className="flex items-center justify-between">
                 <div className="p-3 rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
                   <History size={24} />
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Pending</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-extrabold text-gray-900 dark:text-white">42</span>
-                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Requires action</span>
-                  </div>
+                <div className="h-10 w-24">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={sparklineData.pending}>
+                      <Bar dataKey="value" fill="#d97706" radius={[2, 2, 2, 2]} barSize={4} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Pending</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-extrabold text-gray-900 dark:text-white">42</span>
+                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Requires action</span>
+                </div>
+              </div>
+            </div>
 
-              <div className="flex items-center gap-4 px-2 md:border-l border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+              <div className="flex items-center justify-between">
                 <div className="p-3 rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
                   <CheckCircle2 size={24} />
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Approved Today</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-extrabold text-gray-900 dark:text-white">18</span>
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">+12%</span>
-                  </div>
+                <div className="h-10 w-24">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={sparklineData.approved}>
+                      <Bar dataKey="value" fill="#10b981" radius={[2, 2, 2, 2]} barSize={4} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-
-              <div className="flex flex-col justify-center px-2 md:border-l border-gray-200 dark:border-gray-700">
-                 <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Activity Trend</p>
-                    <TrendingUp size={14} className="text-gray-400" />
-                 </div>
-                 <div className="h-10 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData}>
-                        <Bar dataKey="value" fill="#3b82f6" radius={[2, 2, 2, 2]} barSize={4} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                 </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Approved Today</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-extrabold text-gray-900 dark:text-white">18</span>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">+12%</span>
+                </div>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+               <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Activity Trend</p>
+                  <TrendingUp size={14} className="text-gray-400" />
+               </div>
+               <div className="h-20 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <Bar dataKey="value" fill="#3b82f6" radius={[2, 2, 2, 2]} barSize={6} />
+                    </BarChart>
+                  </ResponsiveContainer>
+               </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Filters & Table */}
