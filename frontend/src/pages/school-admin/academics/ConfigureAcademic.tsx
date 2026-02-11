@@ -32,6 +32,13 @@ export default function ConfigureAcademic() {
       color: 'bg-purple-600'
     },
     { 
+      title: 'Programmes', 
+      desc: 'Set up degree programmes and durations.', 
+      icon: GraduationCap, 
+      path: '/school-admin/academics/programmes',
+      color: 'bg-teal-600'
+    },
+    { 
       title: 'Faculties', 
       desc: 'Manage faculties and assign deans.', 
       icon: Building2, 
@@ -44,13 +51,6 @@ export default function ConfigureAcademic() {
       icon: Building, 
       path: '/school-admin/academics/departments',
       color: 'bg-cyan-600'
-    },
-    { 
-      title: 'Programmes', 
-      desc: 'Set up degree programmes and durations.', 
-      icon: GraduationCap, 
-      path: '/school-admin/academics/programmes',
-      color: 'bg-teal-600'
     },
     { 
       title: 'Levels', 

@@ -67,8 +67,8 @@ const SchoolAdminLogin: React.FC = () => {
                     </div>
 
                     <h1 className="text-2xl font-bold leading-tight mb-4 drop-shadow-md">
-                        KEYNOVERSE<br/>
-                        <span className="text-lg font-medium opacity-90">SCHOOL PORTAL</span>
+                        NBTE EDUCATION<br/>
+                        <span className="text-lg font-medium opacity-90">INSTITUTE MANAGEMENT ERP</span>
                     </h1>
 
                     <p className="text-sm opacity-80 max-w-[240px] leading-relaxed mb-12">

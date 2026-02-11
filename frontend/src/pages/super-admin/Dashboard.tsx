@@ -21,9 +21,9 @@ import { Skeleton } from '../../components/ui/Skeleton';
 
 // Mock Data
 const applicationData = [
-  { name: 'Approved', value: 320, color: '#6366f1' }, // Indigo-500
+  { name: 'Approved', value: 320, color: '#10b981' }, // Emerald-500 (Green)
   { name: 'Pending', value: 112, color: '#f97316' },  // Orange-500
-  { name: 'Rejected', value: 50, color: '#fbbf24' },  // Amber-400
+  { name: 'Rejected', value: 50, color: '#ef4444' },  // Red-500
 ];
 
 const provisioningData = [
@@ -81,7 +81,7 @@ const SuperAdminDashboard: React.FC = () => {
           ) : (
             <>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">System Overview</h1>
-              <p className="text-gray-600 dark:text-gray-400 font-medium">Today is Friday, 12th January 2024</p>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">Friday, 12th January 2024</p>
             </>
           )}
         </div>

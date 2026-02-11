@@ -205,7 +205,7 @@ const SchoolAdminDashboard: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">School Overview</h1>
-          <p className="text-gray-600 dark:text-gray-400 font-medium">Today is Friday, 12th January 2024</p>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Friday, 12th January 2024</p>
         </div>
         
         <div className="flex items-center gap-3">

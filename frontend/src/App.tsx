@@ -89,13 +89,14 @@ const superAdminItems = [
     icon: ClipboardCheck 
   },
   { 
-    name: 'Institutions', 
+    name: 'All Institutes', 
     path: '/super-admin/institutions',
-    icon: Building2,
-    subItems: [
-      { name: 'All Institutions', path: '/super-admin/institutions' },
-      { name: 'Configuration', path: '/super-admin/config' }
-    ]
+    icon: Building2
+  },
+  { 
+    name: 'Configuration', 
+    path: '/super-admin/config',
+    icon: SettingsIcon 
   },
 ];
 
@@ -125,6 +126,19 @@ const schoolAdminItems = [
     ]
   },
   { 
+    name: 'Examinations', 
+    icon: ClipboardCheck,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/examinations/dashboard' },
+      { name: 'Exam Cycle', path: '/school-admin/examinations/cycle' },
+      { name: 'Configuration', path: '/school-admin/examinations/assessment-config' },
+      { name: 'Timetable', path: '/school-admin/examinations/timetable' },
+      { name: 'Score Upload', path: '/school-admin/examinations/scores' },
+      { name: 'Result Processing', path: '/school-admin/examinations/processing' },
+      { name: 'Publication', path: '/school-admin/examinations/publication' },
+    ]
+  },
+  { 
     name: 'Staff Management', 
     icon: Briefcase,
     subItems: [
@@ -138,19 +152,6 @@ const schoolAdminItems = [
     subItems: [
       { name: 'All Students', path: '/school-admin/students/list' },
       { name: 'Student Profile', path: '/school-admin/students/profile' }
-    ]
-  },
-  { 
-    name: 'Examinations', 
-    icon: ClipboardCheck,
-    subItems: [
-      { name: 'Dashboard', path: '/school-admin/examinations/dashboard' },
-      { name: 'Exam Cycle', path: '/school-admin/examinations/cycle' },
-      { name: 'Timetable', path: '/school-admin/examinations/timetable' },
-      { name: 'Score Upload', path: '/school-admin/examinations/scores' },
-      { name: 'Result Processing', path: '/school-admin/examinations/processing' },
-      { name: 'Publication', path: '/school-admin/examinations/publication' },
-      { name: 'Configuration', path: '/school-admin/examinations/assessment-config' },
     ]
   },
   { 
