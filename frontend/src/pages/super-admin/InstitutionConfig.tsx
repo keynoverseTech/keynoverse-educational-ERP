@@ -11,15 +11,14 @@ import {
   Users, 
   School,
   AlertTriangle,
-  History,
   CheckCircle2,
   XCircle,
   Lock,
+  History,
   Search,
   Globe,
   Sliders,
-  Construction,
-  Power
+  Construction
 } from 'lucide-react';
 
 interface Module {

@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Building2, 
-  BookOpen, 
+import {
+  LayoutDashboard,
+  Building2,
+  BookOpen,
   UserPlus,
   ClipboardCheck,
   GraduationCap,
@@ -76,10 +76,17 @@ import StudentProfile from './pages/school-admin/students/StudentProfile';
 import StudentList from './pages/school-admin/students/StudentList';
 import CreateStudent from './pages/school-admin/students/CreateStudent';
 // Staff
-import StaffProfile from './pages/school-admin/staff/StaffProfile';
-import StaffList from './pages/school-admin/staff/StaffList';
-import CreateStaff from './pages/school-admin/staff/CreateStaff';
+import StaffProfile from './pages/school-admin/HR/StaffProfile';
+import Staff from './pages/school-admin/HR/Staff';
+import CreateStaff from './pages/school-admin/HR/CreateStaff';
 import StaffGrading from './pages/staff-portal/StaffGrading';
+import { HRProvider } from './state/hrAccessControl';
+
+import HRDashboard from './pages/school-admin/HR/HRDashboard';
+import HRDepartments from './pages/school-admin/HR/HRDepartments';
+import HRDesignations from './pages/school-admin/HR/HRDesignations';
+import PermissionsManagement from './pages/school-admin/HR/PermissionsManagement';
+import RolesManagement from './pages/school-admin/HR/RolesManagement';
 
 const superAdminItems = [
   { name: 'Overview', path: '/super-admin/dashboard', icon: LayoutDashboard },
@@ -139,14 +146,6 @@ const schoolAdminItems = [
     ]
   },
   { 
-    name: 'Staff Management', 
-    icon: Briefcase,
-    subItems: [
-      { name: 'All Staff', path: '/school-admin/staff/list' },
-      { name: 'Staff Profile', path: '/school-admin/staff/profile' }
-    ]
-  },
-  { 
     name: 'Student Management', 
     icon: GraduationCap,
     subItems: [
@@ -168,9 +167,24 @@ const schoolAdminItems = [
     ]
   },
   { 
+    name: 'HR & Staff only', 
+    icon: Briefcase,
+    subItems: [
+      { name: 'HR Dashboard', path: '/school-admin/hr/dashboard' },
+      { name: 'All Staff', path: '/school-admin/staff/list' },
+      { name: 'Staff Profile', path: '/school-admin/staff/profile' },
+      { name: 'Departments', path: '/school-admin/hr/departments' },
+      { name: 'Designations', path: '/school-admin/hr/designations' },
+      { name: 'Roles', path: '/school-admin/settings/roles' },
+      { name: 'Permissions', path: '/school-admin/settings/permissions' }
+    ]
+  },
+  { 
     name: 'Settings', 
-    path: '/school-admin/settings',
-    icon: SettingsIcon
+    icon: SettingsIcon,
+    subItems: [
+      { name: 'General Settings', path: '/school-admin/settings' }
+    ]
   }
 ];
 
@@ -193,8 +207,9 @@ const staffItems = [
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <HRProvider>
+      <Router>
+        <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Navigate to="/auth" replace />} />
         <Route path="/auth" element={<AuthSelection />} />
@@ -221,20 +236,22 @@ function App() {
         <Route path="/super-admin/institutions/:id" element={<InstitutionDetails />} />
 
         {/* School Admin Routes */}
-        <Route element={
-          <DashboardLayout 
-            sidebarItems={schoolAdminItems}
-            role="School Admin"
-            roleSubtitle="Administrator"
-            userInitials="AD"
-            sidebarTitle="School Name"
-            sidebarLogo={<GraduationCap className="w-5 h-5 fill-current" />}
-          >
-            <Outlet />
-          </DashboardLayout>
-        }>
+        <Route
+          element={
+            <DashboardLayout
+              sidebarItems={schoolAdminItems}
+              role="School Admin"
+              roleSubtitle="Administrator"
+              userInitials="AD"
+              sidebarTitle="School Name"
+              sidebarLogo={<GraduationCap className="w-5 h-5 fill-current" />}
+            >
+              <Outlet />
+            </DashboardLayout>
+          }
+        >
           <Route path="/school-admin/dashboard" element={<SchoolAdminDashboard />} />
-          
+
           {/* Admissions */}
           <Route path="/school-admin/admissions/dashboard" element={<AdmissionsDashboard />} />
           <Route path="/school-admin/admissions/intake" element={<AdmissionIntake />} />
@@ -254,8 +271,8 @@ function App() {
           <Route path="/school-admin/academics/levels" element={<LevelsPage />} />
           <Route path="/school-admin/academics/courses" element={<CoursesPage />} />
           <Route path="/school-admin/academics/registration-config" element={<CourseRegistrationConfig />} />
-           <Route path="/school-admin/academics/registration-approvals" element={<RegistrationApprovals />} />
-           <Route path="/school-admin/academics/courses-management" element={<CourseManagement />} />
+          <Route path="/school-admin/academics/registration-approvals" element={<RegistrationApprovals />} />
+          <Route path="/school-admin/academics/courses-management" element={<CourseManagement />} />
           <Route path="/school-admin/academics/lectures-timetable" element={<LecturesTimetable />} />
           <Route path="/school-admin/academics/registration" element={<CourseRegistration />} />
           <Route path="/school-admin/academics/promotion" element={<LevelPromotion />} />
@@ -276,14 +293,22 @@ function App() {
           <Route path="/school-admin/students/create" element={<CreateStudent />} />
 
           {/* Staff Management */}
-          <Route path="/school-admin/staff/list" element={<StaffList />} />
+          <Route path="/school-admin/staff/list" element={<Staff />} />
           <Route path="/school-admin/staff/profile" element={<StaffProfile />} />
           <Route path="/school-admin/staff/create" element={<CreateStaff />} />
 
+          {/* HR */}
+          <Route path="/school-admin/hr/dashboard" element={<HRDashboard />} />
+          <Route path="/school-admin/hr/departments" element={<HRDepartments />} />
+          <Route path="/school-admin/hr/designations" element={<HRDesignations />} />
+
+          {/* Settings */}
+          <Route path="/school-admin/settings" element={<Settings />} />
+          <Route path="/school-admin/settings/roles" element={<RolesManagement />} />
+          <Route path="/school-admin/settings/permissions" element={<PermissionsManagement />} />
+
           {/* Other Pages */}
           <Route path="/school-admin/reports" element={<BasicReports />} />
-          <Route path="/school-admin/settings" element={<Settings />} />
-
         </Route>
 
         {/* Student Portal Routes */}
@@ -304,26 +329,29 @@ function App() {
         </Route>
 
         {/* Staff Portal Routes */}
-        <Route element={
-          <DashboardLayout 
-            sidebarItems={staffItems}
-            role="Staff"
-            roleSubtitle="Academic Staff"
-            userInitials="DS"
-            sidebarTitle="Staff Portal"
-            sidebarLogo={<Briefcase className="w-5 h-5 fill-current" />}
-          >
-            <Outlet />
-          </DashboardLayout>
-        }>
+        <Route
+          element={
+            <DashboardLayout
+              sidebarItems={staffItems}
+              role="Staff"
+              roleSubtitle="Academic Staff"
+              userInitials="DS"
+              sidebarTitle="Staff Portal"
+              sidebarLogo={<Briefcase className="w-5 h-5 fill-current" />}
+            >
+              <Outlet />
+            </DashboardLayout>
+          }
+        >
           <Route path="/staff/dashboard" element={<StaffPortalDashboard />} />
           <Route path="/staff/grading" element={<StaffGrading />} />
           <Route path="/staff/score-upload" element={<ScoreUpload />} />
           {/* Add other staff routes here as placeholders for now */}
         </Route>
 
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </HRProvider>
   );
 }
 

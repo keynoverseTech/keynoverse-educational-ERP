@@ -26,7 +26,9 @@ const AuthSelection: React.FC = () => {
                 {/* Header */}
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-                        Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Keynoverse</span>
+                        Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">NBTE
+                            
+                        </span>
                     </h1>
                     <p className="text-lg text-slate-400 max-w-lg mx-auto">
                         Please select your administrative role to access the dashboard.
