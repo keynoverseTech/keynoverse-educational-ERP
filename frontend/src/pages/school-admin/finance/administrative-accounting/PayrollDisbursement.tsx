@@ -9,7 +9,8 @@ import {
   Users,
   Search,
   Eye,
-  ArrowRight
+  ArrowRight,
+  X
 } from 'lucide-react';
 import { useFinance } from '../../../../state/financeContext';
 import type { PayrollRun } from '../../../../state/financeContext';
