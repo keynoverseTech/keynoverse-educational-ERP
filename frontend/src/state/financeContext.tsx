@@ -51,6 +51,8 @@ export interface SalaryStructure {
 export interface StaffSalaryAssignment {
   staffId: string;
   salaryStructureId: string;
+  customAllowances?: { name: string; amount: number }[];
+  customDeductions?: { name: string; amount: number }[];
 }
 
 export interface PayrollRun {
