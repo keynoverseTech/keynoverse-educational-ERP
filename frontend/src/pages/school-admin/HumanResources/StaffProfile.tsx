@@ -13,23 +13,29 @@ import {
   Briefcase,
   AlertTriangle,
   Lock,
-  Calendar
+  Calendar,
+  Landmark,
+  ArrowRight,
+  UserCheck,
+  Building2,
+  Clock,
+  IdCard
 } from 'lucide-react';
 import type { Staff } from '../../../state/hrAccessControl';
 import { useHR } from '../../../state/hrAccessControl';
 
-type StaffProfileTab = 'profile' | 'employment' | 'audit' | 'roles' | 'account' | 'leave';
+type StaffProfileTab = 'profile' | 'employment' | 'bank' | 'roles' | 'account' | 'leave' | 'audit';
 
-  const StaffProfile: React.FC = () => {
-    const {
-      staff,
-      departments,
-      designations,
-      roles,
-      setStaff,
-      leaveTypes,
-      leaveRequests
-    } = useHR();
+const StaffProfile: React.FC = () => {
+  const {
+    staff,
+    departments,
+    designations,
+    roles,
+    setStaff,
+    leaveTypes,
+    leaveRequests
+  } = useHR();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
@@ -46,8 +52,8 @@ type StaffProfileTab = 'profile' | 'employment' | 'audit' | 'roles' | 'account' 
   const selectedStaff: Staff | null =
     staff.find(s => s.id === selectedStaffId) || null;
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (e?: React.FormEvent | React.KeyboardEvent) => {
+    e?.preventDefault();
     const term = searchQuery.trim().toLowerCase();
     if (!term) {
       return;
@@ -69,16 +75,13 @@ type StaffProfileTab = 'profile' | 'employment' | 'audit' | 'roles' | 'account' 
 
   const getStatusColor = (status: Staff['status']) => {
     if (status === 'active') {
-      return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
     }
-    return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+    return 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400';
   };
 
   const handleRoleChange = (roleId: string) => {
     if (!selectedStaff) return;
-    
-    // Logic to handle max 3 active roles can be extended here if staff model supports multiple roles
-    // For now, updating the single role as per current schema
     setStaff(prev => prev.map(s => 
       s.id === selectedStaff.id ? { ...s, roleId } : s
     ));
@@ -104,65 +107,102 @@ type StaffProfileTab = 'profile' | 'employment' | 'audit' | 'roles' | 'account' 
 
   if (!selectedStaff) {
     return (
-      <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Staff Management
-        </h1>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center border border-gray-200 dark:border-gray-700">
-          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+      <div className="p-6 max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+              <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
+                <IdCard className="w-6 h-6 text-white" />
+              </div>
+              Staff Management
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
+              Search, view, and manage academic and non-academic staff profiles.
+            </p>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Find a Staff Member
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
-            Search by name or staff ID to view profile and manage permissions.
-          </p>
-          <form
-            onSubmit={handleSearch}
-            className="max-w-md mx-auto relative"
-          >
-            <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Enter name or ID"
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-            >
-              Search Staff
-            </button>
-          </form>
-          <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
-            <p className="text-sm text-gray-500 mb-4">Quick Access</p>
-            <div className="flex flex-wrap justify-center gap-4">
-              {staff.slice(0, 6).map(s => (
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Search Card */}
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-gray-200/50 dark:shadow-none p-8 border border-gray-100 dark:border-gray-700/50 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors duration-500" />
+            
+            <div className="relative">
+              <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-6">
+                <Search className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                Find a Staff Member
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md">
+                Enter a staff name or unique ID to access their full profile, employment history, and payroll details.
+              </p>
+
+              <form onSubmit={handleSearch} className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Search by name, ID or email..."
+                    className="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-blue-500 focus:ring-0 outline-none transition-all text-lg font-medium"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                  />
+                </div>
                 <button
-                  key={s.id}
-                  onClick={() => setSelectedStaffId(s.id)}
-                  className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                  type="submit"
+                  className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 group/btn"
                 >
-                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-xs">
-                    {s.firstName[0]}
-                    {s.lastName[0]}
-                  </div>
-                  <div className="text-left">
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      {s.firstName} {s.lastName}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {s.staffId}
-                    </div>
-                  </div>
+                  Search Database
+                  <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
                 </button>
-              ))}
+              </form>
+            </div>
+          </div>
+
+          {/* Quick Stats/Links Card */}
+          <div className="space-y-6">
+            <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/20">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <UserCheck size={20} /> Staff Directory
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                  <span className="text-white/80 text-sm">Total Staff</span>
+                  <span className="text-2xl font-black">{staff.length}</span>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                  <span className="text-white/80 text-sm">Active Now</span>
+                  <span className="text-2xl font-black">{staff.filter(s => s.status === 'active').length}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+              <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Recent Profiles</h4>
+              <div className="space-y-3">
+                {staff.slice(0, 4).map(s => (
+                  <button
+                    key={s.id}
+                    onClick={() => setSelectedStaffId(s.id)}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-2xl transition-all border border-transparent hover:border-gray-100 dark:hover:border-gray-700"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-sm">
+                      {s.firstName[0]}{s.lastName[0]}
+                    </div>
+                    <div className="text-left flex-1">
+                      <div className="text-sm font-bold text-gray-900 dark:text-white leading-none mb-1">
+                        {s.firstName} {s.lastName}
+                      </div>
+                      <div className="text-xs text-gray-500 font-mono">
+                        {s.staffId}
+                      </div>
+                    </div>
+                    <ArrowRight size={14} className="text-gray-300" />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -179,227 +219,295 @@ type StaffProfileTab = 'profile' | 'employment' | 'audit' | 'roles' | 'account' 
   const role = roles.find(r => r.id === selectedStaff.roleId);
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Profile Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
         <button
           onClick={() => setSelectedStaffId(null)}
-          className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center gap-2"
+          className="group flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl text-sm font-bold text-gray-500 hover:text-blue-600 border border-gray-100 dark:border-gray-700 transition-all shadow-sm"
         >
-          &larr; Back to Search
+          <ArrowRight className="rotate-180 w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Directory
         </button>
-        <div className="relative w-64">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            size={16}
-          />
-          <input
-            type="text"
-            placeholder="Quick search..."
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                handleSearch(e as any);
-              }
-            }}
-          />
-        </div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row gap-6 items-start md:items-center">
-        <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-          {selectedStaff.firstName[0]}
-          {selectedStaff.lastName[0]}
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {selectedStaff.firstName} {selectedStaff.lastName}
-            </h1>
-            <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${getStatusColor(
-                selectedStaff.status
-              )}`}
-            >
-              {selectedStaff.status === 'active' ? 'Active' : 'Inactive'}
-            </span>
+        
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={16} />
+            <input
+              type="text"
+              placeholder="Search staff..."
+              className="pl-10 pr-4 py-2 text-sm rounded-xl border border-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white w-48 focus:w-64 focus:border-blue-500 transition-all outline-none shadow-sm"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch(e)}
+            />
           </div>
-          <p className="text-gray-500 dark:text-gray-400 flex items-center gap-4 text-sm">
-            <span className="flex items-center gap-1">
-              <Briefcase size={14} /> {designation?.name || 'No designation'}
-            </span>
-            <span className="flex items-center gap-1">
-              <MapPin size={14} /> {department?.name || 'No department'}
-            </span>
-            <span className="flex items-center gap-1">
-              <User size={14} /> {selectedStaff.staffId}
-            </span>
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-md flex items-center gap-2">
-            <Edit size={16} /> Edit Profile
-          </button>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+      {/* Hero Card */}
+      <div className="relative overflow-hidden bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-gray-700">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-20 -mt-20" />
+        
+        <div className="relative flex flex-col md:flex-row gap-8 items-start md:items-center">
+          <div className="relative">
+            <div className="w-32 h-32 rounded-[2rem] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-4xl font-black shadow-2xl shadow-blue-500/40">
+              {selectedStaff.firstName[0]}{selectedStaff.lastName[0]}
+            </div>
+            <div className="absolute -bottom-2 -right-2 p-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-50 dark:border-gray-800">
+              <div className={`w-4 h-4 rounded-full ${selectedStaff.status === 'active' ? 'bg-emerald-500 shadow-emerald-500/50' : 'bg-rose-500 shadow-rose-500/50'} shadow-lg`} />
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-4 mb-3">
+              <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                {selectedStaff.firstName} {selectedStaff.lastName}
+              </h1>
+              <span className={`px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-widest ${getStatusColor(selectedStaff.status)} shadow-sm`}>
+                {selectedStaff.status}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                  <Briefcase size={16} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Designation</p>
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{designation?.name || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
+                  <Building2 size={16} className="text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Department</p>
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{department?.name || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-violet-50 dark:bg-violet-900/20 rounded-xl">
+                  <IdCard size={16} className="text-violet-600 dark:text-violet-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Staff ID</p>
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{selectedStaff.staffId}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 self-start md:self-center">
+            <button className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl text-sm font-black hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-gray-900/20 dark:shadow-none flex items-center gap-2">
+              <Edit size={16} /> Edit Profile
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Navigation Sidebar */}
         <div className="lg:col-span-1 space-y-2">
-          {(['profile', 'employment', 'roles', 'account', 'leave', 'audit'] as const).map(
+          {(['profile', 'employment', 'bank', 'roles', 'account', 'leave', 'audit'] as const).map(
             tabId => {
               const label =
                 tabId === 'profile'
-                  ? 'Profile'
+                  ? 'Personal Info'
                   : tabId === 'employment'
                   ? 'Employment'
+                  : tabId === 'bank'
+                  ? 'Bank Details'
                   : tabId === 'roles'
-                  ? 'Roles & Permissions'
+                  ? 'Access Roles'
                   : tabId === 'account'
-                  ? 'Account Settings'
+                  ? 'Account Security'
                   : tabId === 'leave'
                   ? 'Leave Tracking'
-                  : 'Audit Log';
+                  : 'Activity Logs';
               const icon =
                 tabId === 'profile'
                   ? User
                   : tabId === 'employment'
                   ? Briefcase
+                  : tabId === 'bank'
+                  ? Landmark
                   : tabId === 'roles'
                   ? Shield
                   : tabId === 'account'
-                  ? Key
+                  ? Lock
                   : tabId === 'leave'
                   ? Calendar
-                  : CheckCircle;
+                  : Clock;
+              
+              const isActive = activeTab === tabId;
+
               return (
                 <button
                   key={tabId}
                   onClick={() => setActiveTab(tabId)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                    activeTab === tabId
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-black transition-all duration-300 ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/25 scale-[1.02]'
+                      : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 border border-gray-50 dark:border-gray-700'
                   }`}
                 >
-                  {React.createElement(icon, { size: 18 })}
+                  {React.createElement(icon, { size: 18, className: isActive ? 'text-white' : 'text-gray-400' })}
                   {label}
                 </button>
               );
             }
           )}
         </div>
-        <div className="lg:col-span-3 space-y-6">
-          {activeTab === 'profile' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
-                Personal Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    First Name
-                  </label>
-                  <div className="mt-1 text-gray-900 dark:text-white font-medium">
-                    {selectedStaff.firstName}
+
+        {/* Content Area */}
+        <div className="lg:col-span-3">
+          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl shadow-gray-200/30 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden min-h-[500px]">
+            {activeTab === 'profile' && (
+              <div className="p-10 space-y-10">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Personal Information
+                  </h3>
+                  <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                    <User className="w-5 h-5 text-blue-600" />
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Last Name
-                  </label>
-                  <div className="mt-1 text-gray-900 dark:text-white font-medium">
-                    {selectedStaff.lastName}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-12">
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Legal Name</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{selectedStaff.firstName} {selectedStaff.lastName}</p>
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Email Address
-                  </label>
-                  <div className="mt-1 text-gray-900 dark:text-white font-medium flex items-center gap-2">
-                    <Mail size={14} className="text-gray-400" />
-                    {selectedStaff.email}
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Email Contact</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Mail size={16} className="text-blue-500" /> {selectedStaff.email}
+                    </p>
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Phone Number
-                  </label>
-                  <div className="mt-1 text-gray-900 dark:text-white font-medium flex items-center gap-2">
-                    <Phone size={14} className="text-gray-400" />
-                    {selectedStaff.phone}
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Phone Number</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Phone size={16} className="text-indigo-500" /> {selectedStaff.phone}
+                    </p>
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Employment Status
-                  </label>
-                  <div className="mt-1 text-gray-900 dark:text-white font-medium">
-                    {selectedStaff.status === 'active'
-                      ? 'Active'
-                      : 'Inactive'}
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Employment Date</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Calendar size={16} className="text-emerald-500" /> {selectedStaff.dateEmployed ? new Date(selectedStaff.dateEmployed).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'}
+                    </p>
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                    Date Employed
-                  </label>
-                  <div className="mt-1 text-gray-900 dark:text-white font-medium">
-                    {selectedStaff.dateEmployed
-                      ? new Date(
-                          selectedStaff.dateEmployed
-                        ).toLocaleDateString()
-                      : 'Not set'}
+                  <div className="space-y-1.5 md:col-span-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Residential Address</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white flex items-start gap-2">
+                      <MapPin size={16} className="text-rose-500 mt-1" /> {selectedStaff.address || 'No address provided'}
+                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-          {activeTab === 'employment' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  Employment Details
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                      Department
-                    </label>
-                    <div className="mt-1 text-gray-900 dark:text-white font-medium">
-                      {department?.name || 'Not set'}
+            )}
+
+            {activeTab === 'employment' && (
+              <div className="p-10 space-y-10">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Professional Status
+                  </h3>
+                  <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                    <Briefcase className="w-5 h-5 text-emerald-600" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="p-6 bg-gray-50 dark:bg-gray-900/40 rounded-3xl space-y-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Building2 className="text-blue-600" size={20} />
+                      <span className="text-sm font-black text-gray-900 dark:text-white">Organization</span>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</p>
+                        <p className="text-md font-bold text-gray-800 dark:text-gray-200">{department?.name || 'Unassigned'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Designation</p>
+                        <p className="text-md font-bold text-gray-800 dark:text-gray-200">{designation?.name || 'Unassigned'}</p>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                      Designation
-                    </label>
-                    <div className="mt-1 text-gray-900 dark:text-white font-medium">
-                      {designation?.name || 'Not set'}
+
+                  <div className="p-6 bg-gray-50 dark:bg-gray-900/40 rounded-3xl space-y-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <UserCheck className="text-indigo-600" size={20} />
+                      <span className="text-sm font-black text-gray-900 dark:text-white">System Role</span>
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                      Role
-                    </label>
-                    <div className="mt-1 text-gray-900 dark:text-white font-medium">
-                      {role?.name || 'Not set'}
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Assigned Role</p>
+                        <p className="text-md font-bold text-gray-800 dark:text-gray-200">{role?.name || 'No Role'}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Permissions</p>
+                        <p className="text-xs font-medium text-gray-500">{role?.description || 'No system access configured'}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-          {activeTab === 'roles' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  Role Assignment
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                  Assign a system role to this staff member. This will automatically inherit all associated permissions.
-                  <span className="block mt-1 text-xs text-orange-600 dark:text-orange-400 font-medium">
-                    Note: Staff can have a maximum of 3 active roles (Currently 1 supported in UI).
-                  </span>
-                </p>
+            )}
+
+            {activeTab === 'bank' && (
+              <div className="p-10 space-y-10">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Banking Details
+                  </h3>
+                  <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+                    <Landmark className="w-5 h-5 text-amber-600" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-12">
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Bank Name</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{selectedStaff.bankName || 'Not Provided'}</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Account Number</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white font-mono tracking-wider">{selectedStaff.bankAccountNumber || 'Not Provided'}</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Account Holder Name</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{selectedStaff.bankAccountName || 'Not Provided'}</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Bank Branch / Address</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{selectedStaff.bankAddress || 'Not Provided'}</p>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border border-blue-100 dark:border-blue-800 flex items-start gap-4">
+                  <Shield size={20} className="text-blue-600 mt-1 shrink-0" />
+                  <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed font-medium">
+                    This banking information was submitted during staff registration and is used for payroll processing.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Other tabs follow the same premium styling... */}
+            {activeTab === 'roles' && (
+              <div className="p-10 space-y-10">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Access & Roles
+                  </h3>
+                  <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
+                    <Shield className="w-5 h-5 text-indigo-600" />
+                  </div>
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {roles.map(r => (
@@ -407,56 +515,128 @@ type StaffProfileTab = 'profile' | 'employment' | 'audit' | 'roles' | 'account' 
                       key={r.id}
                       onClick={() => handleRoleChange(r.id)}
                       className={`
-                        relative p-4 rounded-xl border text-left transition-all
+                        group relative p-6 rounded-[2rem] border-2 text-left transition-all duration-500
                         ${selectedStaff.roleId === r.id 
-                          ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 ring-1 ring-blue-500' 
-                          : 'bg-white border-gray-200 hover:border-blue-300 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-blue-700'}
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-500/30' 
+                          : 'bg-white border-gray-100 hover:border-blue-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-blue-900'}
                       `}
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <span className={`font-bold ${selectedStaff.roleId === r.id ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>
-                          {r.name}
-                        </span>
+                      <div className="flex justify-between items-start mb-4">
+                        <div className={`p-3 rounded-2xl ${selectedStaff.roleId === r.id ? 'bg-white/20' : 'bg-gray-50 dark:bg-gray-900 group-hover:bg-blue-50 transition-colors'}`}>
+                          <UserCheck size={20} className={selectedStaff.roleId === r.id ? 'text-white' : 'text-gray-400 group-hover:text-blue-600'} />
+                        </div>
                         {selectedStaff.roleId === r.id && (
-                          <CheckCircle size={18} className="text-blue-600 dark:text-blue-400" />
+                          <div className="bg-white text-blue-600 p-1.5 rounded-full">
+                            <CheckCircle size={14} />
+                          </div>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                      <h4 className="font-black text-lg mb-1 tracking-tight">{r.name}</h4>
+                      <p className={`text-xs font-medium leading-relaxed ${selectedStaff.roleId === r.id ? 'text-white/70' : 'text-gray-500'}`}>
                         {r.description}
                       </p>
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTab === 'leave' && (
-            <div className="space-y-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Leave Entitlements</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {activeTab === 'account' && (
+              <div className="p-10 space-y-10">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Security Controls
+                  </h3>
+                  <div className="p-2 bg-rose-50 dark:bg-rose-900/20 rounded-xl">
+                    <Lock className="w-5 h-5 text-rose-600" />
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="p-8 bg-gray-50 dark:bg-gray-900/40 rounded-[2.5rem] flex flex-col md:flex-row md:items-center justify-between gap-6 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
+                    <div className="flex items-center gap-5">
+                      <div className="w-14 h-14 bg-white dark:bg-gray-800 rounded-2xl shadow-sm flex items-center justify-center text-rose-600">
+                        <Shield size={28} />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black text-gray-900 dark:text-white mb-1">Account Visibility</h4>
+                        <p className="text-xs font-medium text-gray-500">Toggle staff access to the ERP platform.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className={`text-xs font-black uppercase tracking-widest ${selectedStaff.status === 'active' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        {selectedStaff.status}
+                      </span>
+                      <button 
+                        onClick={() => handleAccountStatusChange(selectedStaff.status === 'active' ? 'inactive' : 'active')}
+                        className={`px-8 py-3 rounded-2xl text-xs font-black transition-all ${
+                          selectedStaff.status === 'active' 
+                            ? 'bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white' 
+                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'
+                        }`}
+                      >
+                        {selectedStaff.status === 'active' ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <button className="p-8 bg-white dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700 rounded-[2.5rem] hover:border-blue-500 group transition-all text-left">
+                      <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
+                        <Key size={24} />
+                      </div>
+                      <h4 className="font-black text-gray-900 dark:text-white mb-2">Reset Password</h4>
+                      <p className="text-xs font-medium text-gray-500 leading-relaxed">Securely send a password reset link to the staff's registered email.</p>
+                    </button>
+
+                    <button className="p-8 bg-white dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700 rounded-[2.5rem] hover:border-orange-500 group transition-all text-left">
+                      <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/20 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:scale-110 transition-transform">
+                        <AlertTriangle size={24} />
+                      </div>
+                      <h4 className="font-black text-gray-900 dark:text-white mb-2">Force Logout</h4>
+                      <p className="text-xs font-medium text-gray-500 leading-relaxed">Terminate all active sessions for this user across all devices immediately.</p>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'leave' && (
+              <div className="p-10 space-y-10">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Leave Entitlements
+                  </h3>
+                  <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                    <Calendar className="w-5 h-5 text-emerald-600" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {leaveTypes.map(type => {
                     const used = calculateUsedLeave(selectedStaff.id, type.id);
                     const remaining = type.maxDays - used;
                     const percentage = Math.round((used / type.maxDays) * 100);
                     
                     return (
-                      <div key={type.id} className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-gray-900 dark:text-white text-sm">{type.name}</h4>
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${remaining > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                            {remaining} Left
+                      <div key={type.id} className="p-8 rounded-[2rem] border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 hover:shadow-lg transition-all">
+                        <div className="flex justify-between items-start mb-6">
+                          <div>
+                            <h4 className="font-black text-gray-900 dark:text-white text-lg tracking-tight mb-1">{type.name}</h4>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Annual Allocation</p>
+                          </div>
+                          <span className={`text-[10px] font-black px-4 py-1.5 rounded-2xl uppercase tracking-widest shadow-sm ${remaining > 5 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {remaining} Days Left
                           </span>
                         </div>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-xs text-gray-500">
-                            <span>Used: {used}</span>
-                            <span>Total: {type.maxDays}</span>
+                        <div className="space-y-3">
+                          <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
+                            <span>Consumed: {used}</span>
+                            <span>Limit: {type.maxDays}</span>
                           </div>
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                             <div 
-                              className={`h-1.5 rounded-full ${percentage > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 
+                              className={`h-3 rounded-full transition-all duration-1000 ${percentage > 80 ? 'bg-rose-500 shadow-rose-500/50' : 'bg-blue-600 shadow-blue-500/50'} shadow-lg`} 
                               style={{ width: `${percentage}%` }}
                             ></div>
                           </div>
@@ -466,152 +646,41 @@ type StaffProfileTab = 'profile' | 'employment' | 'audit' | 'roles' | 'account' 
                   })}
                 </div>
               </div>
+            )}
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Leave History</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                      <tr>
-                        <th className="px-4 py-3 font-medium text-gray-500">Type</th>
-                        <th className="px-4 py-3 font-medium text-gray-500">Duration</th>
-                        <th className="px-4 py-3 font-medium text-gray-500">Reason</th>
-                        <th className="px-4 py-3 font-medium text-gray-500">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {leaveRequests
-                        .filter(req => req.staffId === selectedStaff.id)
-                        .map(req => {
-                          const typeName = leaveTypes.find(t => t.id === req.leaveTypeId)?.name || 'Unknown';
-                          return (
-                            <tr key={req.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/30">
-                              <td className="px-4 py-3 text-gray-900 dark:text-white">{typeName}</td>
-                              <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
-                                {new Date(req.startDate).toLocaleDateString()} - {new Date(req.endDate).toLocaleDateString()}
-                              </td>
-                              <td className="px-4 py-3 text-gray-500 italic truncate max-w-xs">{req.reason}</td>
-                              <td className="px-4 py-3">
-                                <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                                  req.status === 'Approved' ? 'bg-green-100 text-green-700' : 
-                                  req.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
-                                }`}>
-                                  {req.status}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      {leaveRequests.filter(req => req.staffId === selectedStaff.id).length === 0 && (
-                        <tr>
-                          <td colSpan={4} className="px-4 py-8 text-center text-gray-500">No leave history found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'account' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-8">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  Account Control
-                </h3>
-                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Account Status</h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Suspend or activate this staff member's access to the portal.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-sm font-bold ${selectedStaff.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
-                        {selectedStaff.status === 'active' ? 'Active' : 'Inactive'}
-                      </span>
-                      <button 
-                        onClick={() => handleAccountStatusChange(selectedStaff.status === 'active' ? 'inactive' : 'active')}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          selectedStaff.status === 'active' 
-                            ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30' 
-                            : 'bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30'
-                        }`}
-                      >
-                        {selectedStaff.status === 'active' ? 'Deactivate Account' : 'Activate Account'}
-                      </button>
-                    </div>
+            {activeTab === 'audit' && (
+              <div className="p-10 space-y-10">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Activity Logs
+                  </h3>
+                  <div className="p-2 bg-gray-50 dark:bg-gray-900/20 rounded-xl">
+                    <Clock className="w-5 h-5 text-gray-600" />
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  Security Settings
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
-                        <Lock size={18} />
+                <div className="space-y-8 relative before:absolute before:inset-y-0 before:left-4 before:w-0.5 before:bg-gray-100 dark:before:bg-gray-700">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="relative pl-12">
+                      <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-white dark:bg-gray-800 border-4 border-gray-50 dark:border-gray-700 shadow-sm flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Reset Password</h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Send a password reset link to {selectedStaff.email}
+                      <div className="p-6 bg-gray-50 dark:bg-gray-900/40 rounded-3xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all">
+                        <p className="text-sm font-bold text-gray-900 dark:text-white mb-2">
+                          Role updated to <span className="text-blue-600">Senior Lecturer</span>
                         </p>
+                        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                          <span className="flex items-center gap-1.5"><User size={12} /> Admin User</span>
+                          <span className="flex items-center gap-1.5"><Calendar size={12} /> {new Date().toLocaleDateString()}</span>
+                          <span className="flex items-center gap-1.5"><Clock size={12} /> 10:3{i} AM</span>
+                        </div>
                       </div>
                     </div>
-                    <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                      Send Reset Link
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 rounded-lg">
-                        <AlertTriangle size={18} />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Force Logout</h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Sign out this user from all active sessions immediately.
-                        </p>
-                      </div>
-                    </div>
-                    <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                      Revoke Sessions
-                    </button>
-                  </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'audit' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
-                Activity Audit Log
-              </h3>
-              <div className="space-y-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-4 relative pb-6 border-l-2 border-gray-100 dark:border-gray-700 last:border-0 last:pb-0 pl-6 -ml-2">
-                    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-800" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Role updated to <span className="font-bold">Senior Lecturer</span>
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Changed by Admin User • {new Date().toLocaleDateString()} at 10:3{i} AM
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

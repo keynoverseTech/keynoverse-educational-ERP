@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { Users, Briefcase, Activity, Mail, Filter, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Briefcase, Activity, Mail, Filter, Search, Download, FileText, Link2, Eye } from 'lucide-react';
 import type { Staff as StaffEntity } from '../../../state/hrAccessControl';
 import { useHR } from '../../../state/hrAccessControl';
 
 type StaffFilterType = 'All' | 'Academic' | 'Non-Academic';
+type ExportScope = 'filtered' | 'all';
 
 interface EnrichedStaffRow {
   staff: StaffEntity;
@@ -13,20 +15,26 @@ interface EnrichedStaffRow {
   email: string;
   roleName: string;
   departmentName: string;
+  designationName: string;
   statusLabel: 'Active' | 'Inactive';
   typeLabel: 'Academic' | 'Non-Academic';
 }
 
 const HRDashboard: React.FC = () => {
-  const { staff, departments, roles } = useHR();
+  const navigate = useNavigate();
+  const { staff, departments, roles, designations } = useHR();
   const [filterType, setFilterType] = useState<StaffFilterType>('All');
   const [filterDepartment, setFilterDepartment] = useState('All');
+  const [filterDesignation, setFilterDesignation] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [exportScope, setExportScope] = useState<ExportScope>('filtered');
+  const [copyStatus, setCopyStatus] = useState('');
 
   const enrichedStaff = useMemo<EnrichedStaffRow[]>(() => {
     return staff.map(s => {
       const dept = departments.find(d => d.id === s.departmentId);
       const role = roles.find(r => r.id === s.roleId);
+      const designation = designations.find(d => d.id === s.designationId);
       const name = `${s.firstName} ${s.lastName}`.trim();
       const typeLabel: 'Academic' | 'Non-Academic' =
         dept && dept.type === 'Academic' ? 'Academic' : 'Non-Academic';
@@ -40,11 +48,12 @@ const HRDashboard: React.FC = () => {
         email: s.email,
         roleName: role ? role.name : '',
         departmentName: dept ? dept.name : '',
+        designationName: designation ? designation.name : '',
         statusLabel,
         typeLabel
       };
     });
-  }, [staff, departments, roles]);
+  }, [staff, departments, roles, designations]);
 
   const totalStaff = enrichedStaff.length;
   const academicStaff = enrichedStaff.filter(
@@ -64,7 +73,10 @@ const HRDashboard: React.FC = () => {
     const matchesDept =
       filterDepartment === 'All' ||
       row.departmentName === filterDepartment;
-    return matchesSearch && matchesType && matchesDept;
+    const matchesDesignation =
+      filterDesignation === 'All' ||
+      row.designationName === filterDesignation;
+    return matchesSearch && matchesType && matchesDept && matchesDesignation;
   });
 
   const getStatusColor = (statusLabel: 'Active' | 'Inactive') => {
@@ -81,6 +93,151 @@ const HRDashboard: React.FC = () => {
   ];
 
   const maxChartValue = Math.max(...chartData.map(d => d.value), 1);
+
+  const exportRows = exportScope === 'all' ? enrichedStaff : filteredStaff;
+
+  const fileStamp = new Date().toISOString().slice(0, 10);
+
+  const escapeCsvValue = (value: string) => {
+    return `"${value.replace(/"/g, '""')}"`;
+  };
+
+  const buildCsvContent = () => {
+    const headers = [
+      'Name',
+      'Staff ID',
+      'Email',
+      'Role',
+      'Department',
+      'Designation',
+      'Status',
+      'Type',
+      'Date Employed'
+    ];
+
+    const rows = exportRows.map(row => [
+      row.name,
+      row.staffId,
+      row.email,
+      row.roleName,
+      row.departmentName,
+      row.designationName,
+      row.statusLabel,
+      row.typeLabel,
+      row.staff.dateEmployed
+    ]);
+
+    const csvLines = [
+      headers.map(escapeCsvValue).join(','),
+      ...rows.map(row => row.map(value => escapeCsvValue(String(value))).join(','))
+    ];
+
+    return csvLines.join('\n');
+  };
+
+  const triggerDownload = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadExcel = () => {
+    const csvContent = buildCsvContent();
+    triggerDownload(csvContent, `staff-directory-${exportScope}-${fileStamp}.csv`, 'text/csv;charset=utf-8;');
+  };
+
+  const handleDownloadPdf = () => {
+    const printableRows = exportRows
+      .map(row => `
+        <tr>
+          <td>${row.name}</td>
+          <td>${row.staffId}</td>
+          <td>${row.email}</td>
+          <td>${row.roleName}</td>
+          <td>${row.departmentName}</td>
+          <td>${row.designationName}</td>
+          <td>${row.statusLabel}</td>
+          <td>${row.typeLabel}</td>
+          <td>${row.staff.dateEmployed}</td>
+        </tr>
+      `)
+      .join('');
+
+    const html = `
+      <html>
+        <head>
+          <title>Staff Directory</title>
+          <style>
+            body { font-family: Inter, Arial, sans-serif; padding: 24px; color: #111827; }
+            h1 { font-size: 20px; margin-bottom: 8px; }
+            p { font-size: 12px; margin: 0 0 16px; color: #6b7280; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+            th { background: #f9fafb; }
+          </style>
+        </head>
+        <body>
+          <h1>Staff Directory</h1>
+          <p>${exportRows.length} staff members</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Staff ID</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Department</th>
+                <th>Designation</th>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Date Employed</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${printableRows}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+    if (!printWindow) {
+      return;
+    }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
+  const handleCopyLink = async () => {
+    const params = new URLSearchParams();
+    if (filterType !== 'All') params.set('type', filterType);
+    if (filterDepartment !== 'All') params.set('department', filterDepartment);
+    if (filterDesignation !== 'All') params.set('designation', filterDesignation);
+    if (searchTerm.trim()) params.set('search', searchTerm.trim());
+    const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    const link = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(link);
+    } else {
+      const input = document.createElement('textarea');
+      input.value = link;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+    }
+
+    setCopyStatus('Link copied');
+    window.setTimeout(() => setCopyStatus(''), 2000);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -262,6 +419,23 @@ const HRDashboard: React.FC = () => {
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Designation
+              </label>
+              <select
+                value={filterDesignation}
+                onChange={e => setFilterDesignation(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="All">All Designations</option>
+                {designations.map(designation => (
+                  <option key={designation.id} value={designation.name}>
+                    {designation.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">
                 Search
               </label>
               <div className="relative">
@@ -292,6 +466,39 @@ const HRDashboard: React.FC = () => {
               {filteredStaff.length} of {totalStaff} staff members shown
             </p>
           </div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <select
+              value={exportScope}
+              onChange={e => setExportScope(e.target.value as ExportScope)}
+              className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs text-gray-600 dark:text-gray-300"
+            >
+              <option value="filtered">Current filters</option>
+              <option value="all">All staff</option>
+            </select>
+            <button
+              onClick={handleDownloadPdf}
+              className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300"
+            >
+              <FileText size={14} /> PDF
+            </button>
+            <button
+              onClick={handleDownloadExcel}
+              className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300"
+            >
+              <Download size={14} /> Excel
+            </button>
+            <button
+              onClick={handleCopyLink}
+              className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200"
+            >
+              <Link2 size={14} /> Link
+            </button>
+            {copyStatus && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {copyStatus}
+              </span>
+            )}
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -311,6 +518,9 @@ const HRDashboard: React.FC = () => {
                 </th>
                 <th className="px-6 py-4 font-medium text-gray-500 dark:text-gray-400">
                   Status
+                </th>
+                <th className="px-6 py-4 font-medium text-gray-500 dark:text-gray-400 text-right">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -362,6 +572,15 @@ const HRDashboard: React.FC = () => {
                       >
                         {row.statusLabel}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => navigate('/school-admin/staff/profile', { state: { staffId: row.id } })}
+                        className="p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                        title="View Profile"
+                      >
+                        <Eye size={18} />
+                      </button>
                     </td>
                   </tr>
                 ))

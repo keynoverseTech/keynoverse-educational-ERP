@@ -80,7 +80,6 @@ import StudentProfile from './pages/school-admin/students/StudentProfile';
 import StudentList from './pages/school-admin/students/StudentList';
 import CreateStudent from './pages/school-admin/students/CreateStudent';
 // Staff
-import StaffList from './pages/school-admin/HumanResources/StaffList';
 import StaffProfile from './pages/school-admin/HumanResources/StaffProfile';
 import CreateStaff from './pages/school-admin/HumanResources/CreateStaff';
 import StaffGrading from './pages/staff-portal/StaffGrading';
@@ -210,7 +209,7 @@ const schoolAdminItems = [
     icon: Briefcase,
     subItems: [
       { name: 'HR Dashboard', path: '/school-admin/human-resources/dashboard' },
-      { name: 'Staff List', path: '/school-admin/staff/list' },
+      { name: 'Staff Profile', path: '/school-admin/staff/profile' },
       { name: 'Add Staff', path: '/school-admin/staff/create' },
       { name: 'Leave Request', path: '/school-admin/human-resources/leave/request' },
       { name: 'Leave Approvals', path: '/school-admin/human-resources/leave/approvals' },
@@ -335,7 +334,6 @@ function App() {
           <Route path="/school-admin/students/create" element={<CreateStudent />} />
 
           {/* Staff Management */}
-          <Route path="/school-admin/staff/list" element={<StaffList />} />
           <Route path="/school-admin/staff/profile" element={<StaffProfile />} />
           <Route path="/school-admin/staff/create" element={<CreateStaff />} />
 

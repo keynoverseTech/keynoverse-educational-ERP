@@ -29,7 +29,7 @@ const generatePassword = (len = 14): string => {
   const digits = '23456789';
   const symbols = '!@#$%&*';
   const all = upper + lower + digits + symbols;
-  let pwd = [
+  const pwd = [
     upper[Math.floor(Math.random() * upper.length)],
     lower[Math.floor(Math.random() * lower.length)],
     digits[Math.floor(Math.random() * digits.length)],
