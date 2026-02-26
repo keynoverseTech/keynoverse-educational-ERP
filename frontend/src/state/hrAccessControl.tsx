@@ -42,6 +42,8 @@ export interface StaffPermissionOverride {
 
 export type StaffStatus = 'active' | 'inactive';
 
+export type Gender = 'Male' | 'Female' | 'Other';
+
 export interface Staff {
   id: string;
   staffId: string;
@@ -54,6 +56,22 @@ export interface Staff {
   roleId: string;
   status: StaffStatus;
   dateEmployed: string;
+  // Personal details
+  gender?: Gender;
+  dateOfBirth?: string;
+  address?: string;
+  ninNumber?: string;
+  profilePicture?: string;
+  // Employment
+  qualifications?: string;
+  // Bank details
+  bankAccountNumber?: string;
+  bankAccountName?: string;
+  bankName?: string;
+  bankAddress?: string;
+  // ERP login
+  loginEmail?: string;
+  loginPassword?: string;
 }
 
 export interface LeaveType {
@@ -151,7 +169,7 @@ const initialPermissions: Permission[] = [
   { id: 'perm_configure_hr', key: 'configure_hr', description: 'Configure HR and role settings', module: 'HR' },
   { id: 'perm_manage_library', key: 'manage_library', description: 'Manage library resources', module: 'Library' },
   { id: 'perm_approve_leave', key: 'approve_leave', description: 'Approve or reject leave requests', module: 'HR' },
-  
+
   // Exams Workflow Permissions
   { id: 'perm_submit_result', key: 'submit_result', description: 'Submit results for departmental review', module: 'Exams' },
   { id: 'perm_review_result_department', key: 'review_result_department', description: 'Review and approve results at department level', module: 'Exams' },
