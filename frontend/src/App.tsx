@@ -96,10 +96,12 @@ import AdminFinanceDashboard from './pages/school-admin/finance/administrative-a
 import AdminFeeStructurePage from './pages/school-admin/finance/administrative-accounting/FeeStructurePage';
 import AdminInvoicesPage from './pages/school-admin/finance/administrative-accounting/InvoicesPage';
 import AdminPaymentsPage from './pages/school-admin/finance/administrative-accounting/PaymentsPage';
+import AccountsPage from './pages/school-admin/finance/AccountsPage';
 
 import StudentFinanceDashboard from './pages/school-admin/finance/student-accounting/FinanceDashboard';
-import StudentFeeStructurePage from './pages/school-admin/finance/student-accounting/FeeStructurePage';
+import StudentFeeConfigurationPage from './pages/school-admin/finance/student-accounting/FeeConfigurationPage';
 import StudentInvoicesPage from './pages/school-admin/finance/student-accounting/InvoicesPage';
+import StudentInvoiceDetailsPage from './pages/school-admin/finance/student-accounting/InvoiceDetailsPage';
 import StudentPaymentsPage from './pages/school-admin/finance/student-accounting/PaymentsPage';
 import { FinanceProvider } from './state/financeContext';
 import { DollarSign } from 'lucide-react';
@@ -192,7 +194,7 @@ const schoolAdminItems = [
         name: 'Student Accounting',
         subItems: [
           { name: 'Dashboard', path: '/school-admin/finance/student-accounting/dashboard' },
-          { name: 'Fee Structure', path: '/school-admin/finance/student-accounting/fee-structure' },
+          { name: 'Fee Configuration', path: '/school-admin/finance/student-accounting/fee-structure' },
           { name: 'Invoices', path: '/school-admin/finance/student-accounting/invoices' },
           { name: 'Payments & Receipts', path: '/school-admin/finance/student-accounting/payments' },
         ]
@@ -205,7 +207,8 @@ const schoolAdminItems = [
           { name: 'Invoices', path: '/school-admin/finance/administrative-accounting/invoices' },
           { name: 'Payments', path: '/school-admin/finance/administrative-accounting/payments' }
         ]
-      }
+      },
+      { name: 'Bank Accounts', path: '/school-admin/finance/accounts' }
     ]
   },
   { 
@@ -364,8 +367,9 @@ function App() {
 
           {/* Finance - Student Accounting */}
           <Route path="/school-admin/finance/student-accounting/dashboard" element={<StudentFinanceDashboard />} />
-          <Route path="/school-admin/finance/student-accounting/fee-structure" element={<StudentFeeStructurePage />} />
+          <Route path="/school-admin/finance/student-accounting/fee-structure" element={<StudentFeeConfigurationPage />} />
           <Route path="/school-admin/finance/student-accounting/invoices" element={<StudentInvoicesPage />} />
+          <Route path="/school-admin/finance/student-accounting/invoices/:id" element={<StudentInvoiceDetailsPage />} />
           <Route path="/school-admin/finance/student-accounting/payments" element={<StudentPaymentsPage />} />
 
           {/* Finance - Administrative Accounting */}
@@ -373,6 +377,8 @@ function App() {
           <Route path="/school-admin/finance/administrative-accounting/fee-structure" element={<AdminFeeStructurePage />} />
           <Route path="/school-admin/finance/administrative-accounting/invoices" element={<AdminInvoicesPage />} />
           <Route path="/school-admin/finance/administrative-accounting/payments" element={<AdminPaymentsPage />} />
+          
+          <Route path="/school-admin/finance/accounts" element={<AccountsPage />} />
           
           {/* Other Pages */}
           <Route path="/school-admin/reports" element={<BasicReports />} />

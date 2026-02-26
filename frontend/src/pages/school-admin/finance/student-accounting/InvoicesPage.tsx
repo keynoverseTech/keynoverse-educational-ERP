@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FileText, Plus, Search, Eye, Printer } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useFinance, type Invoice } from '../../../../state/financeContext';
-// import { useHR } from '../../../state/hrAccessControl';
 
 const InvoicesPage: React.FC = () => {
+  const navigate = useNavigate();
   const { invoices, setInvoices, feeStructures } = useFinance();
   // const { hasPermission } = useHR();
 
@@ -117,10 +118,21 @@ const InvoicesPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg">
+                      <button 
+                        onClick={() => navigate(`/school-admin/finance/student-accounting/invoices/${inv.id}`)}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                        title="View Details"
+                      >
                         <Eye size={16} />
                       </button>
-                      <button className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                      <button 
+                         onClick={() => {
+                            navigate(`/school-admin/finance/student-accounting/invoices/${inv.id}`);
+                            setTimeout(() => window.print(), 500);
+                         }}
+                         className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                         title="Print Invoice"
+                      >
                         <Printer size={16} />
                       </button>
                     </div>
