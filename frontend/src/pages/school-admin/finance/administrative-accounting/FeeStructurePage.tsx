@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Filter, Coins, Check, X } from 'lucide-react';
-import { useFinance, type FeeStructure } from '../../../state/financeContext';
+import { useFinance, type FeeStructure } from '../../../../state/financeContext';
 // import { useHR } from '../../../state/hrAccessControl';
 
 const FeeStructurePage: React.FC = () => {
@@ -63,7 +63,7 @@ const FeeStructurePage: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Coins className="w-7 h-7 text-blue-600" />
-            Fee Structure
+            Fee Structure (Admin)
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             Configure tuition and other fees for different programs and levels

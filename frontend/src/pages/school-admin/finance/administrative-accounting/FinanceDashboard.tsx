@@ -1,6 +1,6 @@
 import React from 'react';
 import { DollarSign, TrendingUp, CreditCard, PieChart, ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
-import { useFinance } from '../../../state/financeContext';
+import { useFinance } from '../../../../state/financeContext';
 
 const FinanceDashboard: React.FC = () => {
   const { invoices, payments } = useFinance();

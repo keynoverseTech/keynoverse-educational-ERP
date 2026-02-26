@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CreditCard, Search, Plus, RefreshCw, Printer } from 'lucide-react';
-import { useFinance, type Payment } from '../../../state/financeContext';
+import { useFinance, type Payment } from '../../../../state/financeContext';
 // import { useHR } from '../../../state/hrAccessControl';
 
 const PaymentsPage: React.FC = () => {
