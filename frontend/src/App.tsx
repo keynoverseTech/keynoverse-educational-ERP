@@ -23,6 +23,7 @@ import AuthSelection from './pages/auth/AuthSelection';
 import SuperAdminLogin from './pages/auth/SuperAdminLogin';
 import SchoolAdminLogin from './pages/auth/SchoolAdminLogin';
 import BasicReports from './pages/school-admin/reports/BasicReports';
+import Settings from './pages/school-admin/settings-modules/Settings';
 
 // Super Admin Pages
 import SuperAdminDashboard from './pages/super-admin/Dashboard';
@@ -79,8 +80,8 @@ import StudentProfile from './pages/school-admin/students/StudentProfile';
 import StudentList from './pages/school-admin/students/StudentList';
 import CreateStudent from './pages/school-admin/students/CreateStudent';
 // Staff
+import StaffList from './pages/school-admin/HumanResources/StaffList';
 import StaffProfile from './pages/school-admin/HumanResources/StaffProfile';
-import Staff from './pages/school-admin/HumanResources/Staff';
 import CreateStaff from './pages/school-admin/HumanResources/CreateStaff';
 import StaffGrading from './pages/staff-portal/StaffGrading';
 import { HRProvider } from './state/hrAccessControl';
@@ -209,9 +210,8 @@ const schoolAdminItems = [
     icon: Briefcase,
     subItems: [
       { name: 'HR Dashboard', path: '/school-admin/human-resources/dashboard' },
-      { name: 'All Staff', path: '/school-admin/staff/list' },
+      { name: 'Staff List', path: '/school-admin/staff/list' },
       { name: 'Add Staff', path: '/school-admin/staff/create' },
-      { name: 'Staff Profile', path: '/school-admin/staff/profile' },
       { name: 'Leave Request', path: '/school-admin/human-resources/leave/request' },
       { name: 'Leave Approvals', path: '/school-admin/human-resources/leave/approvals' },
       { name: 'Configuration', path: '/school-admin/human-resources/config' }
@@ -335,7 +335,7 @@ function App() {
           <Route path="/school-admin/students/create" element={<CreateStudent />} />
 
           {/* Staff Management */}
-          <Route path="/school-admin/staff/list" element={<Staff />} />
+          <Route path="/school-admin/staff/list" element={<StaffList />} />
           <Route path="/school-admin/staff/profile" element={<StaffProfile />} />
           <Route path="/school-admin/staff/create" element={<CreateStaff />} />
 
@@ -356,6 +356,7 @@ function App() {
 
           {/* Other Pages */}
           <Route path="/school-admin/reports" element={<BasicReports />} />
+          <Route path="/school-admin/settings" element={<Settings />} />
         </Route>
 
         {/* Student Portal Routes */}

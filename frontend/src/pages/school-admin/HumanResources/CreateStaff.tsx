@@ -199,7 +199,7 @@ const CreateStaff: React.FC = () => {
           </p>
           <div className="flex items-center justify-center gap-3 pt-3">
             <button
-              onClick={() => navigate('/school-admin/human-resources/staff')}
+              onClick={() => navigate('/school-admin/human-resources/dashboard')}
               className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:from-blue-700 hover:to-indigo-700 transition-all"
             >
               View Staff List
