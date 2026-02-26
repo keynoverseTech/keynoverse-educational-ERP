@@ -56,6 +56,29 @@ export interface Staff {
   dateEmployed: string;
 }
 
+export interface LeaveType {
+  id: string;
+  name: string;
+  maxDays: number;
+  carryForward: boolean;
+  requiresAttachment: boolean;
+}
+
+export type LeaveStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface LeaveRequest {
+  id: string;
+  staffId: string;
+  leaveTypeId: string;
+  startDate: string;
+  endDate: string;
+  reason: string;
+  attachment?: string;
+  status: LeaveStatus;
+  comment?: string;
+  createdAt: string;
+}
+
 interface HRContextValue {
   staff: Staff[];
   setStaff: React.Dispatch<React.SetStateAction<Staff[]>>;
@@ -71,10 +94,23 @@ interface HRContextValue {
   setRolePermissions: React.Dispatch<React.SetStateAction<RolePermission[]>>;
   staffOverrides: StaffPermissionOverride[];
   setStaffOverrides: React.Dispatch<React.SetStateAction<StaffPermissionOverride[]>>;
+  leaveTypes: LeaveType[];
+  setLeaveTypes: React.Dispatch<React.SetStateAction<LeaveType[]>>;
+  leaveRequests: LeaveRequest[];
+  setLeaveRequests: React.Dispatch<React.SetStateAction<LeaveRequest[]>>;
   hasPermission: (staffId: string, permissionKey: string) => boolean;
 }
 
 const HRContext = createContext<HRContextValue | undefined>(undefined);
+
+const initialLeaveTypes: LeaveType[] = [
+  { id: 'leave_annual', name: 'Annual Leave', maxDays: 21, carryForward: true, requiresAttachment: false },
+  { id: 'leave_sick', name: 'Sick Leave', maxDays: 10, carryForward: false, requiresAttachment: true },
+  { id: 'leave_casual', name: 'Casual Leave', maxDays: 5, carryForward: false, requiresAttachment: false },
+  { id: 'leave_study', name: 'Study Leave', maxDays: 30, carryForward: false, requiresAttachment: true },
+];
+
+const initialLeaveRequests: LeaveRequest[] = [];
 
 const initialDepartments: Department[] = [
   { id: 'dept_cs', name: 'Computer Science', type: 'Academic' },
@@ -114,6 +150,34 @@ const initialPermissions: Permission[] = [
   { id: 'perm_manage_staff', key: 'manage_staff', description: 'Create and edit staff records', module: 'HR' },
   { id: 'perm_configure_hr', key: 'configure_hr', description: 'Configure HR and role settings', module: 'HR' },
   { id: 'perm_manage_library', key: 'manage_library', description: 'Manage library resources', module: 'Library' },
+  { id: 'perm_approve_leave', key: 'approve_leave', description: 'Approve or reject leave requests', module: 'HR' },
+  
+  // Exams Workflow Permissions
+  { id: 'perm_submit_result', key: 'submit_result', description: 'Submit results for departmental review', module: 'Exams' },
+  { id: 'perm_review_result_department', key: 'review_result_department', description: 'Review and approve results at department level', module: 'Exams' },
+  { id: 'perm_approve_result_faculty', key: 'approve_result_faculty', description: 'Approve results at faculty level', module: 'Exams' },
+  { id: 'perm_approve_result_senate', key: 'approve_result_senate', description: 'Final senate approval for results', module: 'Exams' },
+  { id: 'perm_publish_result', key: 'publish_result', description: 'Publish results to students', module: 'Exams' },
+  { id: 'perm_reopen_result', key: 'reopen_result', description: 'Reopen processed results for correction', module: 'Exams' },
+
+  // Student Finance Permissions
+  { id: 'perm_create_fee_structure', key: 'create_fee_structure', description: 'Create new fee structures', module: 'Finance' },
+  { id: 'perm_edit_fee_structure', key: 'edit_fee_structure', description: 'Edit existing fee structures', module: 'Finance' },
+  { id: 'perm_delete_fee_structure', key: 'delete_fee_structure', description: 'Delete fee structures', module: 'Finance' },
+  { id: 'perm_generate_invoice', key: 'generate_invoice', description: 'Generate student invoices', module: 'Finance' },
+  { id: 'perm_view_invoice', key: 'view_invoice', description: 'View student invoices', module: 'Finance' },
+  { id: 'perm_record_payment', key: 'record_payment', description: 'Record manual payments', module: 'Finance' },
+  { id: 'perm_reverse_transaction', key: 'reverse_transaction', description: 'Reverse posted transactions', module: 'Finance' },
+  { id: 'perm_generate_receipt', key: 'generate_receipt', description: 'Generate payment receipts', module: 'Finance' },
+  { id: 'perm_view_financial_report', key: 'view_financial_report', description: 'View financial reports and dashboards', module: 'Finance' },
+
+  // Payroll Permissions
+  { id: 'perm_create_salary_structure', key: 'create_salary_structure', description: 'Create salary structures', module: 'Finance' },
+  { id: 'perm_assign_salary_structure', key: 'assign_salary_structure', description: 'Assign salary structures to staff', module: 'Finance' },
+  { id: 'perm_generate_payroll', key: 'generate_payroll', description: 'Generate payroll runs', module: 'Finance' },
+  { id: 'perm_approve_payroll', key: 'approve_payroll', description: 'Approve payroll runs', module: 'Finance' },
+  { id: 'perm_view_payslip', key: 'view_payslip', description: 'View staff payslips', module: 'Finance' },
+  { id: 'perm_reverse_payroll', key: 'reverse_payroll', description: 'Reverse payroll runs', module: 'Finance' },
 ];
 
 const initialRolePermissions: RolePermission[] = [
@@ -127,6 +191,24 @@ const initialRolePermissions: RolePermission[] = [
   { roleId: 'role_finance_officer', permissionId: 'perm_collect_payment', allowed: true },
   { roleId: 'role_library_officer', permissionId: 'perm_manage_library', allowed: true },
   { roleId: 'role_hostel_officer', permissionId: 'perm_assign_hostel', allowed: true },
+  { roleId: 'role_academic_staff', permissionId: 'perm_submit_result', allowed: true },
+  { roleId: 'role_department_manager', permissionId: 'perm_review_result_department', allowed: true },
+  { roleId: 'role_department_manager', permissionId: 'perm_submit_result', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_create_fee_structure', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_edit_fee_structure', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_delete_fee_structure', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_generate_invoice', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_view_invoice', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_record_payment', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_reverse_transaction', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_generate_receipt', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_view_financial_report', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_create_salary_structure', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_assign_salary_structure', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_generate_payroll', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_approve_payroll', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_view_payslip', allowed: true },
+  { roleId: 'role_finance_officer', permissionId: 'perm_reverse_payroll', allowed: true },
   { roleId: 'role_academic_staff', permissionId: 'perm_create_student', allowed: false },
 ];
 
@@ -193,6 +275,8 @@ export const HRProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [permissions, setPermissions] = useState<Permission[]>(initialPermissions);
   const [rolePermissions, setRolePermissions] = useState<RolePermission[]>(initialRolePermissions);
   const [staffOverrides, setStaffOverrides] = useState<StaffPermissionOverride[]>(initialOverrides);
+  const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>(initialLeaveTypes);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(initialLeaveRequests);
 
   const hasPermission = useCallback(
     (staffId: string, permissionKey: string) => {
@@ -242,6 +326,10 @@ export const HRProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setRolePermissions,
         staffOverrides,
         setStaffOverrides,
+        leaveTypes,
+        setLeaveTypes,
+        leaveRequests,
+        setLeaveRequests,
         hasPermission,
       }}
     >

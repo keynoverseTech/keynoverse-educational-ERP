@@ -11,7 +11,8 @@ import {
   CreditCard,
   FileText,
   Ban,
-  Edit
+  Edit,
+  BookOpen
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,6 +22,7 @@ import ERPModules from './institution-tabs/ERPModules';
 import AuditTrail from './institution-tabs/AuditTrail';
 import UsersTab from './institution-tabs/Users';
 import Subscriptions from './institution-tabs/Subscriptions';
+import AcademicCatalog from './institution-tabs/AcademicCatalog';
 
 const InstitutionDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -52,6 +54,7 @@ const InstitutionDetails: React.FC = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'modules', label: 'ERP Modules', icon: Layers },
+    { id: 'academic', label: 'Program Governance', icon: BookOpen },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'subscription', label: 'Subscription', icon: CreditCard },
     { id: 'audit', label: 'Audit Trail', icon: FileText },
@@ -63,6 +66,8 @@ const InstitutionDetails: React.FC = () => {
         return <Overview />;
       case 'modules':
         return <ERPModules />;
+      case 'academic':
+        return <AcademicCatalog />;
       case 'users':
         return <UsersTab />;
       case 'subscription':

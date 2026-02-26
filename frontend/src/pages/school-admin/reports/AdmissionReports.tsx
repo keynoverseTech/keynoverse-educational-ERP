@@ -11,9 +11,18 @@ const AdmissionReports: React.FC = () => {
     { id: 'jamb', label: 'JAMB Statistics' },
   ];
 
+  const [reportData, setReportData] = useState<any[]>([]);
+
   const handleGenerate = (filters: FilterState) => {
     console.log('Generating report with filters:', filters);
-    // Logic to fetch report data
+    // Simulate data generation
+    setReportData([
+      { id: 1, name: 'John Doe', regNo: 'APP/2024/001', score: 280, status: 'Admitted', programme: 'Computer Science' },
+      { id: 2, name: 'Jane Smith', regNo: 'APP/2024/002', score: 265, status: 'Pending', programme: 'Biochemistry' },
+      { id: 3, name: 'Mike Johnson', regNo: 'APP/2024/003', score: 240, status: 'Rejected', programme: 'Mass Communication' },
+      { id: 4, name: 'Sarah Wilson', regNo: 'APP/2024/004', score: 290, status: 'Admitted', programme: 'Computer Science' },
+      { id: 5, name: 'David Brown', regNo: 'APP/2024/005', score: 255, status: 'Pending', programme: 'Economics' },
+    ]);
   };
 
   return (
@@ -56,11 +65,48 @@ const AdmissionReports: React.FC = () => {
           </div>
         </div>
 
-        <div className="min-h-[300px] flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
-          <div className="text-center text-gray-500">
-            <p className="mb-2">Select filters and click "Generate Report" to view data</p>
-            <p className="text-sm text-gray-400">Showing sample layout for {activeTab}</p>
-          </div>
+        <div className="min-h-[300px] border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          {reportData.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-900/50">
+                  <tr>
+                    <th className="p-4 font-medium text-gray-500">Applicant Name</th>
+                    <th className="p-4 font-medium text-gray-500">Reg No</th>
+                    <th className="p-4 font-medium text-gray-500">Programme</th>
+                    <th className="p-4 font-medium text-gray-500">JAMB Score</th>
+                    <th className="p-4 font-medium text-gray-500">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {reportData.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/20">
+                      <td className="p-4 font-medium text-gray-900 dark:text-white">{item.name}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400">{item.regNo}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400">{item.programme}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400">{item.score}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          item.status === 'Admitted' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                          item.status === 'Rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                          'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-[300px] text-center text-gray-500">
+              <div>
+                <p className="mb-2">Select filters and click "Generate Report" to view data</p>
+                <p className="text-sm text-gray-400">Showing sample layout for {activeTab}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

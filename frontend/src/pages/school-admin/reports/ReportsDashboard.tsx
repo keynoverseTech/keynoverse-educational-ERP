@@ -3,7 +3,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
-import { Users, UserPlus, GraduationCap, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Users, UserPlus, GraduationCap, AlertTriangle, ArrowUpRight, ArrowDownRight, Printer, Download } from 'lucide-react';
+import ReportFilter, { type FilterState } from './ReportFilter';
 
 interface StatCardProps {
   title: string;
@@ -72,8 +73,30 @@ const ReportsDashboard: React.FC = () => {
 
   const COLORS = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'];
 
+  const handleGenerate = (filters: FilterState) => {
+    console.log('Generating dashboard with filters:', filters);
+    // Simulate data loading
+  };
+
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Overview</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">University-wide performance metrics</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">
+            <Printer size={16} /> Print
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-blue-500/20">
+            <Download size={16} /> Export
+          </button>
+        </div>
+      </div>
+
+      <ReportFilter onGenerate={handleGenerate} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Total Students" 

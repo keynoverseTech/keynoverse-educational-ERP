@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FileText, UserCheck, Gavel, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { FileText, UserCheck, Gavel, ArrowLeft, CheckCircle, XCircle, Lock, AlertTriangle } from 'lucide-react';
 import Malpractice from './Malpractice';
+import { useHR } from '../../../state/hrAccessControl';
 
 // --- Types ---
 
@@ -8,21 +9,29 @@ interface ResultBatch {
   id: string;
   courseCode: string;
   courseTitle: string;
+  departmentId: string; // Added departmentId
   department: string;
   submittedBy: string;
   submissionDate: string;
-  status: 'Draft' | 'Submitted' | 'Dept. Approved' | 'Faculty Approved' | 'Senate Approved';
+  status: 'Draft' | 'Submitted' | 'Dept. Approved' | 'Faculty Approved' | 'Senate Approved' | 'Published';
   currentHandler: string;
 }
 
 // --- Components ---
 
 const ResultWorkflowContent = () => {
+  const { hasPermission, staff } = useHR();
+  
+  // Simulating logged-in user (e.g., HOD of Computer Science)
+  // In a real app, this comes from auth context
+  const currentUser = staff.find(s => s.roleId === 'role_department_manager' && s.departmentId === 'dept_cs') || staff[0];
+
   const [batches, setBatches] = useState<ResultBatch[]>([
     {
       id: '1',
       courseCode: 'CSC 301',
       courseTitle: 'Operating Systems',
+      departmentId: 'dept_cs',
       department: 'Computer Science',
       submittedBy: 'Dr. Sarah Wilson',
       submissionDate: '2025-06-20',
@@ -33,6 +42,7 @@ const ResultWorkflowContent = () => {
       id: '2',
       courseCode: 'MTH 201',
       courseTitle: 'Linear Algebra',
+      departmentId: 'dept_me', // Different department
       department: 'Mathematics',
       submittedBy: 'Mr. James Okafor',
       submissionDate: '2025-06-21',
@@ -43,6 +53,7 @@ const ResultWorkflowContent = () => {
       id: '3',
       courseCode: 'PHY 101',
       courseTitle: 'General Physics I',
+      departmentId: 'dept_cs',
       department: 'Physics',
       submittedBy: 'Prof. Adeleke',
       submissionDate: '2025-06-22',
@@ -52,6 +63,46 @@ const ResultWorkflowContent = () => {
   ]);
   const [selectedBatch, setSelectedBatch] = useState<ResultBatch | null>(null);
 
+  const canApprove = (batch: ResultBatch) => {
+    // 1. Department Constraint: User must belong to the batch's department
+    // EXCEPT for Senate/Faculty level approvals which might be cross-departmental (simplified here)
+    if (batch.departmentId !== currentUser.departmentId && 
+        !hasPermission(currentUser.id, 'approve_result_senate') && 
+        !hasPermission(currentUser.id, 'approve_result_faculty')) {
+      return false;
+    }
+
+    // 2. Permission-driven Stage Transition
+    switch (batch.status) {
+      case 'Draft':
+        return hasPermission(currentUser.id, 'submit_result');
+      case 'Submitted':
+        return hasPermission(currentUser.id, 'review_result_department');
+      case 'Dept. Approved':
+        return hasPermission(currentUser.id, 'approve_result_faculty');
+      case 'Faculty Approved':
+        return hasPermission(currentUser.id, 'approve_result_senate');
+      case 'Senate Approved':
+        return hasPermission(currentUser.id, 'publish_result');
+      default:
+        return false;
+    }
+  };
+
+  const canReopen = () => {
+    // Emergency Override Logic
+    return hasPermission(currentUser.id, 'reopen_result');
+  };
+
+  const isLocked = (batch: ResultBatch) => {
+    // Stage Locking Rules
+    // Once Faculty Approved, Lecturer/HOD cannot modify unless reopened
+    if (batch.status === 'Faculty Approved' || batch.status === 'Senate Approved' || batch.status === 'Published') {
+      return !canReopen();
+    }
+    return false;
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Draft': return 'bg-gray-100 text-gray-700 border-gray-200';
@@ -59,12 +110,13 @@ const ResultWorkflowContent = () => {
       case 'Dept. Approved': return 'bg-purple-100 text-purple-700 border-purple-200';
       case 'Faculty Approved': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
       case 'Senate Approved': return 'bg-green-100 text-green-700 border-green-200';
+      case 'Published': return 'bg-teal-100 text-teal-700 border-teal-200';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
 
   const getProgress = (status: string) => {
-    const stages = ['Draft', 'Submitted', 'Dept. Approved', 'Faculty Approved', 'Senate Approved'];
+    const stages = ['Draft', 'Submitted', 'Dept. Approved', 'Faculty Approved', 'Senate Approved', 'Published'];
     const index = stages.indexOf(status);
     return ((index + 1) / stages.length) * 100;
   };
@@ -73,9 +125,11 @@ const ResultWorkflowContent = () => {
     setBatches(prev => prev.map(b => {
       if (b.id === batchId) {
         let nextStatus = b.status;
-        if (b.status === 'Submitted') nextStatus = 'Dept. Approved';
+        if (b.status === 'Draft') nextStatus = 'Submitted';
+        else if (b.status === 'Submitted') nextStatus = 'Dept. Approved';
         else if (b.status === 'Dept. Approved') nextStatus = 'Faculty Approved';
         else if (b.status === 'Faculty Approved') nextStatus = 'Senate Approved';
+        else if (b.status === 'Senate Approved') nextStatus = 'Published';
         return { ...b, status: nextStatus as ResultBatch['status'] };
       }
       return b;
@@ -83,7 +137,24 @@ const ResultWorkflowContent = () => {
     setSelectedBatch(null);
   };
 
+  const handleReopen = (batchId: string) => {
+    if (!window.confirm('Emergency Override: Are you sure you want to reopen this result batch? This action is logged.')) return;
+    
+    setBatches(prev => prev.map(b => {
+      if (b.id === batchId) {
+        // Revert to previous stage or Draft depending on logic. Here we revert to Submitted for correction.
+        return { ...b, status: 'Submitted' };
+      }
+      return b;
+    }));
+    setSelectedBatch(null);
+  };
+
   if (selectedBatch) {
+    const locked = isLocked(selectedBatch);
+    const userCanApprove = canApprove(selectedBatch);
+    const userCanReopen = canReopen();
+
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
         <button 
@@ -94,6 +165,14 @@ const ResultWorkflowContent = () => {
           Back to Workflow
         </button>
 
+        {/* Simulation Banner */}
+        <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 p-3 rounded-lg flex items-center gap-3 text-sm">
+           <AlertTriangle size={16} className="text-yellow-600 dark:text-yellow-400" />
+           <span className="text-yellow-800 dark:text-yellow-200">
+             Simulating as: <strong>{currentUser.firstName} {currentUser.lastName}</strong> ({currentUser.departmentId})
+           </span>
+        </div>
+
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
            <div className="flex justify-between items-start mb-6">
              <div>
@@ -102,28 +181,53 @@ const ResultWorkflowContent = () => {
                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(selectedBatch.status)}`}>
                    {selectedBatch.status}
                  </span>
+                 {locked && <Lock size={16} className="text-red-500" />}
                </h2>
                <p className="text-gray-500 dark:text-gray-400">{selectedBatch.courseTitle}</p>
              </div>
              <div className="flex gap-3">
+               {userCanReopen && (locked || selectedBatch.status !== 'Draft') && (
+                 <button 
+                   className="px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors flex items-center gap-2 border border-orange-200"
+                   onClick={() => handleReopen(selectedBatch.id)}
+                 >
+                   <Gavel size={18} />
+                   Emergency Reopen
+                 </button>
+               )}
+               
                <button 
-                 className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2"
+                 className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
                  onClick={() => setSelectedBatch(null)}
                >
                  <XCircle size={18} />
-                 Return
+                 Close
                </button>
-               {selectedBatch.status !== 'Senate Approved' && selectedBatch.status !== 'Draft' && (
+               
+               {userCanApprove && (
                  <button 
-                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-sm"
                    onClick={() => handleApprove(selectedBatch.id)}
                  >
                    <CheckCircle size={18} />
-                   Approve & Forward
+                   {selectedBatch.status === 'Senate Approved' ? 'Publish Results' : 'Approve & Forward'}
                  </button>
                )}
              </div>
            </div>
+           
+           {!userCanApprove && !locked && (
+             <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg text-sm text-gray-500 italic text-center">
+               You do not have the required permissions or department authority to approve this result at this stage.
+             </div>
+           )}
+
+           {locked && (
+             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800 rounded-lg flex items-center justify-center gap-2 text-red-600 dark:text-red-400">
+               <Lock size={16} />
+               <span>This result batch is locked at <strong>{selectedBatch.status}</strong> stage. Editing is disabled to protect integrity.</span>
+             </div>
+           )}
            
            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />

@@ -10,6 +10,7 @@ import {
   Calendar,
   Users,
   FileText,
+  Shield,
   Settings as SettingsIcon
 } from 'lucide-react';
 import './App.css';
@@ -22,7 +23,6 @@ import AuthSelection from './pages/auth/AuthSelection';
 import SuperAdminLogin from './pages/auth/SuperAdminLogin';
 import SchoolAdminLogin from './pages/auth/SchoolAdminLogin';
 import BasicReports from './pages/school-admin/reports/BasicReports';
-import Settings from './pages/school-admin/settings-modules/Settings';
 
 // Super Admin Pages
 import SuperAdminDashboard from './pages/super-admin/Dashboard';
@@ -34,6 +34,9 @@ import InstitutionDetails from './pages/super-admin/InstitutionDetails';
 import InstitutionConfig from './pages/super-admin/InstitutionConfig';
 import SubAdmins from './pages/super-admin/SubAdmins';
 import SystemLogs from './pages/super-admin/SystemLogs';
+import AdmissionsGovernance from './pages/super-admin/AdmissionsGovernance';
+import ProgramGovernance from './pages/super-admin/ProgramGovernance';
+import ReportsLayout from './pages/super-admin/reports/ReportsLayout';
 
 // School Admin Pages
 import SchoolAdminDashboard from './pages/school-admin/Dashboard';
@@ -76,17 +79,26 @@ import StudentProfile from './pages/school-admin/students/StudentProfile';
 import StudentList from './pages/school-admin/students/StudentList';
 import CreateStudent from './pages/school-admin/students/CreateStudent';
 // Staff
-import StaffProfile from './pages/school-admin/HR/StaffProfile';
-import Staff from './pages/school-admin/HR/Staff';
-import CreateStaff from './pages/school-admin/HR/CreateStaff';
+import StaffProfile from './pages/school-admin/HumanResources/StaffProfile';
+import Staff from './pages/school-admin/HumanResources/Staff';
+import CreateStaff from './pages/school-admin/HumanResources/CreateStaff';
 import StaffGrading from './pages/staff-portal/StaffGrading';
 import { HRProvider } from './state/hrAccessControl';
 
-import HRDashboard from './pages/school-admin/HR/HRDashboard';
-import HRDepartments from './pages/school-admin/HR/HRDepartments';
-import HRDesignations from './pages/school-admin/HR/HRDesignations';
-import PermissionsManagement from './pages/school-admin/HR/PermissionsManagement';
-import RolesManagement from './pages/school-admin/HR/RolesManagement';
+import HRDashboard from './pages/school-admin/HumanResources/HRDashboard';
+import HRConfig from './pages/school-admin/HumanResources/HRConfig';
+import PermissionsManagement from './pages/school-admin/HumanResources/PermissionsManagement';
+import LeaveRequest from './pages/school-admin/HumanResources/LeaveRequest';
+import LeaveApprovals from './pages/school-admin/HumanResources/LeaveApprovals';
+
+// Finance
+import FinanceDashboard from './pages/school-admin/finance/FinanceDashboard';
+import FeeStructurePage from './pages/school-admin/finance/FeeStructurePage';
+import InvoicesPage from './pages/school-admin/finance/InvoicesPage';
+import PaymentsPage from './pages/school-admin/finance/PaymentsPage';
+import PayrollScaffold from './pages/school-admin/finance/PayrollScaffold';
+import { FinanceProvider } from './state/financeContext';
+import { DollarSign } from 'lucide-react';
 
 const superAdminItems = [
   { name: 'Overview', path: '/super-admin/dashboard', icon: LayoutDashboard },
@@ -104,6 +116,21 @@ const superAdminItems = [
     name: 'Configuration', 
     path: '/super-admin/config',
     icon: SettingsIcon 
+  },
+  { 
+    name: 'Admissions Governance', 
+    path: '/super-admin/admissions-governance',
+    icon: Shield 
+  },
+  { 
+    name: 'Program Governance', 
+    path: '/super-admin/academic-catalog',
+    icon: BookOpen 
+  },
+  { 
+    name: 'Reports', 
+    path: '/super-admin/reports',
+    icon: FileText 
   },
 ];
 
@@ -154,6 +181,17 @@ const schoolAdminItems = [
     ]
   },
   { 
+    name: 'Finance', 
+    icon: DollarSign,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/finance/dashboard' },
+      { name: 'Fee Structure', path: '/school-admin/finance/fee-structure' },
+      { name: 'Invoices', path: '/school-admin/finance/invoices' },
+      { name: 'Payments & Receipts', path: '/school-admin/finance/payments' },
+      { name: 'Payroll Management', path: '/school-admin/finance/payroll' }
+    ]
+  },
+  { 
     name: 'Reports', 
     path: '/school-admin/reports', 
     icon: FileText,
@@ -167,16 +205,16 @@ const schoolAdminItems = [
     ]
   },
   { 
-    name: 'HR & Staff only', 
+    name: 'Human Resources', 
     icon: Briefcase,
     subItems: [
-      { name: 'HR Dashboard', path: '/school-admin/hr/dashboard' },
+      { name: 'HR Dashboard', path: '/school-admin/human-resources/dashboard' },
       { name: 'All Staff', path: '/school-admin/staff/list' },
+      { name: 'Add Staff', path: '/school-admin/staff/create' },
       { name: 'Staff Profile', path: '/school-admin/staff/profile' },
-      { name: 'Departments', path: '/school-admin/hr/departments' },
-      { name: 'Designations', path: '/school-admin/hr/designations' },
-      { name: 'Roles', path: '/school-admin/settings/roles' },
-      { name: 'Permissions', path: '/school-admin/settings/permissions' }
+      { name: 'Leave Request', path: '/school-admin/human-resources/leave/request' },
+      { name: 'Leave Approvals', path: '/school-admin/human-resources/leave/approvals' },
+      { name: 'Configuration', path: '/school-admin/human-resources/config' }
     ]
   },
   { 
@@ -208,8 +246,9 @@ const staffItems = [
 function App() {
   return (
     <HRProvider>
-      <Router>
-        <Routes>
+      <FinanceProvider>
+        <Router>
+          <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Navigate to="/auth" replace />} />
         <Route path="/auth" element={<AuthSelection />} />
@@ -227,8 +266,11 @@ function App() {
           <Route path="/super-admin/new-registration" element={<NewRegistration />} />
           <Route path="/super-admin/applications" element={<Applications />} />
           <Route path="/super-admin/sub-admins" element={<SubAdmins />} />
+          <Route path="/super-admin/admissions-governance" element={<AdmissionsGovernance />} />
+          <Route path="/super-admin/academic-catalog" element={<ProgramGovernance />} />
           <Route path="/super-admin/system-logs" element={<SystemLogs />} />
           <Route path="/super-admin/config" element={<InstitutionConfig />} />
+          <Route path="/super-admin/reports" element={<ReportsLayout />} />
         </Route>
 
         {/* Super Admin Application Details (Full Page) */}
@@ -298,14 +340,19 @@ function App() {
           <Route path="/school-admin/staff/create" element={<CreateStaff />} />
 
           {/* HR */}
-          <Route path="/school-admin/hr/dashboard" element={<HRDashboard />} />
-          <Route path="/school-admin/hr/departments" element={<HRDepartments />} />
-          <Route path="/school-admin/hr/designations" element={<HRDesignations />} />
+          <Route path="/school-admin/human-resources/dashboard" element={<HRDashboard />} />
+          <Route path="/school-admin/human-resources/config" element={<HRConfig />} />
+          <Route path="/school-admin/human-resources/permissions" element={<PermissionsManagement />} />
+          {/* LeaveTypes is now a tab in HRConfig */}
+          <Route path="/school-admin/human-resources/leave/request" element={<LeaveRequest />} />
+          <Route path="/school-admin/human-resources/leave/approvals" element={<LeaveApprovals />} />
 
-          {/* Settings */}
-          <Route path="/school-admin/settings" element={<Settings />} />
-          <Route path="/school-admin/settings/roles" element={<RolesManagement />} />
-          <Route path="/school-admin/settings/permissions" element={<PermissionsManagement />} />
+          {/* Finance */}
+          <Route path="/school-admin/finance/dashboard" element={<FinanceDashboard />} />
+          <Route path="/school-admin/finance/fee-structure" element={<FeeStructurePage />} />
+          <Route path="/school-admin/finance/invoices" element={<InvoicesPage />} />
+          <Route path="/school-admin/finance/payments" element={<PaymentsPage />} />
+          <Route path="/school-admin/finance/payroll" element={<PayrollScaffold />} />
 
           {/* Other Pages */}
           <Route path="/school-admin/reports" element={<BasicReports />} />
@@ -350,7 +397,8 @@ function App() {
         </Route>
 
         </Routes>
-      </Router>
+        </Router>
+      </FinanceProvider>
     </HRProvider>
   );
 }

@@ -10,7 +10,9 @@ import {
   Settings,
   ArrowRight,
   CheckCircle,
-  FileText
+  FileText,
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 
 export default function ConfigureAcademic() {
@@ -33,10 +35,11 @@ export default function ConfigureAcademic() {
     },
     { 
       title: 'Programmes', 
-      desc: 'Set up degree programmes and durations.', 
+      desc: 'View available degree programmes and durations. Managed by Super Admin.', 
       icon: GraduationCap, 
       path: '/school-admin/academics/programmes',
-      color: 'bg-teal-600'
+      color: 'bg-teal-600',
+      isManaged: true
     },
     { 
       title: 'Faculties', 
@@ -64,7 +67,8 @@ export default function ConfigureAcademic() {
       desc: 'Manage course catalog, codes, and credit units.', 
       icon: BookOpen, 
       path: '/school-admin/academics/courses',
-      color: 'bg-orange-600'
+      color: 'bg-orange-600',
+      isManaged: false
     },
     { 
       title: 'Course Registration Config', 
@@ -102,23 +106,34 @@ export default function ConfigureAcademic() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {modules.map((module, index) => (
+        {modules.map((module: any, index) => (
           <button
             key={index}
             onClick={() => navigate(module.path)}
-            className="group flex flex-col p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-blue-500 dark:hover:border-blue-500 transition-all text-left h-full"
+            className={`group flex flex-col p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all text-left h-full ${
+              module.isManaged ? 'hover:border-blue-500/50' : 'hover:border-blue-500'
+            }`}
           >
-            <div className={`w-14 h-14 rounded-xl ${module.color} flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300`}>
-              <module.icon size={28} />
+            <div className="flex justify-between items-start mb-4">
+              <div className={`w-14 h-14 rounded-xl ${module.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <module.icon size={28} />
+              </div>
+              {module.isManaged && (
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                  <ShieldCheck size={12} />
+                  Super Admin
+                </div>
+              )}
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2">
               {module.title}
+              {module.isManaged && <Lock size={14} className="text-gray-400" />}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-6 flex-grow">
               {module.desc}
             </p>
             <div className="flex items-center text-sm font-semibold text-blue-600 dark:text-blue-400 group-hover:translate-x-2 transition-transform">
-              Configure
+              {module.isManaged ? 'View Catalog' : 'Configure'}
               <ArrowRight size={16} className="ml-2" />
             </div>
           </button>

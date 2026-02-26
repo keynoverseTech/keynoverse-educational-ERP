@@ -1,53 +1,50 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { ShieldCheck, Lock, Users } from 'lucide-react';
 
 interface Programme {
   id: string;
   name: string;
   degreeType: string;
-  duration: number;
-  departmentId?: string;
+  isGlobal?: boolean;
+  studentCapacity?: number;
+  currentUsers?: number;
+  expirationDate?: string;
 }
 
 export const ProgrammesPage: React.FC = () => {
-  const [programmes, setProgrammes] = useState<Programme[]>([
-    { id: '1', name: 'B.Eng Computer Engineering', degreeType: 'B.Eng', duration: 5, departmentId: '1' },
-    { id: '2', name: 'B.Sc Biochemistry', degreeType: 'B.Sc', duration: 4, departmentId: '3' },
+  // Only show local programmes created by this institution
+  const [programmes] = useState<Programme[]>([
+    { id: '1', name: 'ND Computer Science', degreeType: 'ND', isGlobal: true, studentCapacity: 120, currentUsers: 45, expirationDate: '2028-12-31' },
+    { id: '2', name: 'HND Software Engineering', degreeType: 'HND', isGlobal: true, studentCapacity: 80, currentUsers: 62, expirationDate: '2027-06-30' },
   ]);
 
-  const departments = [
-    { id: '1', name: 'Computer Engineering' },
-    { id: '2', name: 'Electrical Engineering' },
-    { id: '3', name: 'Biochemistry' },
-  ];
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentProg, setCurrentProg] = useState<Partial<Programme>>({});
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (currentProg.id) {
-      setProgrammes(programmes.map(p => p.id === currentProg.id ? { ...p, ...currentProg } as Programme : p));
-    } else {
-      setProgrammes([...programmes, { ...currentProg, id: Math.random().toString(36).substr(2, 9) } as Programme]);
-    }
-    setIsModalOpen(false);
-    setCurrentProg({});
-  };
 
   return (
     <div className="space-y-6 p-6">
+      {/* Super Admin Management Header */}
+      <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 p-4 rounded-xl flex gap-4 items-start mb-6">
+        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+          <ShieldCheck size={20} />
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2">
+            Managed by Super Admin
+            <Lock size={14} className="text-blue-400" />
+          </h4>
+          <p className="text-xs text-blue-700 dark:text-blue-400 mt-1 leading-relaxed">
+            The list of available degree programmes is configured at the institution level by the Super Admin. Please contact your system administrator to add or modify programmes.
+          </p>
+        </div>
+      </div>
+      
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Programmes</h1>
-          <p className="text-gray-500 dark:text-gray-400">Manage degree programmes and durations.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            Programmes
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">View available degree programmes and capacities.</p>
         </div>
-        <button 
-          onClick={() => { setCurrentProg({}); setIsModalOpen(true); }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus size={20} /> Add Programme
-        </button>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -56,31 +53,38 @@ export const ProgrammesPage: React.FC = () => {
             <tr>
               <th className="p-4 text-xs font-bold text-gray-500 uppercase">Programme Name</th>
               <th className="p-4 text-xs font-bold text-gray-500 uppercase">Degree Type</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Duration (Years)</th>
-              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Department</th>
+              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Capacity</th>
+              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Current Users</th>
+              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Expiration</th>
               <th className="p-4 text-xs font-bold text-gray-500 uppercase text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {programmes.map(prog => (
               <tr key={prog.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/50">
-                <td className="p-4 font-medium text-gray-900 dark:text-white">{prog.name}</td>
-                <td className="p-4 text-gray-600 dark:text-gray-400">{prog.degreeType}</td>
-                <td className="p-4 text-gray-600 dark:text-gray-400">{prog.duration}</td>
-                <td className="p-4 text-gray-600 dark:text-gray-400">
-                  {departments.find(d => d.id === prog.departmentId)?.name || <span className="text-gray-400 italic">Not Linked</span>}
+                <td className="p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-900 dark:text-white">{prog.name}</span>
+                    {prog.isGlobal && (
+                      <span className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-[9px] font-black uppercase rounded border border-purple-100 dark:border-purple-900/30">Super Admin</span>
+                    )}
+                  </div>
                 </td>
+                <td className="p-4 text-gray-600 dark:text-gray-400">{prog.degreeType}</td>
+                <td className="p-4 text-gray-600 dark:text-gray-400">{prog.studentCapacity || 'N/A'}</td>
+                <td className="p-4 text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <Users size={14} />
+                    {prog.currentUsers || 0}
+                  </div>
+                </td>
+                <td className="p-4 text-gray-600 dark:text-gray-400">{prog.expirationDate || 'N/A'}</td>
                 <td className="p-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button 
-                      onClick={() => { setCurrentProg(prog); setIsModalOpen(true); }}
-                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="px-3 py-1 bg-gray-50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                      <Lock size={10} />
+                      ReadOnly
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -92,76 +96,19 @@ export const ProgrammesPage: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4 dark:text-white">{currentProg.id ? 'Edit Programme' : 'New Programme'}</h2>
-            <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Programme Name</label>
-                <input 
-                  type="text" 
-                  value={currentProg.name || ''}
-                  onChange={e => setCurrentProg({...currentProg, name: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="e.g. B.Eng Computer Engineering"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Degree Type</label>
-                  <select 
-                    value={currentProg.degreeType || 'B.Sc'}
-                    onChange={e => setCurrentProg({...currentProg, degreeType: e.target.value})}
-                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  >
-                    <option value="B.Sc">B.Sc</option>
-                    <option value="B.Eng">B.Eng</option>
-                    <option value="B.A">B.A</option>
-                    <option value="M.Sc">M.Sc</option>
-                    <option value="PhD">PhD</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duration (Years)</label>
-                  <input 
-                    type="number" 
-                    value={currentProg.duration || 4}
-                    onChange={e => setCurrentProg({...currentProg, duration: parseInt(e.target.value)})}
-                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    min="1"
-                    max="10"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department (Optional)</label>
-                <select 
-                  value={currentProg.departmentId || ''}
-                  onChange={e => setCurrentProg({...currentProg, departmentId: e.target.value})}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="">-- Select Department --</option>
-                  {departments.map(d => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button 
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg dark:text-gray-300 dark:hover:bg-gray-700"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Save Programme
-                </button>
-              </div>
-            </form>
+            <h2 className="text-xl font-bold mb-4 dark:text-white">Read Only View</h2>
+            <p className="text-gray-500 dark:text-gray-400">
+              This programme is managed by the Super Admin. You cannot edit or delete it.
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button 
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

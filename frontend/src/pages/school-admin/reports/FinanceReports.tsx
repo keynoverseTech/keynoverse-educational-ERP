@@ -11,8 +11,18 @@ const FinanceReports: React.FC = () => {
     { id: 'faculty', label: 'Payment per Faculty' },
   ];
 
+  const [reportData, setReportData] = useState<any[]>([]);
+
   const handleGenerate = (filters: FilterState) => {
     console.log('Generating report with filters:', filters);
+    // Simulate data generation
+    setReportData([
+      { id: 1, student: 'Alice Johnson', matricNo: 'MAT/2023/001', amountDue: 150000, amountPaid: 150000, balance: 0, status: 'Paid' },
+      { id: 2, student: 'Bob Williams', matricNo: 'MAT/2023/002', amountDue: 150000, amountPaid: 100000, balance: 50000, status: 'Partially Paid' },
+      { id: 3, student: 'Charlie Davis', matricNo: 'MAT/2022/045', amountDue: 150000, amountPaid: 0, balance: 150000, status: 'Unpaid' },
+      { id: 4, student: 'Diana Evans', matricNo: 'MAT/2021/012', amountDue: 150000, amountPaid: 150000, balance: 0, status: 'Paid' },
+      { id: 5, student: 'Evan Wright', matricNo: 'MAT/2024/101', amountDue: 150000, amountPaid: 75000, balance: 75000, status: 'Partially Paid' },
+    ]);
   };
 
   return (
@@ -53,11 +63,50 @@ const FinanceReports: React.FC = () => {
           </div>
         </div>
 
-        <div className="min-h-[300px] flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
-          <div className="text-center text-gray-500">
-             <p className="mb-2">Select filters and click "Generate Report" to view data</p>
-             <p className="text-sm text-gray-400">Showing sample layout for {activeTab}</p>
-          </div>
+        <div className="min-h-[300px] border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          {reportData.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-900/50">
+                  <tr>
+                    <th className="p-4 font-medium text-gray-500">Student Name</th>
+                    <th className="p-4 font-medium text-gray-500">Matric No</th>
+                    <th className="p-4 font-medium text-gray-500">Amount Due</th>
+                    <th className="p-4 font-medium text-gray-500">Amount Paid</th>
+                    <th className="p-4 font-medium text-gray-500">Balance</th>
+                    <th className="p-4 font-medium text-gray-500">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {reportData.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/20">
+                      <td className="p-4 font-medium text-gray-900 dark:text-white">{item.student}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400">{item.matricNo}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400 font-medium">₦{item.amountDue.toLocaleString()}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400 font-medium text-green-600">₦{item.amountPaid.toLocaleString()}</td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400 font-medium text-red-500">₦{item.balance.toLocaleString()}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          item.status === 'Paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                          item.status === 'Unpaid' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                          'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-[300px] text-center text-gray-500">
+              <div>
+                <p className="mb-2">Select filters and click "Generate Report" to view data</p>
+                <p className="text-sm text-gray-400">Showing sample layout for {activeTab}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

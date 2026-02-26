@@ -2,9 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { 
   BookOpen, 
   Plus, 
+  User,
   Edit2, 
-  Trash2,
-  User
+  Trash2
 } from 'lucide-react';
 
 // --- Interfaces ---
@@ -62,6 +62,7 @@ interface Course {
   status: 'active' | 'inactive';
   assignedStaffId?: string;
   prerequisites?: Prerequisite[];
+  isGlobal?: boolean;
 }
 
 // --- Mock Data ---
@@ -106,10 +107,10 @@ const staffMembers: Staff[] = [
 ];
 
 const initialCourses: Course[] = [
-  { id: 'crs-1', code: 'CSC101', title: 'Introduction to Computer Science', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-1', status: 'active', assignedStaffId: 'stf-1', prerequisites: [] },
-  { id: 'crs-2', code: 'CSC102', title: 'Introduction to Programming', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-2', status: 'active', assignedStaffId: 'stf-3', prerequisites: [{ courseId: 'crs-1', minGrade: 'C' }] },
-  { id: 'crs-3', code: 'MTH101', title: 'General Mathematics I', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-1', status: 'active', prerequisites: [] },
-  { id: 'crs-4', code: 'EEE201', title: 'Circuit Theory I', creditUnits: 4, programmeId: 'prog-3', levelId: 'lvl-200', semesterId: 'sem-1', status: 'active', assignedStaffId: 'stf-4', prerequisites: [] },
+  { id: 'crs-1', code: 'CSC101', title: 'Introduction to Computer Science', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-1', status: 'active', assignedStaffId: 'stf-1', prerequisites: [], isGlobal: true },
+  { id: 'crs-2', code: 'CSC102', title: 'Introduction to Programming', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-2', status: 'active', assignedStaffId: 'stf-3', prerequisites: [{ courseId: 'crs-1', minGrade: 'C' }], isGlobal: true },
+  { id: 'crs-3', code: 'MTH101', title: 'General Mathematics I', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-1', status: 'active', prerequisites: [], isGlobal: true },
+  { id: 'crs-4', code: 'EEE201', title: 'Circuit Theory I', creditUnits: 4, programmeId: 'prog-3', levelId: 'lvl-200', semesterId: 'sem-1', status: 'active', assignedStaffId: 'stf-4', prerequisites: [], isGlobal: false },
 ];
 
 // --- Component ---
@@ -202,27 +203,30 @@ export const CoursesPage: React.FC = () => {
     setCurrentCourse({});
   };
 
-  const openAddModal = () => {
-    // Pre-fill with current selection to save time
-    setCurrentCourse({
-      programmeId: selectedProgramme,
-      levelId: selectedLevel,
-      semesterId: selectedSemester,
-      creditUnits: 2 // default
-    });
-    setIsModalOpen(true);
-  };
+
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <BookOpen className="text-blue-600" />
-          Course Management
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Manage courses by drilling down from Faculty to Semester.
-        </p>
+      
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-2xl">
+            <BookOpen size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Courses Catalog</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">View and manage courses and credit units.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => {
+            setCurrentCourse({});
+            setIsModalOpen(true);
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+        >
+          <Plus size={20} /> Add Course
+        </button>
       </div>
 
       {/* --- Hierarchy Filters --- */}
@@ -304,13 +308,6 @@ export const CoursesPage: React.FC = () => {
           Showing {filteredCourses.length} courses
           {selectedProgramme && ` for ${programmes.find(p => p.id === selectedProgramme)?.name}`}
         </div>
-        <button 
-          onClick={openAddModal}
-          disabled={!selectedProgramme}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          <Plus size={20} /> Add Course
-        </button>
       </div>
 
       {/* --- Courses Table --- */}
@@ -335,10 +332,15 @@ export const CoursesPage: React.FC = () => {
                     {course.code}
                   </td>
                   <td className="p-4 font-medium text-gray-900 dark:text-white">
-                    {course.title}
+                    <div className="flex items-center gap-2">
+                      <span>{course.title}</span>
+                      {course.isGlobal && (
+                        <span className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-[9px] font-black uppercase rounded border border-purple-100 dark:border-purple-900/30">Global</span>
+                      )}
+                    </div>
                   </td>
-                  <td className="p-4 text-gray-600 dark:text-gray-400">
-                    {course.creditUnits}
+                  <td className="p-4 text-gray-600 dark:text-gray-400 font-medium">
+                    {course.creditUnits} Units
                   </td>
                   <td className="p-4 text-gray-600 dark:text-gray-400">
                     <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">
@@ -376,12 +378,19 @@ export const CoursesPage: React.FC = () => {
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button 
-                        onClick={() => { setCurrentCourse(course); setIsModalOpen(true); }}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        onClick={() => {
+                          setCurrentCourse(course);
+                          setIsModalOpen(true);
+                        }}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        title="Edit Course"
                       >
                         <Edit2 size={16} />
                       </button>
-                      <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <button 
+                        className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Delete Course"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>

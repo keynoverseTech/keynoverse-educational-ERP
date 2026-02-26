@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   Search,
-  Plus,
   Download,
   Eye,
   Edit,
@@ -11,6 +10,7 @@ import {
   Building2,
   Mail
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { Staff as StaffEntity } from '../../../state/hrAccessControl';
 import { useHR } from '../../../state/hrAccessControl';
 
@@ -30,6 +30,7 @@ interface EnrichedStaffRow {
 
 const Staff: React.FC = () => {
   const { staff, departments, roles, designations, setStaff } = useHR();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<StaffFilterType>('All');
   const [filterDepartment, setFilterDepartment] = useState('All');
@@ -88,11 +89,8 @@ const Staff: React.FC = () => {
     row => row.statusLabel === 'Inactive'
   ).length;
 
-  const handleOpenCreate = () => {
-    setCurrentStaff({ status: 'active' });
-    setFullName('');
-    setPortalAccess(false);
-    setIsModalOpen(true);
+  const handleViewProfile = (staff: StaffEntity) => {
+    navigate('/school-admin/staff/profile', { state: { staffId: staff.id } });
   };
 
   const handleOpenEdit = (row: EnrichedStaffRow) => {
@@ -173,13 +171,6 @@ const Staff: React.FC = () => {
           <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <Download size={18} />
             Export
-          </button>
-          <button 
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
-          >
-            <Plus size={18} />
-            Add Staff
           </button>
         </div>
       </div>
@@ -327,7 +318,10 @@ const Staff: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-400 hover:text-blue-600 transition-colors">
+                        <button 
+                          onClick={() => handleViewProfile(row.staff)}
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"
+                        >
                           <Eye size={16} />
                         </button>
                         <button 

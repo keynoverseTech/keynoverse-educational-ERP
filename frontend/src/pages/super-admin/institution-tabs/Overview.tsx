@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import { 
   GraduationCap, 
@@ -41,6 +42,7 @@ interface ModuleData {
 }
 
 const Overview: React.FC = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [selectedModule, setSelectedModule] = useState<ModuleData | null>(null);
 
@@ -50,6 +52,14 @@ const Overview: React.FC = () => {
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleViewModule = (module: ModuleData) => {
+    if (module.id === 'admissions') {
+      navigate('/super-admin/admissions-governance');
+    } else {
+      setSelectedModule(module);
+    }
+  };
 
   const recentActivity = [
     {
@@ -374,7 +384,7 @@ const Overview: React.FC = () => {
                   </div>
                   {module.active && (
                     <button 
-                      onClick={() => setSelectedModule(module)}
+                      onClick={() => handleViewModule(module)}
                       className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
                       title="View Details"
                     >
