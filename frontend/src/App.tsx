@@ -92,13 +92,11 @@ import LeaveRequest from './pages/school-admin/HumanResources/LeaveRequest';
 import LeaveApprovals from './pages/school-admin/HumanResources/LeaveApprovals';
 
 // Finance
-import AdminFinanceDashboard from './pages/school-admin/finance/administrative-accounting/FinanceDashboard';
-import AdminFeeStructurePage from './pages/school-admin/finance/administrative-accounting/FeeStructurePage';
-import AdminInvoicesPage from './pages/school-admin/finance/administrative-accounting/InvoicesPage';
-import AdminPaymentsPage from './pages/school-admin/finance/administrative-accounting/PaymentsPage';
+import GeneralLedgerPage from './pages/school-admin/finance/administrative-accounting/GeneralLedger';
+import PayrollDisbursementPage from './pages/school-admin/finance/administrative-accounting/PayrollDisbursement';
 import AccountsPage from './pages/school-admin/finance/AccountsPage';
 
-import StudentFinanceDashboard from './pages/school-admin/finance/student-accounting/FinanceDashboard';
+
 import StudentFeeConfigurationPage from './pages/school-admin/finance/student-accounting/FeeConfigurationPage';
 import StudentInvoicesPage from './pages/school-admin/finance/student-accounting/InvoicesPage';
 import StudentInvoiceDetailsPage from './pages/school-admin/finance/student-accounting/InvoiceDetailsPage';
@@ -202,10 +200,8 @@ const schoolAdminItems = [
       {
         name: 'Administrative Accounting',
         subItems: [
-          { name: 'Dashboard', path: '/school-admin/finance/administrative-accounting/dashboard' },
-          { name: 'Fee Structure', path: '/school-admin/finance/administrative-accounting/fee-structure' },
-          { name: 'Invoices', path: '/school-admin/finance/administrative-accounting/invoices' },
-          { name: 'Payments', path: '/school-admin/finance/administrative-accounting/payments' }
+          { name: 'General Ledger', path: '/school-admin/finance/administrative-accounting/ledger' },
+          { name: 'Payroll Disbursement', path: '/school-admin/finance/administrative-accounting/disbursement' }
         ]
       },
       { name: 'Bank Accounts', path: '/school-admin/finance/accounts' }
@@ -366,17 +362,15 @@ function App() {
           <Route path="/school-admin/human-resources/leave/approvals" element={<LeaveApprovals />} />
 
           {/* Finance - Student Accounting */}
-          <Route path="/school-admin/finance/student-accounting/dashboard" element={<StudentFinanceDashboard />} />
+          
           <Route path="/school-admin/finance/student-accounting/fee-structure" element={<StudentFeeConfigurationPage />} />
           <Route path="/school-admin/finance/student-accounting/invoices" element={<StudentInvoicesPage />} />
           <Route path="/school-admin/finance/student-accounting/invoices/:id" element={<StudentInvoiceDetailsPage />} />
           <Route path="/school-admin/finance/student-accounting/payments" element={<StudentPaymentsPage />} />
 
           {/* Finance - Administrative Accounting */}
-          <Route path="/school-admin/finance/administrative-accounting/dashboard" element={<AdminFinanceDashboard />} />
-          <Route path="/school-admin/finance/administrative-accounting/fee-structure" element={<AdminFeeStructurePage />} />
-          <Route path="/school-admin/finance/administrative-accounting/invoices" element={<AdminInvoicesPage />} />
-          <Route path="/school-admin/finance/administrative-accounting/payments" element={<AdminPaymentsPage />} />
+          <Route path="/school-admin/finance/administrative-accounting/ledger" element={<GeneralLedgerPage />} />
+          <Route path="/school-admin/finance/administrative-accounting/disbursement" element={<PayrollDisbursementPage />} />
           
           <Route path="/school-admin/finance/accounts" element={<AccountsPage />} />
           

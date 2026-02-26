@@ -51,19 +51,48 @@ export interface SalaryStructure {
 export interface StaffSalaryAssignment {
   staffId: string;
   salaryStructureId: string;
+  customBaseSalary?: number;
   customAllowances?: { name: string; amount: number }[];
   customDeductions?: { name: string; amount: number }[];
+}
+
+export interface PayrollStaffEntry {
+  staffId: string;
+  name: string;
+  baseSalary: number;
+  allowances: number;
+  deductions: number;
+  netPay: number;
 }
 
 export interface PayrollRun {
   id: string;
   month: string;
   year: number;
+  totalAmount: number;
+  totalStaff: number;
   generatedBy: string;
-  status: 'Draft' | 'Approved' | 'Paid';
+  status: 'Pending' | 'Approved' | 'Disbursed';
+  forwardedAt?: string;
+  disbursedAt?: string;
+  disbursedBy?: string;
+  staffEntries: PayrollStaffEntry[];
 }
 
 // --- Context State ---
+
+export interface LedgerTransaction {
+  id: string;
+  accountName: string; 
+  reference: string;
+  date: string;
+  amount: number;
+  paymentMethod: 'Bank Transfer' | 'Cash' | 'Cheque' | 'Card' | 'Payment Gateways';
+  description: string;
+  attachment?: string;
+  type: 'Income' | 'Expense';
+  createdAt: string;
+}
 
 interface FinanceContextValue {
   feeStructures: FeeStructure[];
@@ -78,6 +107,8 @@ interface FinanceContextValue {
   setStaffSalaryAssignments: React.Dispatch<React.SetStateAction<StaffSalaryAssignment[]>>;
   payrollRuns: PayrollRun[];
   setPayrollRuns: React.Dispatch<React.SetStateAction<PayrollRun[]>>;
+  ledgerTransactions: LedgerTransaction[];
+  setLedgerTransactions: React.Dispatch<React.SetStateAction<LedgerTransaction[]>>;
 }
 
 const FinanceContext = createContext<FinanceContextValue | undefined>(undefined);
@@ -135,6 +166,31 @@ const initialPayments: Payment[] = [
   }
 ];
 
+const initialLedgerTransactions: LedgerTransaction[] = [
+  {
+    id: 'trx_1',
+    accountName: 'Zenith Bank - Main Account',
+    reference: 'UTIL-2024-001',
+    date: '2024-09-10',
+    amount: 45000,
+    paymentMethod: 'Bank Transfer',
+    description: 'Monthly electricity bill for Admin block',
+    type: 'Expense',
+    createdAt: '2024-09-10T10:00:00.000Z'
+  },
+  {
+    id: 'trx_2',
+    accountName: 'GTBank - Revenue Account',
+    reference: 'TUI-REV-882',
+    date: '2024-09-12',
+    amount: 1250000,
+    paymentMethod: 'Payment Gateways',
+    description: 'Bulk tuition payment batch #882',
+    type: 'Income',
+    createdAt: '2024-09-12T14:30:00.000Z'
+  }
+];
+
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [feeStructures, setFeeStructures] = useState<FeeStructure[]>(initialFeeStructures);
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
@@ -142,6 +198,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [salaryStructures, setSalaryStructures] = useState<SalaryStructure[]>([]);
   const [staffSalaryAssignments, setStaffSalaryAssignments] = useState<StaffSalaryAssignment[]>([]);
   const [payrollRuns, setPayrollRuns] = useState<PayrollRun[]>([]);
+  const [ledgerTransactions, setLedgerTransactions] = useState<LedgerTransaction[]>(initialLedgerTransactions);
 
   return (
     <FinanceContext.Provider
@@ -157,7 +214,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         staffSalaryAssignments,
         setStaffSalaryAssignments,
         payrollRuns,
-        setPayrollRuns
+        setPayrollRuns,
+        ledgerTransactions,
+        setLedgerTransactions
       }}
     >
       {children}
