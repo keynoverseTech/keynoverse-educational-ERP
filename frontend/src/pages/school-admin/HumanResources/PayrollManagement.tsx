@@ -22,7 +22,9 @@ const PayrollManagement: React.FC = () => {
   const { 
     salaryStructures, 
     setSalaryStructures, 
-    setStaffSalaryAssignments 
+    staffSalaryAssignments,
+    setStaffSalaryAssignments,
+    setPayrollRuns
   } = useFinance();
 
   const [activeView, setActiveView] = useState<'list' | 'create' | 'edit'>('list');
@@ -40,6 +42,8 @@ const PayrollManagement: React.FC = () => {
   // Track individual staff overrides/exclusions
   const [excludedStaffIds, setExcludedStaffIds] = useState<string[]>([]);
   const [staffPenalties, setStaffPenalties] = useState<Record<string, { name: string; amount: number }[]>>({});
+  const [staffBonuses, setStaffBonuses] = useState<Record<string, { name: string; amount: number }[]>>({});
+  const [staffBaseSalaries, setStaffBaseSalaries] = useState<Record<string, number>>({});
 
   // Memoized list of staff affected by current filters
   const affectedStaff = useMemo(() => {
@@ -74,6 +78,32 @@ const PayrollManagement: React.FC = () => {
 
   const handleEdit = (structure: SalaryStructure) => {
     setEditingId(structure.id);
+    
+    // Find current assignments for this structure to see who is excluded/has penalties
+    const assignments = staffSalaryAssignments.filter(a => a.salaryStructureId === structure.id);
+    
+    // We can't easily know who was "excluded" versus just not matching the designation 
+    // unless we track the designation in the structure. 
+    // For now, let's just populate the overrides for staff who HAVE assignments.
+    const penalties: Record<string, { name: string; amount: number }[]> = {};
+    const bonuses: Record<string, { name: string; amount: number }[]> = {};
+    const baseSalaries: Record<string, number> = {};
+    
+    assignments.forEach(a => {
+      if (a.customDeductions && a.customDeductions.length > 0) {
+        penalties[a.staffId] = a.customDeductions;
+      }
+      if (a.customAllowances && a.customAllowances.length > 0) {
+        bonuses[a.staffId] = a.customAllowances;
+      }
+      if (a.customBaseSalary !== undefined) {
+        baseSalaries[a.staffId] = a.customBaseSalary;
+      }
+    });
+
+    setStaffPenalties(penalties);
+    setStaffBonuses(bonuses);
+    setStaffBaseSalaries(baseSalaries);
     
     setNewStructure({
       name: structure.gradeLevel,
@@ -118,6 +148,8 @@ const PayrollManagement: React.FC = () => {
     const newAssignments: StaffSalaryAssignment[] = staffToAssign.map(s => ({
       staffId: s.id,
       salaryStructureId: structureId,
+      customBaseSalary: staffBaseSalaries[s.id],
+      customAllowances: staffBonuses[s.id] || [],
       customDeductions: staffPenalties[s.id] || []
     }));
 
@@ -135,6 +167,8 @@ const PayrollManagement: React.FC = () => {
     setEditingId(null);
     setExcludedStaffIds([]);
     setStaffPenalties({});
+    setStaffBonuses({});
+    setStaffBaseSalaries({});
     setNewStructure({
       name: '',
       designationId: '',
@@ -145,8 +179,49 @@ const PayrollManagement: React.FC = () => {
     });
   };
 
-  const forwardToFinance = () => {
-    alert('Payroll data has been successfully forwarded to the Finance module.');
+  const forwardToFinance = (structure: SalaryStructure) => {
+    const assignments = staffSalaryAssignments.filter(a => a.salaryStructureId === structure.id);
+    
+    if (assignments.length === 0) {
+      alert('No staff members are assigned to this structure yet.');
+      return;
+    }
+
+    const staffEntries = assignments.map(a => {
+      const staffMember = staff.find(s => s.id === a.staffId);
+      const base = a.customBaseSalary ?? structure.baseSalary;
+      const allowances = (a.customAllowances ?? []).reduce((s, item) => s + item.amount, 0) + 
+                        structure.allowances.reduce((s, item) => s + item.amount, 0);
+      const deductions = (a.customDeductions ?? []).reduce((s, item) => s + item.amount, 0) + 
+                        structure.deductions.reduce((s, item) => s + item.amount, 0);
+      
+      return {
+        staffId: a.staffId,
+        name: staffMember ? `${staffMember.firstName} ${staffMember.lastName}` : 'Unknown Staff',
+        baseSalary: base,
+        allowances,
+        deductions,
+        netPay: base + allowances - deductions
+      };
+    });
+
+    const totalAmount = staffEntries.reduce((sum, entry) => sum + entry.netPay, 0);
+
+    const now = new Date();
+    const payrollRun = {
+      id: `run_${crypto.randomUUID()}`,
+      month: now.toLocaleString('default', { month: 'long' }),
+      year: now.getFullYear(),
+      totalAmount,
+      totalStaff: staffEntries.length,
+      generatedBy: 'HR Admin', // Replace with actual user name
+      status: 'Pending' as const,
+      forwardedAt: now.toISOString(),
+      staffEntries
+    };
+
+    setPayrollRuns(prev => [...prev, payrollRun]);
+    alert(`Payroll for ${structure.gradeLevel} (${staffEntries.length} staff) has been forwarded to Finance.`);
   };
 
   const toggleStaffExclusion = (id: string) => {
@@ -172,6 +247,45 @@ const PayrollManagement: React.FC = () => {
       ...prev,
       [staffId]: prev[staffId].filter((_, i) => i !== idx)
     }));
+  };
+
+  const addBonus = (staffId: string) => {
+    const bonusName = prompt('Enter bonus name:');
+    const bonusAmount = parseFloat(prompt('Enter amount (₦):') || '0');
+    
+    if (bonusName && bonusAmount > 0) {
+      setStaffBonuses(prev => ({
+        ...prev,
+        [staffId]: [...(prev[staffId] || []), { name: bonusName, amount: bonusAmount }]
+      }));
+    }
+  };
+
+  const removeBonus = (staffId: string, idx: number) => {
+    setStaffBonuses(prev => ({
+      ...prev,
+      [staffId]: prev[staffId].filter((_, i) => i !== idx)
+    }));
+  };
+
+  const editBaseSalary = (staffId: string) => {
+    const currentBase = staffBaseSalaries[staffId] || newStructure.baseSalary;
+    const newBase = parseFloat(prompt('Enter individual base salary (₦):', currentBase.toString()) || '0');
+    
+    if (newBase > 0) {
+      setStaffBaseSalaries(prev => ({
+        ...prev,
+        [staffId]: newBase
+      }));
+    }
+  };
+
+  const removeBaseSalaryOverride = (staffId: string) => {
+    setStaffBaseSalaries(prev => {
+      const newState = { ...prev };
+      delete newState[staffId];
+      return newState;
+    });
   };
 
   return (
@@ -241,7 +355,7 @@ const PayrollManagement: React.FC = () => {
                 </div>
 
                 <button 
-                  onClick={() => forwardToFinance()}
+                  onClick={() => forwardToFinance(struct)}
                   className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl text-xs font-black hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-gray-900/10"
                 >
                   <Send size={14} /> Forward to Finance
@@ -397,6 +511,8 @@ const PayrollManagement: React.FC = () => {
                   affectedStaff.map(s => {
                     const isExcluded = excludedStaffIds.includes(s.id);
                     const penalties = staffPenalties[s.id] || [];
+                    const bonuses = staffBonuses[s.id] || [];
+                    const customBase = staffBaseSalaries[s.id];
                     
                     return (
                       <div key={s.id} className={`p-4 rounded-2xl border transition-all ${isExcluded ? 'bg-gray-50 border-transparent opacity-50' : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-700 shadow-sm'}`}>
@@ -412,9 +528,17 @@ const PayrollManagement: React.FC = () => {
                           </div>
                           <div className="flex gap-1">
                             {!isExcluded && (
-                              <button onClick={() => addPenalty(s.id)} className="p-1.5 text-orange-400 hover:text-orange-600 rounded-lg hover:bg-orange-50 transition-colors" title="Add Fine/Penalty">
-                                <AlertCircle size={14} />
-                              </button>
+                              <>
+                                <button onClick={() => editBaseSalary(s.id)} className="p-1.5 text-blue-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors" title="Edit Individual Base Salary">
+                                  <DollarSign size={14} />
+                                </button>
+                                <button onClick={() => addBonus(s.id)} className="p-1.5 text-emerald-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors" title="Add Individual Bonus">
+                                  <Plus size={14} />
+                                </button>
+                                <button onClick={() => addPenalty(s.id)} className="p-1.5 text-orange-400 hover:text-orange-600 rounded-lg hover:bg-orange-50 transition-colors" title="Add Fine/Penalty">
+                                  <AlertCircle size={14} />
+                                </button>
+                              </>
                             )}
                             <button onClick={() => toggleStaffExclusion(s.id)} className={`p-1.5 rounded-lg transition-colors ${isExcluded ? 'text-emerald-500 hover:bg-emerald-50' : 'text-rose-400 hover:text-rose-600 hover:bg-rose-50'}`} title={isExcluded ? 'Include Staff' : 'Exclude Staff'}>
                               {isExcluded ? <Check size={14} /> : <UserX size={14} />}
@@ -422,17 +546,48 @@ const PayrollManagement: React.FC = () => {
                           </div>
                         </div>
 
-                        {penalties.length > 0 && !isExcluded && (
-                          <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800 space-y-1.5">
-                            {penalties.map((p, idx) => (
-                              <div key={idx} className="flex justify-between items-center bg-rose-50/50 dark:bg-rose-900/10 px-2 py-1 rounded-lg">
-                                <span className="text-[9px] font-bold text-rose-600 uppercase tracking-tight">{p.name}</span>
+                        {!isExcluded && (
+                          <div className="mt-3 space-y-2">
+                            {/* Base Salary Override Display */}
+                            {customBase !== undefined && (
+                              <div className="flex justify-between items-center bg-blue-50/50 dark:bg-blue-900/10 px-2 py-1.5 rounded-lg border border-blue-100 dark:border-blue-800">
+                                <span className="text-[9px] font-black text-blue-600 uppercase tracking-tight">Custom Base Salary</span>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[9px] font-black text-rose-700">-₦{p.amount.toLocaleString()}</span>
-                                  <button onClick={() => removePenalty(s.id, idx)} className="text-rose-300 hover:text-rose-500"><X size={10} /></button>
+                                  <span className="text-[9px] font-black text-blue-700">₦{customBase.toLocaleString()}</span>
+                                  <button onClick={() => removeBaseSalaryOverride(s.id)} className="text-blue-300 hover:text-blue-500"><X size={10} /></button>
                                 </div>
                               </div>
-                            ))}
+                            )}
+
+                            {/* Bonuses Display */}
+                            {bonuses.length > 0 && (
+                              <div className="space-y-1">
+                                {bonuses.map((b, idx) => (
+                                  <div key={idx} className="flex justify-between items-center bg-emerald-50/50 dark:bg-emerald-900/10 px-2 py-1 rounded-lg">
+                                    <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-tight">{b.name}</span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[9px] font-black text-emerald-700">+₦{b.amount.toLocaleString()}</span>
+                                      <button onClick={() => removeBonus(s.id, idx)} className="text-emerald-300 hover:text-emerald-500"><X size={10} /></button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Penalties Display */}
+                            {penalties.length > 0 && (
+                              <div className="space-y-1">
+                                {penalties.map((p, idx) => (
+                                  <div key={idx} className="flex justify-between items-center bg-rose-50/50 dark:bg-rose-900/10 px-2 py-1 rounded-lg">
+                                    <span className="text-[9px] font-bold text-rose-600 uppercase tracking-tight">{p.name}</span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[9px] font-black text-rose-700">-₦{p.amount.toLocaleString()}</span>
+                                      <button onClick={() => removePenalty(s.id, idx)} className="text-rose-300 hover:text-rose-500"><X size={10} /></button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
