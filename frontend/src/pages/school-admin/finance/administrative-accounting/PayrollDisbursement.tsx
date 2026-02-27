@@ -13,7 +13,7 @@ import {
   X
 } from 'lucide-react';
 import { useFinance } from '../../../../state/financeContext';
-import type { PayrollRun } from '../../../../state/financeContext';
+import type { PayrollRun, PayrollStaffEntry } from '../../../../state/financeTypes';
 
 const PayrollDisbursement: React.FC = () => {
   const { payrollRuns, setPayrollRuns, setLedgerTransactions } = useFinance();
@@ -312,7 +312,7 @@ const PayrollDisbursement: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-                    {selectedRun.staffEntries.map((entry, idx) => (
+                    {selectedRun.staffEntries.map((entry: PayrollStaffEntry, idx: number) => (
                       <tr key={idx} className="text-sm hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
                         <td className="px-6 py-4">
                           <p className="font-bold text-gray-900 dark:text-white">{entry.name}</p>

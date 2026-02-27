@@ -17,7 +17,7 @@ import {
   Building2
 } from 'lucide-react';
 import { useFinance } from '../../../../state/financeContext';
-import type { LedgerTransaction } from '../../../../state/financeContext';
+import type { LedgerTransaction } from '../../../../state/financeTypes';
 
 interface LedgerFormData {
   accountName: string;
