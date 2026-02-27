@@ -156,6 +156,21 @@ const initialRoles: Role[] = [
   { id: 'role_finance_officer', name: 'Finance Officer', description: 'Handles payments and finance operations' },
   { id: 'role_library_officer', name: 'Library Officer', description: 'Manages library services' },
   { id: 'role_hostel_officer', name: 'Hostel Officer', description: 'Manages hostel allocation' },
+  // New Roles
+  { id: 'role_lecturer', name: 'Lecturer', description: 'Delivers lectures and grades students' },
+  { id: 'role_assistant_lecturer', name: 'Assistant Lecturer', description: 'Assists in lectures and grading' },
+  { id: 'role_exams_officer', name: 'Exams Officer', description: 'Manages examination processes and results' },
+  { id: 'role_bursary_accountant', name: 'Bursary/Accountant', description: 'Manages financial records and transactions' },
+  { id: 'role_librarian', name: 'Librarian', description: 'Manages library resources and access' },
+  { id: 'role_ict_officer', name: 'ICT Officer', description: 'Manages IT infrastructure and support' },
+  { id: 'role_health_officer', name: 'Health Officer', description: 'Manages student health services' },
+  { id: 'role_student_affairs_officer', name: 'Student Affairs Officer', description: 'Oversees student welfare and activities' },
+  { id: 'role_hostel_manager', name: 'Hostel Manager', description: 'Manages hostel facilities and allocation' },
+  { id: 'role_transport_officer', name: 'Transport Officer', description: 'Manages transportation logistics' },
+  { id: 'role_security_officer', name: 'Security Officer', description: 'Ensures campus security and safety' },
+  { id: 'role_maintenance_officer', name: 'Maintenance Officer', description: 'Oversees facility maintenance' },
+  { id: 'role_admin_officer', name: 'Admin Officer', description: 'General administrative duties' },
+  { id: 'role_quality_assurance_officer', name: 'Quality Assurance Officer', description: 'Ensures academic and operational quality' },
 ];
 
 const initialPermissions: Permission[] = [
@@ -228,6 +243,18 @@ const initialRolePermissions: RolePermission[] = [
   { roleId: 'role_finance_officer', permissionId: 'perm_view_payslip', allowed: true },
   { roleId: 'role_finance_officer', permissionId: 'perm_reverse_payroll', allowed: true },
   { roleId: 'role_academic_staff', permissionId: 'perm_create_student', allowed: false },
+  // Permissions for new roles
+  { roleId: 'role_lecturer', permissionId: 'perm_upload_result', allowed: true },
+  { roleId: 'role_lecturer', permissionId: 'perm_submit_result', allowed: true },
+  { roleId: 'role_assistant_lecturer', permissionId: 'perm_upload_result', allowed: true },
+  { roleId: 'role_exams_officer', permissionId: 'perm_upload_result', allowed: true },
+  { roleId: 'role_exams_officer', permissionId: 'perm_approve_result', allowed: true },
+  { roleId: 'role_exams_officer', permissionId: 'perm_publish_result', allowed: true },
+  { roleId: 'role_bursary_accountant', permissionId: 'perm_collect_payment', allowed: true },
+  { roleId: 'role_bursary_accountant', permissionId: 'perm_generate_invoice', allowed: true },
+  { roleId: 'role_librarian', permissionId: 'perm_manage_library', allowed: true },
+  { roleId: 'role_ict_officer', permissionId: 'perm_configure_hr', allowed: true },
+  { roleId: 'role_hostel_manager', permissionId: 'perm_assign_hostel', allowed: true },
 ];
 
 const initialStaff: Staff[] = [

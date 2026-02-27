@@ -23,9 +23,9 @@ const HRConfig: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.tab) {
-      setActiveTab(location.state.tab as HRTab);
-    }
+    const tab = (location.state as { tab?: HRTab } | null | undefined)?.tab;
+    if (!tab) return;
+    queueMicrotask(() => setActiveTab(tab));
   }, [location.state]);
 
   const tabs = [

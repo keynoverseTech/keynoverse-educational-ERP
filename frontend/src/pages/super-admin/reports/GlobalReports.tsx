@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FilterState } from './ReportsFilter';
 import { 
   Users, 
   GraduationCap, 
@@ -25,7 +26,7 @@ import {
 } from 'recharts';
 
 interface GlobalReportsProps {
-  filters: any;
+  filters: FilterState;
 }
 
 const GlobalReports: React.FC<GlobalReportsProps> = ({ filters }) => {

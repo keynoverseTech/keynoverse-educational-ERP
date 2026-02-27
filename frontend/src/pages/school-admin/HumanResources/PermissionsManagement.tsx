@@ -17,12 +17,9 @@ const PermissionsManagement: React.FC = () => {
   const [newPermission, setNewPermission] = useState({ key: '', description: '', module: 'Student' as PermissionModule });
 
   useEffect(() => {
-    if (location.state?.roleId) {
-      setSelectedRoleId(location.state.roleId);
-    } else if (roles.length > 0) {
-      // Default to first role if none provided
-      setSelectedRoleId(roles[0].id);
-    }
+    const nextRoleId = (location.state as { roleId?: string } | null | undefined)?.roleId ?? roles[0]?.id ?? null;
+    if (!nextRoleId) return;
+    queueMicrotask(() => setSelectedRoleId(nextRoleId));
   }, [location.state, roles]);
 
   const selectedRole = roles.find(r => r.id === selectedRoleId);

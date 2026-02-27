@@ -1,69 +1,57 @@
 import React from 'react';
-import { DollarSign, Users, CreditCard, TrendingUp, ArrowRight } from 'lucide-react';
-import { useFinance } from '../../../../state/financeContext';
 import { useNavigate } from 'react-router-dom';
+import { 
+  DollarSign, 
+  TrendingUp, 
+  TrendingDown, 
+  FileText, 
+  CreditCard, 
+  Clock, 
+  ArrowRight,
+  PieChart
+} from 'lucide-react';
 
 const FinanceDashboard: React.FC = () => {
-  const { invoices, payments, feeStructures } = useFinance();
   const navigate = useNavigate();
 
-  // Calculate stats
-  const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
-  const totalCollected = payments
-    .filter(p => p.status === 'Posted')
-    .reduce((sum, p) => sum + p.amountPaid, 0);
-  const outstanding = totalInvoiced - totalCollected;
-  
-  const paymentRate = totalInvoiced > 0 ? Math.round((totalCollected / totalInvoiced) * 100) : 0;
-
+  // Mock data for dashboard
   const stats = [
-    { 
-      title: 'Total Invoiced', 
-      value: `₦${totalInvoiced.toLocaleString()}`, 
-      icon: DollarSign, 
-      color: 'bg-blue-500',
-      trend: '+12% from last session'
-    },
-    { 
-      title: 'Total Collected', 
-      value: `₦${totalCollected.toLocaleString()}`, 
-      icon: CreditCard, 
-      color: 'bg-green-500',
-      trend: `${paymentRate}% collection rate`
-    },
-    { 
-      title: 'Outstanding', 
-      value: `₦${outstanding.toLocaleString()}`, 
-      icon: TrendingUp, 
-      color: 'bg-orange-500',
-      trend: 'Needs attention'
-    },
-    { 
-      title: 'Active Fees', 
-      value: feeStructures.length.toString(), 
-      icon: Users, 
-      color: 'bg-purple-500',
-      trend: 'Across all programs'
-    }
+    { title: 'Total Revenue', value: '₦45.2M', change: '+12%', isPositive: true, color: 'bg-emerald-500', icon: DollarSign },
+    { title: 'Pending Invoices', value: '₦8.5M', change: '-5%', isPositive: false, color: 'bg-amber-500', icon: Clock },
+    { title: 'Expenses (YTD)', value: '₦12.1M', change: '+8%', isPositive: false, color: 'bg-rose-500', icon: TrendingDown },
+    { title: 'Net Income', value: '₦33.1M', change: '+15%', isPositive: true, color: 'bg-blue-500', icon: TrendingUp },
+  ];
+
+  const recentTransactions = [
+    { id: 1, type: 'Payment', student: 'John Doe', amount: '₦150,000', date: '2024-03-15', status: 'Success' },
+    { id: 2, type: 'Invoice', student: 'Jane Smith', amount: '₦45,000', date: '2024-03-14', status: 'Pending' },
+    { id: 3, type: 'Payment', student: 'Michael Brown', amount: '₦200,000', date: '2024-03-14', status: 'Success' },
   ];
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
+    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Student Finance Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Overview of student fees, invoices, and collections.</p>
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/20">
+              <PieChart className="w-6 h-6 text-white" />
+            </div>
+            Student Finance Dashboard
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
+            Overview of student fees, invoices, and collections.
+          </p>
         </div>
         <div className="flex gap-3">
           <button 
             onClick={() => navigate('/school-admin/finance/student-accounting/invoices')}
-            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm font-medium text-sm"
+            className="px-6 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm text-sm"
           >
             View Invoices
           </button>
           <button 
             onClick={() => navigate('/school-admin/finance/student-accounting/payments')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium text-sm"
+            className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-indigo-500/25"
           >
             Record Payment
           </button>
@@ -73,90 +61,88 @@ const FinanceDashboard: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.title}</p>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{stat.value}</h3>
+          <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+             <div className={`absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 opacity-10 rounded-full ${stat.color}`} />
+            <div className="flex justify-between items-start mb-4">
+              <div className={`p-3 rounded-2xl bg-opacity-10 ${stat.color.replace('bg-', 'text-').replace('500', '600')} ${stat.color.replace('bg-', 'bg-').replace('500', '50')}`}>
+                <stat.icon size={24} />
               </div>
-              <div className={`p-3 rounded-lg ${stat.color} bg-opacity-10 text-${stat.color.replace('bg-', '')}`}>
-                <stat.icon size={20} className={stat.color.replace('bg-', 'text-')} />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs">
-              <span className="text-green-600 font-medium bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full">
-                {stat.trend}
+              <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${
+                stat.isPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+              }`}>
+                {stat.change}
               </span>
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.title}</p>
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white mt-1">{stat.value}</h3>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recent Transactions */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Recent Transactions</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-8 shadow-sm">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-black text-gray-900 dark:text-white">Recent Transactions</h3>
             <button 
               onClick={() => navigate('/school-admin/finance/student-accounting/payments')}
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+              className="text-indigo-600 hover:text-indigo-700 text-xs font-black flex items-center gap-1 uppercase tracking-wide"
             >
-              View All <ArrowRight size={16} />
+              View All <ArrowRight size={14} />
             </button>
           </div>
           <div className="space-y-4">
-            {payments.slice(0, 5).map(payment => (
-              <div key={payment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+            {recentTransactions.map((tx) => (
+              <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors group">
                 <div className="flex items-center gap-4">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full">
-                    <CreditCard size={16} />
+                  <div className={`p-3 rounded-xl ${
+                    tx.type === 'Payment' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+                  }`}>
+                    {tx.type === 'Payment' ? <CreditCard size={20} /> : <FileText size={20} />}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{payment.transactionReference}</p>
-                    <p className="text-xs text-gray-500">{new Date(payment.createdAt).toLocaleDateString()}</p>
+                    <p className="font-bold text-gray-900 dark:text-white">{tx.student}</p>
+                    <p className="text-xs text-gray-500 font-medium">{tx.type} • {tx.date}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-gray-900 dark:text-white">₦{payment.amountPaid.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500">{payment.paymentMethod}</p>
-                </div>
-              </div>
-            ))}
-            {payments.length === 0 && (
-              <div className="text-center py-8 text-gray-500">No recent transactions</div>
-            )}
-          </div>
-        </div>
-
-        {/* Pending Invoices */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Pending Invoices</h3>
-            <button 
-              onClick={() => navigate('/school-admin/finance/student-accounting/invoices')}
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
-            >
-              View All <ArrowRight size={16} />
-            </button>
-          </div>
-          <div className="space-y-4">
-            {invoices.filter(i => i.status !== 'Paid').slice(0, 5).map(invoice => (
-              <div key={invoice.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">{invoice.studentId}</p>
-                  <p className="text-xs text-gray-500">ID: {invoice.id}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900 dark:text-white">₦{invoice.totalAmount.toLocaleString()}</p>
-                  <span className="text-xs font-medium text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-full">
-                    {invoice.status}
+                  <p className="font-black text-gray-900 dark:text-white">{tx.amount}</p>
+                  <span className={`text-[10px] font-bold uppercase tracking-wide ${
+                    tx.status === 'Success' ? 'text-emerald-500' : 'text-amber-500'
+                  }`}>
+                    {tx.status}
                   </span>
                 </div>
               </div>
             ))}
-            {invoices.filter(i => i.status !== 'Paid').length === 0 && (
-              <div className="text-center py-8 text-gray-500">No pending invoices</div>
-            )}
+          </div>
+        </div>
+
+        {/* Quick Actions / Summary */}
+        <div className="bg-indigo-600 rounded-[2.5rem] p-8 shadow-xl shadow-indigo-500/20 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
+          <div className="relative z-10">
+            <h3 className="text-2xl font-black mb-2">Finance Overview</h3>
+            <p className="text-indigo-100 mb-8 max-w-md">
+              Monitor key financial metrics and student payment statuses. Ensure all invoices are generated for the new term.
+            </p>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
+                <p className="text-xs text-indigo-200 uppercase tracking-widest font-bold mb-1">Collection Rate</p>
+                <p className="text-3xl font-black">85%</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-2xl border border-white/10">
+                <p className="text-xs text-indigo-200 uppercase tracking-widest font-bold mb-1">Outstanding</p>
+                <p className="text-3xl font-black">15%</p>
+              </div>
+            </div>
+
+            <button className="mt-8 w-full py-4 bg-white text-indigo-600 rounded-2xl font-black hover:bg-indigo-50 transition-colors shadow-lg">
+              Generate Financial Report
+            </button>
           </div>
         </div>
       </div>
