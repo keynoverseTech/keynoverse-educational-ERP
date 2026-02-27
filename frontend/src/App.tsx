@@ -14,13 +14,15 @@ import {
   Shield,
   Settings as SettingsIcon,
   DollarSign,
+  MessageSquare,
   Bus
 } from 'lucide-react';
 import './App.css';
 
 // Context Providers
 import { HRProvider } from './state/hrAccessControl';
-import { FinanceProvider } from './state/financeContext';
+import { FinanceProvider } from './state/financeProvider';
+import { LibraryProvider } from './state/libraryProvider';
 import { HostelProvider } from './state/hostelContext';
 import { TransportProvider } from './state/transportContext';
 import { StudentPortalFinanceProvider } from './state/studentPortalFinanceContext';
@@ -104,6 +106,17 @@ const HRConfig = lazy(() => import('./pages/school-admin/HumanResources/HRConfig
 const PermissionsManagement = lazy(() => import('./pages/school-admin/HumanResources/PermissionsManagement'));
 const LeaveRequest = lazy(() => import('./pages/school-admin/HumanResources/LeaveRequest'));
 const LeaveApprovals = lazy(() => import('./pages/school-admin/HumanResources/LeaveApprovals'));
+
+// School Admin - Communication Centre
+const AnnouncementsPage = lazy(() => import('./pages/school-admin/communication-centre/Announcements'));
+const DirectMessagingPage = lazy(() => import('./pages/school-admin/communication-centre/DirectMessaging'));
+
+// School Admin - Library
+const LibraryDashboardPage = lazy(() => import('./pages/school-admin/library/LibraryDashboard'));
+const BookCatalogPage = lazy(() => import('./pages/school-admin/library/BookCatalog'));
+const BookCategoriesPage = lazy(() => import('./pages/school-admin/library/BookCategories'));
+const BorrowingSystemPage = lazy(() => import('./pages/school-admin/library/BorrowingSystem'));
+const ReservationSystemPage = lazy(() => import('./pages/school-admin/library/ReservationSystem'));
 
 // School Admin - Finance
 const GeneralLedgerPage = lazy(() => import('./pages/school-admin/finance/administrative-accounting/GeneralLedger'));
@@ -232,6 +245,25 @@ const schoolAdminItems = [
     ]
   },
   { 
+    name: 'Library', 
+    icon: BookOpen,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/library/dashboard' },
+      { name: 'Book Catalog', path: '/school-admin/library/catalog' },
+      { name: 'Book Categories', path: '/school-admin/library/categories' },
+      { name: 'Borrowing System', path: '/school-admin/library/borrowing' },
+      { name: 'Reservation System', path: '/school-admin/library/reservations' }
+    ]
+  },
+  { 
+    name: 'Communication Centre', 
+    icon: MessageSquare,
+    subItems: [
+      { name: 'Announcements', path: '/school-admin/communication-centre/announcements' },
+      { name: 'Direct Messaging', path: '/school-admin/communication-centre/direct-messaging' }
+    ]
+  },
+  { 
     name: 'Reports', 
     path: '/school-admin/reports', 
     icon: FileText,
@@ -295,188 +327,200 @@ function App() {
     <HRProvider>
       <FinanceProvider>
         <StudentPortalFinanceProvider>
-        <HostelProvider>
-          <TransportProvider>
-            <Router>
-            <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Navigate to="/auth" replace />} />
-              <Route path="/auth" element={<AuthSelection />} />
-              <Route path="/auth/super-admin" element={<SuperAdminLogin />} />
-              <Route path="/auth/school-admin" element={<SchoolAdminLogin />} />
+          <HostelProvider>
+            <TransportProvider>
+              <LibraryProvider>
+                <Router>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      {/* Public Routes */}
+                      <Route path="/" element={<Navigate to="/auth" replace />} />
+                      <Route path="/auth" element={<AuthSelection />} />
+                      <Route path="/auth/super-admin" element={<SuperAdminLogin />} />
+                      <Route path="/auth/school-admin" element={<SchoolAdminLogin />} />
 
-              {/* Super Admin Routes */}
-              <Route element={
-                <DashboardLayout sidebarItems={superAdminItems}>
-                  <Outlet />
-                </DashboardLayout>
-              }>
-                <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
-                <Route path="/super-admin/institutions" element={<Institutions />} />
-                <Route path="/super-admin/new-registration" element={<NewRegistration />} />
-                <Route path="/super-admin/applications" element={<Applications />} />
-                <Route path="/super-admin/sub-admins" element={<SubAdmins />} />
-                <Route path="/super-admin/admissions-governance" element={<AdmissionsGovernance />} />
-                <Route path="/super-admin/academic-catalog" element={<ProgramGovernance />} />
-                <Route path="/super-admin/system-logs" element={<SystemLogs />} />
-                <Route path="/super-admin/config" element={<InstitutionConfig />} />
-                <Route path="/super-admin/reports" element={<ReportsLayout />} />
-              </Route>
+                      {/* Super Admin Routes */}
+                      <Route element={
+                        <DashboardLayout sidebarItems={superAdminItems}>
+                          <Outlet />
+                        </DashboardLayout>
+                      }>
+                        <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+                        <Route path="/super-admin/institutions" element={<Institutions />} />
+                        <Route path="/super-admin/new-registration" element={<NewRegistration />} />
+                        <Route path="/super-admin/applications" element={<Applications />} />
+                        <Route path="/super-admin/sub-admins" element={<SubAdmins />} />
+                        <Route path="/super-admin/admissions-governance" element={<AdmissionsGovernance />} />
+                        <Route path="/super-admin/academic-catalog" element={<ProgramGovernance />} />
+                        <Route path="/super-admin/system-logs" element={<SystemLogs />} />
+                        <Route path="/super-admin/config" element={<InstitutionConfig />} />
+                        <Route path="/super-admin/reports" element={<ReportsLayout />} />
+                      </Route>
 
-              <Route path="/super-admin/applications/:id" element={<ApplicationDetails />} />
-              <Route path="/super-admin/institutions/:id" element={<InstitutionDetails />} />
+                      <Route path="/super-admin/applications/:id" element={<ApplicationDetails />} />
+                      <Route path="/super-admin/institutions/:id" element={<InstitutionDetails />} />
 
-              {/* School Admin Routes */}
-              <Route
-                element={
-                  <DashboardLayout
-                    sidebarItems={schoolAdminItems}
-                    role="School Admin"
-                    roleSubtitle="Administrator"
-                    userInitials="AD"
-                    sidebarTitle="School Name"
-                    sidebarLogo={<GraduationCap className="w-5 h-5 fill-current" />}
-                  >
-                    <Outlet />
-                  </DashboardLayout>
-                }
-              >
-                <Route path="/school-admin/dashboard" element={<SchoolAdminDashboard />} />
+                      {/* School Admin Routes */}
+                      <Route
+                        element={
+                          <DashboardLayout
+                            sidebarItems={schoolAdminItems}
+                            role="School Admin"
+                            roleSubtitle="Administrator"
+                            userInitials="AD"
+                            sidebarTitle="School Name"
+                            sidebarLogo={<GraduationCap className="w-5 h-5 fill-current" />}
+                          >
+                            <Outlet />
+                          </DashboardLayout>
+                        }
+                      >
+                        <Route path="/school-admin/dashboard" element={<SchoolAdminDashboard />} />
 
-                {/* Admissions */}
-                <Route path="/school-admin/admissions/dashboard" element={<AdmissionsDashboard />} />
-                <Route path="/school-admin/admissions/intake" element={<AdmissionIntake />} />
-                <Route path="/school-admin/admissions/profile/:id" element={<ApplicantProfile />} />
-                <Route path="/school-admin/admissions/configure" element={<ConfigureAdmissions />} />
-                <Route path="/school-admin/admissions/create" element={<CreateAdmission />} />
-                <Route path="/school-admin/admissions/imports" element={<MultipleImports />} />
+                        {/* Admissions */}
+                        <Route path="/school-admin/admissions/dashboard" element={<AdmissionsDashboard />} />
+                        <Route path="/school-admin/admissions/intake" element={<AdmissionIntake />} />
+                        <Route path="/school-admin/admissions/profile/:id" element={<ApplicantProfile />} />
+                        <Route path="/school-admin/admissions/configure" element={<ConfigureAdmissions />} />
+                        <Route path="/school-admin/admissions/create" element={<CreateAdmission />} />
+                        <Route path="/school-admin/admissions/imports" element={<MultipleImports />} />
 
-                {/* Academics */}
-                <Route path="/school-admin/academics/dashboard" element={<AcademicDashboard />} />
-                <Route path="/school-admin/academics/configure" element={<ConfigureAcademic />} />
-                <Route path="/school-admin/academics/sessions" element={<SessionsPage />} />
-                <Route path="/school-admin/academics/semesters" element={<SemestersPage />} />
-                <Route path="/school-admin/academics/faculties" element={<FacultiesPage />} />
-                <Route path="/school-admin/academics/departments" element={<DepartmentsPage />} />
-                <Route path="/school-admin/academics/programmes" element={<ProgrammesPage />} />
-                <Route path="/school-admin/academics/levels" element={<LevelsPage />} />
-                <Route path="/school-admin/academics/courses" element={<CoursesPage />} />
-                <Route path="/school-admin/academics/registration-config" element={<CourseRegistrationConfig />} />
-                <Route path="/school-admin/academics/registration-approvals" element={<RegistrationApprovals />} />
-                <Route path="/school-admin/academics/courses-management" element={<CourseManagement />} />
-                <Route path="/school-admin/academics/lectures-timetable" element={<LecturesTimetable />} />
-                <Route path="/school-admin/academics/registration" element={<CourseRegistration />} />
-                <Route path="/school-admin/academics/promotion" element={<LevelPromotion />} />
-                <Route path="/school-admin/academics/calendar" element={<AcademicCalendar />} />
+                        {/* Academics */}
+                        <Route path="/school-admin/academics/dashboard" element={<AcademicDashboard />} />
+                        <Route path="/school-admin/academics/configure" element={<ConfigureAcademic />} />
+                        <Route path="/school-admin/academics/sessions" element={<SessionsPage />} />
+                        <Route path="/school-admin/academics/semesters" element={<SemestersPage />} />
+                        <Route path="/school-admin/academics/faculties" element={<FacultiesPage />} />
+                        <Route path="/school-admin/academics/departments" element={<DepartmentsPage />} />
+                        <Route path="/school-admin/academics/programmes" element={<ProgrammesPage />} />
+                        <Route path="/school-admin/academics/levels" element={<LevelsPage />} />
+                        <Route path="/school-admin/academics/courses" element={<CoursesPage />} />
+                        <Route path="/school-admin/academics/registration-config" element={<CourseRegistrationConfig />} />
+                        <Route path="/school-admin/academics/registration-approvals" element={<RegistrationApprovals />} />
+                        <Route path="/school-admin/academics/courses-management" element={<CourseManagement />} />
+                        <Route path="/school-admin/academics/lectures-timetable" element={<LecturesTimetable />} />
+                        <Route path="/school-admin/academics/registration" element={<CourseRegistration />} />
+                        <Route path="/school-admin/academics/promotion" element={<LevelPromotion />} />
+                        <Route path="/school-admin/academics/calendar" element={<AcademicCalendar />} />
 
-                {/* Examinations */}
-                <Route path="/school-admin/examinations/dashboard" element={<ExaminationDashboard />} />
-                <Route path="/school-admin/examinations/cycle" element={<ExamCycleSetup />} />
-                <Route path="/school-admin/examinations/timetable" element={<TimetableScheduling />} />
-                <Route path="/school-admin/examinations/scores" element={<ScoreUpload />} />
-                <Route path="/school-admin/examinations/processing" element={<ResultProcessing />} />
-                <Route path="/school-admin/examinations/publication" element={<ResultPublication />} />
-                <Route path="/school-admin/examinations/assessment-config" element={<AssessmentConfiguration />} />
+                        {/* Examinations */}
+                        <Route path="/school-admin/examinations/dashboard" element={<ExaminationDashboard />} />
+                        <Route path="/school-admin/examinations/cycle" element={<ExamCycleSetup />} />
+                        <Route path="/school-admin/examinations/timetable" element={<TimetableScheduling />} />
+                        <Route path="/school-admin/examinations/scores" element={<ScoreUpload />} />
+                        <Route path="/school-admin/examinations/processing" element={<ResultProcessing />} />
+                        <Route path="/school-admin/examinations/publication" element={<ResultPublication />} />
+                        <Route path="/school-admin/examinations/assessment-config" element={<AssessmentConfiguration />} />
 
-                {/* Student Management */}
-                <Route path="/school-admin/students/list" element={<StudentList />} />
-                <Route path="/school-admin/students/profile" element={<StudentProfile />} />
-                <Route path="/school-admin/students/create" element={<CreateStudent />} />
+                        {/* Student Management */}
+                        <Route path="/school-admin/students/list" element={<StudentList />} />
+                        <Route path="/school-admin/students/profile" element={<StudentProfile />} />
+                        <Route path="/school-admin/students/create" element={<CreateStudent />} />
 
-                {/* Student Services */}
-                <Route path="/school-admin/student-services/hostel" element={<HostelDashboard />} />
-                <Route path="/school-admin/student-services/hostel/rooms" element={<HostelRooms />} />
-                <Route path="/school-admin/student-services/hostel/allocations" element={<HostelAllocations />} />
-                <Route path="/school-admin/student-services/hostel/config" element={<HostelConfig />} />
+                        {/* Student Services */}
+                        <Route path="/school-admin/student-services/hostel" element={<HostelDashboard />} />
+                        <Route path="/school-admin/student-services/hostel/rooms" element={<HostelRooms />} />
+                        <Route path="/school-admin/student-services/hostel/allocations" element={<HostelAllocations />} />
+                        <Route path="/school-admin/student-services/hostel/config" element={<HostelConfig />} />
 
-                <Route path="/school-admin/student-services/transport" element={<TransportDashboard />} />
-                <Route path="/school-admin/student-services/transport/routes" element={<TransportRoutes />} />
-                <Route path="/school-admin/student-services/transport/vehicles" element={<TransportVehicles />} />
-                <Route path="/school-admin/student-services/transport/subscriptions" element={<TransportSubscriptions />} />
-                <Route path="/school-admin/student-services/transport/config" element={<TransportConfig />} />
+                        <Route path="/school-admin/student-services/transport" element={<TransportDashboard />} />
+                        <Route path="/school-admin/student-services/transport/routes" element={<TransportRoutes />} />
+                        <Route path="/school-admin/student-services/transport/vehicles" element={<TransportVehicles />} />
+                        <Route path="/school-admin/student-services/transport/subscriptions" element={<TransportSubscriptions />} />
+                        <Route path="/school-admin/student-services/transport/config" element={<TransportConfig />} />
 
-                {/* Staff Management */}
-                <Route path="/school-admin/staff/profile" element={<StaffProfile />} />
-                <Route path="/school-admin/staff/create" element={<CreateStaff />} />
+                        {/* Staff Management */}
+                        <Route path="/school-admin/staff/profile" element={<StaffProfile />} />
+                        <Route path="/school-admin/staff/create" element={<CreateStaff />} />
 
-                {/* HR */}
-                <Route path="/school-admin/human-resources/dashboard" element={<HRDashboard />} />
-                <Route path="/school-admin/human-resources/config" element={<HRConfig />} />
-                <Route path="/school-admin/human-resources/permissions" element={<PermissionsManagement />} />
-                <Route path="/school-admin/human-resources/leave/request" element={<LeaveRequest />} />
-                <Route path="/school-admin/human-resources/leave/approvals" element={<LeaveApprovals />} />
+                        {/* HR */}
+                        <Route path="/school-admin/human-resources/dashboard" element={<HRDashboard />} />
+                        <Route path="/school-admin/human-resources/config" element={<HRConfig />} />
+                        <Route path="/school-admin/human-resources/permissions" element={<PermissionsManagement />} />
+                        <Route path="/school-admin/human-resources/leave/request" element={<LeaveRequest />} />
+                        <Route path="/school-admin/human-resources/leave/approvals" element={<LeaveApprovals />} />
 
-                {/* Finance - Student Accounting */}
-                <Route path="/school-admin/finance/student-accounting/dashboard" element={<StudentFinanceDashboard />} />
-                <Route path="/school-admin/finance/student-accounting/fee-structure" element={<StudentFeeConfigurationPage />} />
-                <Route path="/school-admin/finance/student-accounting/invoices" element={<StudentInvoicesPage />} />
-                <Route path="/school-admin/finance/student-accounting/invoices/:id" element={<StudentInvoiceDetailsPage />} />
-                <Route path="/school-admin/finance/student-accounting/payments" element={<StudentPaymentsPage />} />
+                        <Route path="/school-admin/communication-centre/announcements" element={<AnnouncementsPage />} />
+                        <Route path="/school-admin/communication-centre/direct-messaging" element={<DirectMessagingPage />} />
 
-                {/* Finance - Administrative Accounting */}
-                <Route path="/school-admin/finance/administrative-accounting/ledger" element={<GeneralLedgerPage />} />
-                <Route path="/school-admin/finance/administrative-accounting/disbursement" element={<PayrollDisbursementPage />} />
-                
-                <Route path="/school-admin/finance/accounts" element={<AccountsPage />} />
-                
-                {/* Other Pages */}
-                <Route path="/school-admin/reports" element={<BasicReports />} />
-                <Route path="/school-admin/settings" element={<Settings />} />
-              </Route>
+                        {/* Library */}
+                        <Route path="/school-admin/library/dashboard" element={<LibraryDashboardPage />} />
+                        <Route path="/school-admin/library/catalog" element={<BookCatalogPage />} />
+                        <Route path="/school-admin/library/categories" element={<BookCategoriesPage />} />
+                        <Route path="/school-admin/library/borrowing" element={<BorrowingSystemPage />} />
+                        <Route path="/school-admin/library/reservations" element={<ReservationSystemPage />} />
 
-              {/* Student Portal Routes */}
-              <Route element={
-                <DashboardLayout 
-                  sidebarItems={studentItems}
-                  role="Student"
-                  roleSubtitle="Undergraduate"
-                  userInitials="SJ"
-                  sidebarTitle="Student Portal"
-                  sidebarLogo={<GraduationCap className="w-5 h-5 fill-current" />}
-                >
-                  <Outlet />
-                </DashboardLayout>
-              }>
-                <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
-                <Route path="/student/dashboard" element={<StudentPortalDashboard />} />
-                <Route path="/student/courses" element={<StudentCourses />} />
-                <Route path="/student/results" element={<StudentResults />} />
-                <Route path="/student/timetable" element={<StudentTimetable />} />
-                <Route path="/student/fees" element={<StudentFeesDashboard />} />
-                <Route path="/student/fees/invoices/:id" element={<StudentInvoiceDetails />} />
-                <Route path="/student/fees/pay/:invoiceId" element={<StudentPaymentCheckout />} />
-                <Route path="/student/fees/pay/confirm/:intentId" element={<StudentPaymentConfirmation />} />
-                <Route path="/student/fees/receipts" element={<StudentReceipts />} />
-                <Route path="/student/fees/receipts/:receiptId" element={<StudentReceiptDetails />} />
-                <Route path="/student/fees/history" element={<StudentPaymentHistory />} />
-                <Route path="/student/profile" element={<StudentPortalProfile />} />
-              </Route>
+                        {/* Finance - Student Accounting */}
+                        <Route path="/school-admin/finance/student-accounting/dashboard" element={<StudentFinanceDashboard />} />
+                        <Route path="/school-admin/finance/student-accounting/fee-structure" element={<StudentFeeConfigurationPage />} />
+                        <Route path="/school-admin/finance/student-accounting/invoices" element={<StudentInvoicesPage />} />
+                        <Route path="/school-admin/finance/student-accounting/invoices/:id" element={<StudentInvoiceDetailsPage />} />
+                        <Route path="/school-admin/finance/student-accounting/payments" element={<StudentPaymentsPage />} />
 
-              {/* Staff Portal Routes */}
-              <Route
-                element={
-                  <DashboardLayout
-                    sidebarItems={staffItems}
-                    role="Staff"
-                    roleSubtitle="Academic Staff"
-                    userInitials="DS"
-                    sidebarTitle="Staff Portal"
-                    sidebarLogo={<Briefcase className="w-5 h-5 fill-current" />}
-                  >
-                    <Outlet />
-                  </DashboardLayout>
-                }
-              >
-                <Route path="/staff/dashboard" element={<StaffPortalDashboard />} />
-                <Route path="/staff/grading" element={<StaffGrading />} />
-                <Route path="/staff/score-upload" element={<ScoreUpload />} />
-              </Route>
-            </Routes>
-              </Suspense>
-            </Router>
-          </TransportProvider>
-         </HostelProvider>
+                        {/* Finance - Administrative Accounting */}
+                        <Route path="/school-admin/finance/administrative-accounting/ledger" element={<GeneralLedgerPage />} />
+                        <Route path="/school-admin/finance/administrative-accounting/disbursement" element={<PayrollDisbursementPage />} />
+                        
+                        <Route path="/school-admin/finance/accounts" element={<AccountsPage />} />
+                        
+                        {/* Other Pages */}
+                        <Route path="/school-admin/reports" element={<BasicReports />} />
+                        <Route path="/school-admin/settings" element={<Settings />} />
+                      </Route>
+
+                      {/* Student Portal Routes */}
+                      <Route element={
+                        <DashboardLayout 
+                          sidebarItems={studentItems}
+                          role="Student"
+                          roleSubtitle="Undergraduate"
+                          userInitials="SJ"
+                          sidebarTitle="Student Portal"
+                          sidebarLogo={<GraduationCap className="w-5 h-5 fill-current" />}
+                        >
+                          <Outlet />
+                        </DashboardLayout>
+                      }>
+                        <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
+                        <Route path="/student/dashboard" element={<StudentPortalDashboard />} />
+                        <Route path="/student/courses" element={<StudentCourses />} />
+                        <Route path="/student/results" element={<StudentResults />} />
+                        <Route path="/student/timetable" element={<StudentTimetable />} />
+                        <Route path="/student/fees" element={<StudentFeesDashboard />} />
+                        <Route path="/student/fees/invoices/:id" element={<StudentInvoiceDetails />} />
+                        <Route path="/student/fees/pay/:invoiceId" element={<StudentPaymentCheckout />} />
+                        <Route path="/student/fees/pay/confirm/:intentId" element={<StudentPaymentConfirmation />} />
+                        <Route path="/student/fees/receipts" element={<StudentReceipts />} />
+                        <Route path="/student/fees/receipts/:receiptId" element={<StudentReceiptDetails />} />
+                        <Route path="/student/fees/history" element={<StudentPaymentHistory />} />
+                        <Route path="/student/profile" element={<StudentPortalProfile />} />
+                      </Route>
+
+                      {/* Staff Portal Routes */}
+                      <Route
+                        element={
+                          <DashboardLayout
+                            sidebarItems={staffItems}
+                            role="Staff"
+                            roleSubtitle="Academic Staff"
+                            userInitials="DS"
+                            sidebarTitle="Staff Portal"
+                            sidebarLogo={<Briefcase className="w-5 h-5 fill-current" />}
+                          >
+                            <Outlet />
+                          </DashboardLayout>
+                        }
+                      >
+                        <Route path="/staff/dashboard" element={<StaffPortalDashboard />} />
+                        <Route path="/staff/grading" element={<StaffGrading />} />
+                        <Route path="/staff/score-upload" element={<ScoreUpload />} />
+                      </Route>
+                    </Routes>
+                  </Suspense>
+                </Router>
+              </LibraryProvider>
+            </TransportProvider>
+          </HostelProvider>
         </StudentPortalFinanceProvider>
       </FinanceProvider>
     </HRProvider>

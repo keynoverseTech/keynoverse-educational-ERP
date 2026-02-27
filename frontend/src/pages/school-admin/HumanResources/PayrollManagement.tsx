@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useHR } from '../../../state/hrAccessControl';
 import { useFinance } from '../../../state/financeContext';
-import type { SalaryStructure, StaffSalaryAssignment } from '../../../state/financeContext';
+import type { SalaryStructure, StaffSalaryAssignment } from '../../../state/financeTypes';
 
 const PayrollManagement: React.FC = () => {
   const { designations, staff } = useHR();
@@ -80,7 +80,7 @@ const PayrollManagement: React.FC = () => {
     setEditingId(structure.id);
     
     // Find current assignments for this structure to see who is excluded/has penalties
-    const assignments = staffSalaryAssignments.filter(a => a.salaryStructureId === structure.id);
+    const assignments = staffSalaryAssignments.filter((a: StaffSalaryAssignment) => a.salaryStructureId === structure.id);
     
     // We can't easily know who was "excluded" versus just not matching the designation 
     // unless we track the designation in the structure. 
@@ -89,7 +89,7 @@ const PayrollManagement: React.FC = () => {
     const bonuses: Record<string, { name: string; amount: number }[]> = {};
     const baseSalaries: Record<string, number> = {};
     
-    assignments.forEach(a => {
+    assignments.forEach((a: StaffSalaryAssignment) => {
       if (a.customDeductions && a.customDeductions.length > 0) {
         penalties[a.staffId] = a.customDeductions;
       }
@@ -154,7 +154,7 @@ const PayrollManagement: React.FC = () => {
     }));
 
     setStaffSalaryAssignments(prev => [
-      ...prev.filter(a => !affectedStaff.some(s => s.id === a.staffId)), // Remove old assignments for all targeted staff
+      ...prev.filter((a: StaffSalaryAssignment) => !affectedStaff.some(s => s.id === a.staffId)), // Remove old assignments for all targeted staff
       ...newAssignments
     ]);
 
@@ -190,10 +190,10 @@ const PayrollManagement: React.FC = () => {
     const staffEntries = assignments.map(a => {
       const staffMember = staff.find(s => s.id === a.staffId);
       const base = a.customBaseSalary ?? structure.baseSalary;
-      const allowances = (a.customAllowances ?? []).reduce((s, item) => s + item.amount, 0) + 
-                        structure.allowances.reduce((s, item) => s + item.amount, 0);
-      const deductions = (a.customDeductions ?? []).reduce((s, item) => s + item.amount, 0) + 
-                        structure.deductions.reduce((s, item) => s + item.amount, 0);
+      const allowances = (a.customAllowances ?? []).reduce((s: number, item: { name: string; amount: number }) => s + item.amount, 0) + 
+                        structure.allowances.reduce((s: number, item: { name: string; amount: number }) => s + item.amount, 0);
+      const deductions = (a.customDeductions ?? []).reduce((s: number, item: { name: string; amount: number }) => s + item.amount, 0) + 
+                        structure.deductions.reduce((s: number, item: { name: string; amount: number }) => s + item.amount, 0);
       
       return {
         staffId: a.staffId,
