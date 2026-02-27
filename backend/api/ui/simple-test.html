@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple API Test UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .test-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #45a049;
+        }
+
+        .btn.reset {
+            background: #ff9800;
+        }
+
+        .btn.reset:hover {
+            background: #f57c00;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auth-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .auth-status.authenticated {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .auth-status.unauthenticated {
+            background: #f44336;
+            color: white;
+        }
+
+        .login-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .response-area {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .status-code {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status-code.success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-code.error {
+            background: #f44336;
+            color: white;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            min-height: 200px;
+        }
+
+        .token-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .user-info {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .test-group {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .test-group h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 API Test UI</h1>
+
+        <!-- API URL Configuration -->
+        <div class="status-bar">
+            <div>
+                <strong>API URL:</strong> 
+                <input type="text" id="apiUrl" value="http://localhost/api" style="width: 300px; padding: 5px;">
+                <button class="btn" onclick="testConnection()">Test Connection</button>
+            </div>
+            <div>
+                <span id="connectionStatus" style="margin-left: 10px;">Not tested</span>
+            </div>
+        </div>
+
+        <!-- Authentication Status -->
+        <div class="status-bar">
+            <div>
+                <span class="auth-status unauthenticated" id="authStatus">Not Authenticated</span>
+            </div>
+            <div id="userDisplay" style="display: none;">
+                <span id="userEmail"></span> | 
+                <span id="userRole"></span>
+                <button class="btn" onclick="logout()" style="margin-left: 10px; background: #f44336;">Logout</button>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="login-form" id="loginSection">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email" value="admin@planetstech.com">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" value="Password123!">
+            </div>
+            <button class="btn" onclick="login()">Login</button>
+        </div>
+
+        <!-- Token Display -->
+        <div id="tokenSection" style="display: none;">
+            <div class="token-info">
+                <strong>Access Token:</strong> <span id="accessToken"></span>
+            </div>
+            <div class="token-info">
+                <strong>Refresh Token:</strong> <span id="refreshToken"></span>
+            </div>
+        </div>
+
+        <!-- Test Buttons -->
+        <div class="test-buttons">
+            <button class="btn" onclick="testGet('/test')">Test GET</button>
+            <button class="btn" onclick="testPost('/auth/register', {
+                first_name: 'John',
+                last_name: 'Doe',
+                email: 'john@example.com',
+                password: 'Password123!',
+                role: 'user'
+            })">Test Register</button>
+            <button class="btn" onclick="testGet('/auth/me')">Get Current User</button>
+            <button class="btn" onclick="testGet('/users')">Get All Users</button>
+            <button class="btn" onclick="testGet('/users/1')">Get User ID 1</button>
+            <button class="btn" onclick="testPut('/users/1', {
+                first_name: 'Updated',
+                last_name: 'Name'
+            })">Update User</button>
+            <button class="btn" onclick="testDelete('/users/2')">Delete User</button>
+            <button class="btn reset" onclick="resetTokens()">Reset Tokens</button>
+        </div>
+
+        <!-- Custom Request -->
+        <div class="test-group">
+            <h3>Custom Request</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <select id="customMethod" style="width: 100px;">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                    <option value="PATCH">PATCH</option>
+                </select>
+                <input type="text" id="customEndpoint" placeholder="/endpoint" style="flex: 1;">
+            </div>
+            <div class="form-group">
+                <label>Request Body (JSON):</label>
+                <textarea id="customBody" rows="5" placeholder='{"key": "value"}'></textarea>
+            </div>
+            <button class="btn" onclick="sendCustomRequest()">Send Custom Request</button>
+        </div>
+
+        <!-- Response Area -->
+        <div class="response-area">
+            <div class="response-header">
+                <span class="status-code" id="statusCode">Ready</span>
+                <span id="responseTime"></span>
+            </div>
+            <pre id="response">{
+    "message": "Ready to make requests"
+}</pre>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let accessToken = localStorage.getItem('accessToken');
+        let refreshToken = localStorage.getItem('refreshToken');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+        });
+
+        // Update UI based on auth state
+        function updateUI() {
+            const authStatus = document.getElementById('authStatus');
+            const userDisplay = document.getElementById('userDisplay');
+            const tokenSection = document.getElementById('tokenSection');
+            const loginSection = document.getElementById('loginSection');
+
+            if (accessToken && currentUser) {
+                authStatus.textContent = 'Authenticated';
+                authStatus.className = 'auth-status authenticated';
+                userDisplay.style.display = 'block';
+                tokenSection.style.display = 'block';
+                loginSection.style.display = 'none';
+                
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userRole').textContent = currentUser.role;
+                document.getElementById('accessToken').textContent = accessToken.substring(0, 50) + '...';
+                document.getElementById('refreshToken').textContent = refreshToken ? refreshToken.substring(0, 50) + '...' : 'None';
+            } else {
+                authStatus.textContent = 'Not Authenticated';
+                authStatus.className = 'auth-status unauthenticated';
+                userDisplay.style.display = 'none';
+                tokenSection.style.display = 'none';
+                loginSection.style.display = 'block';
+            }
+        }
+
+        // Get API URL
+        function getApiUrl() {
+            return document.getElementById('apiUrl').value;
+        }
+
+        // Test connection
+        async function testConnection() {
+            try {
+                const response = await fetch(getApiUrl() + '/test');
+                const data = await response.json();
+                document.getElementById('connectionStatus').textContent = '✅ Connected';
+                document.getElementById('connectionStatus').style.color = 'green';
+                displayResponse(response, data);
+            } catch (error) {
+                document.getElementById('connectionStatus').textContent = '❌ Failed to connect';
+                document.getElementById('connectionStatus').style.color = 'red';
+                document.getElementById('response').textContent = JSON.stringify({ error: error.message }, null, 2);
+            }
+        }
+
+        // Login
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(getApiUrl() + '/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                displayResponse(response, data);
+
+                if (response.ok && data.access_token) {
+                    accessToken = data.access_token;
+                    refreshToken = data.refresh_token;
+                    currentUser = data.user;
+
+                    localStorage.setItem('accessToken', accessToken);
+                    localStorage.setItem('refreshToken', refreshToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                    updateUI();
+                }
+            } catch (error) {
+                document.getElementById('response').textContent = JSON.stringify({ error: error.message }, null, 2);
+            }
+        }
+
+        // Logout
+        function logout() {
+            accessToken = null;
+            refreshToken = null;
+            currentUser = null;
+            
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('currentUser');
+            
+            updateUI();
+            document.getElementById('response').textContent = JSON.stringify({ message: 'Logged out' }, null, 2);
+        }
+
+        // Reset tokens
+        function resetTokens() {
+            logout();
+        }
+
+        // Test GET request
+        async function testGet(endpoint) {
+            await makeRequest(endpoint, 'GET');
+        }
+
+        // Test POST request
+        async function testPost(endpoint, body) {
+            await makeRequest(endpoint, 'POST', body);
+        }
+
+        // Test PUT request
+        async function testPut(endpoint, body) {
+            await makeRequest(endpoint, 'PUT', body);
+        }
+
+        // Test DELETE request
+        async function testDelete(endpoint) {
+            await makeRequest(endpoint, 'DELETE');
+        }
+
+        // Make authenticated request
+        async function makeRequest(endpoint, method, body = null) {
+            const startTime = Date.now();
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (accessToken) {
+                headers['Authorization'] = `Bearer ${accessToken}`;
+            }
+
+            const options = {
+                method: method,
+                headers: headers
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(getApiUrl() + endpoint, options);
+                const data = await response.json();
+                const endTime = Date.now();
+                
+                displayResponse(response, data, endTime - startTime);
+            } catch (error) {
+                document.getElementById('response').textContent = JSON.stringify({ error: error.message }, null, 2);
+            }
+        }
+
+        // Send custom request
+        async function sendCustomRequest() {
+            const method = document.getElementById('customMethod').value;
+            const endpoint = document.getElementById('customEndpoint').value;
+            const bodyText = document.getElementById('customBody').value;
+            
+            let body = null;
+            if (bodyText) {
+                try {
+                    body = JSON.parse(bodyText);
+                } catch (e) {
+                    alert('Invalid JSON in request body');
+                    return;
+                }
+            }
+            
+            await makeRequest(endpoint, method, body);
+        }
+
+        // Display response
+        function displayResponse(response, data, time = null) {
+            const statusElement = document.getElementById('statusCode');
+            statusElement.textContent = `Status: ${response.status} ${response.statusText}`;
+            statusElement.className = `status-code ${response.ok ? 'success' : 'error'}`;
+            
+            if (time) {
+                document.getElementById('responseTime').textContent = `Time: ${time}ms`;
+            }
+            
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
