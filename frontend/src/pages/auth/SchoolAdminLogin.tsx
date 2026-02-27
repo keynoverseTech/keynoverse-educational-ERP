@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, RefreshCw, Mail, Facebook, Twitter, Linkedin, Youtube, Check } from 'lucide-react';
-import PixelBlast from '../../components/PixelBlast';
+// import PixelBlast from '../../components/PixelBlast';
 import nbteLogo from '../../assets/NBTE LOGO.png';
 import fullLogo from '../../assets/Full logo.jfif';
 
@@ -25,7 +25,8 @@ const SchoolAdminLogin: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden font-sans bg-black">
         {/* Background */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 to-black">
+            {/* 
             <PixelBlast 
                 color="#ffffff"
                 variant="circle"
@@ -33,7 +34,8 @@ const SchoolAdminLogin: React.FC = () => {
                 speed={1}
                 className="opacity-80"
                 enableRipples={true}
-            />
+            /> 
+            */}
         </div>
 
         {/* Floating Card Container */}

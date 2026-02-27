@@ -1,29 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Eye, EyeOff, Lock, RefreshCw, Mail, Check } from 'lucide-react';
-import PixelBlast from '../../components/PixelBlast';
+import { Shield, Eye, EyeOff, Lock, RefreshCw, Mail, Check, AlertCircle } from 'lucide-react';
+// import PixelBlast from '../../components/PixelBlast';
+import { useAuth } from '../../state/authContext';
 
 const SuperAdminLogin: React.FC = () => {
   const navigate = useNavigate();
+  const { login, isLoading: authLoading, error: authError, isAuthenticated } = useAuth();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Suppress unused var warning for now
+  void rememberMe;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/super-admin/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate network delay for better UX
-    setTimeout(() => {
-        navigate('/super-admin/dashboard');
-    }, 800);
+    try {
+      await login(email, password);
+      // Navigation handled by useEffect
+    } catch (err) {
+      console.error('Login failed', err);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden font-sans bg-black">
-        {/* PixelBlast Background */}
-        <div className="absolute inset-0 z-0">
+        {/* Background */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 to-black">
+            {/* 
             <PixelBlast 
                 color="#ffffff"
                 variant="square"
@@ -31,7 +44,8 @@ const SuperAdminLogin: React.FC = () => {
                 speed={0.5}
                 className="opacity-50"
                 enableRipples={true}
-            />
+            /> 
+            */}
         </div>
 
         {/* Floating Card Container */}
@@ -84,6 +98,13 @@ const SuperAdminLogin: React.FC = () => {
                             </div>
                         </div>
                     </div>
+
+                    {authError && (
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl flex items-center gap-3 text-red-200 text-sm animate-in fade-in slide-in-from-top-2">
+                            <AlertCircle size={18} className="text-red-500 shrink-0" />
+                            <p>{authError}</p>
+                        </div>
+                    )}
 
                     <form onSubmit={handleLogin} className="space-y-5">
                         <div className="space-y-2">
@@ -144,18 +165,16 @@ const SuperAdminLogin: React.FC = () => {
 
                         <button 
                             type="submit" 
-                            disabled={isLoading}
-                            className="w-full bg-white hover:bg-slate-200 disabled:bg-slate-600 disabled:opacity-70 text-black font-bold py-4 rounded-xl transition-all duration-200 shadow-lg shadow-white/10 hover:shadow-white/20 active:scale-[0.98] flex items-center justify-center gap-3 mt-4"
+                            disabled={authLoading}
+                            className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-white/10"
                         >
-                            {isLoading ? (
+                            {authLoading ? (
                                 <>
-                                    <RefreshCw className="w-5 h-5 animate-spin" />
-                                    Authenticating...
+                                    <RefreshCw size={20} className="animate-spin" />
+                                    <span>Signing In...</span>
                                 </>
                             ) : (
-                                <>
-                                    Login
-                                </>
+                                <span>Sign In</span>
                             )}
                         </button>
                     </form>

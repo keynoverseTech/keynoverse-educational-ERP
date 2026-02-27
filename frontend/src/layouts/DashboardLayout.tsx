@@ -1,6 +1,8 @@
-import React, { type ReactNode, useState, useEffect } from 'react';
-import { Menu, Bell, Search, ChevronDown, Moon, Sun } from 'lucide-react';
+import React, { type ReactNode, useState, useEffect, useRef } from 'react';
+import { Menu, Bell, Search, ChevronDown, Moon, Sun, LogOut, User, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar, { type SidebarItem } from '../components/Sidebar';
+import { useAuth } from '../state/authContext';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -21,7 +23,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   sidebarTitle,
   sidebarLogo
 }) => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check local storage or system preference
     if (typeof window !== 'undefined') {
@@ -42,8 +49,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     }
   }, [isDarkMode]);
 
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth/select');
   };
 
   return (
@@ -94,16 +120,50 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             
             <div className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700 mx-1"></div>
             
-            <button className="flex items-center gap-3 pl-2 pr-1 py-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">{role}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">{roleSubtitle}</p>
-              </div>
-              <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm shadow-blue-500/20">
-                {userInitials}
-              </div>
-              <ChevronDown size={16} className="text-gray-400" />
-            </button>
+            <div className="relative" ref={profileRef}>
+              <button 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center gap-3 pl-2 pr-1 py-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+              >
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white leading-none">{role}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">{roleSubtitle}</p>
+                </div>
+                <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm shadow-blue-500/20">
+                  {userInitials}
+                </div>
+                <ChevronDown size={16} className={`text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Profile Dropdown */}
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">{role}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{roleSubtitle}</p>
+                  </div>
+                  <div className="p-2">
+                    <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors">
+                      <User size={16} />
+                      My Profile
+                    </button>
+                    <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-colors">
+                      <Settings size={16} />
+                      Account Settings
+                    </button>
+                  </div>
+                  <div className="p-2 border-t border-gray-100 dark:border-gray-700">
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                    >
+                      <LogOut size={16} />
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

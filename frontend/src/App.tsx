@@ -20,6 +20,7 @@ import {
 import './App.css';
 
 // Context Providers
+import { AuthProvider } from './state/authContext';
 import { HRProvider } from './state/hrAccessControl';
 import { FinanceProvider } from './state/financeProvider';
 import { LibraryProvider } from './state/libraryProvider';
@@ -330,14 +331,15 @@ function App() {
           <HostelProvider>
             <TransportProvider>
               <LibraryProvider>
-                <Router>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                      {/* Public Routes */}
-                      <Route path="/" element={<Navigate to="/auth" replace />} />
-                      <Route path="/auth" element={<AuthSelection />} />
-                      <Route path="/auth/super-admin" element={<SuperAdminLogin />} />
-                      <Route path="/auth/school-admin" element={<SchoolAdminLogin />} />
+                <AuthProvider>
+                  <Router>
+                    <Suspense fallback={<LoadingFallback />}>
+                      <Routes>
+                        {/* Auth Routes */}
+                        <Route path="/" element={<AuthSelection />} />
+                        <Route path="/auth/select" element={<AuthSelection />} />
+                        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+                        <Route path="/school-admin/login" element={<SchoolAdminLogin />} />
 
                       {/* Super Admin Routes */}
                       <Route element={
@@ -518,6 +520,7 @@ function App() {
                     </Routes>
                   </Suspense>
                 </Router>
+                </AuthProvider>
               </LibraryProvider>
             </TransportProvider>
           </HostelProvider>
