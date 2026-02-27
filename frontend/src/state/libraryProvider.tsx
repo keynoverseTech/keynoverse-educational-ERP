@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Book, BorrowingRecord, Reservation, BookCategory, LibraryContextValue } from './libraryTypes';
 import { LibraryContext } from './libraryContext';
 
@@ -162,7 +162,7 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     ));
   };
 
-  const value: LibraryContextValue = {
+  const value: LibraryContextValue = useMemo(() => ({
     books,
     setBooks,
     categories,
@@ -180,7 +180,7 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     returnBook,
     reserveBook,
     cancelReservation
-  };
+  }), [books, categories, borrowings, reservations]);
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;
 };

@@ -26,6 +26,7 @@ import { LibraryProvider } from './state/libraryProvider';
 import { HostelProvider } from './state/hostelContext';
 import { TransportProvider } from './state/transportContext';
 import { StudentPortalFinanceProvider } from './state/studentPortalFinanceContext';
+import { EventsProvider } from './state/eventsProvider';
 
 // Components
 import LoadingFallback from './components/LoadingFallback';
@@ -117,6 +118,12 @@ const BookCatalogPage = lazy(() => import('./pages/school-admin/library/BookCata
 const BookCategoriesPage = lazy(() => import('./pages/school-admin/library/BookCategories'));
 const BorrowingSystemPage = lazy(() => import('./pages/school-admin/library/BorrowingSystem'));
 const ReservationSystemPage = lazy(() => import('./pages/school-admin/library/ReservationSystem'));
+
+// School Admin - Events
+const EventsDashboardPage = lazy(() => import('./pages/school-admin/events/EventsDashboard'));
+const EventCategoriesPage = lazy(() => import('./pages/school-admin/events/EventCategories'));
+const CreateEventPage = lazy(() => import('./pages/school-admin/events/CreateEvent'));
+const UpcomingEventsPage = lazy(() => import('./pages/school-admin/events/UpcomingEvents'));
 
 // School Admin - Finance
 const GeneralLedgerPage = lazy(() => import('./pages/school-admin/finance/administrative-accounting/GeneralLedger'));
@@ -249,10 +256,20 @@ const schoolAdminItems = [
     icon: BookOpen,
     subItems: [
       { name: 'Dashboard', path: '/school-admin/library/dashboard' },
-      { name: 'Book Catalog', path: '/school-admin/library/catalog' },
       { name: 'Book Categories', path: '/school-admin/library/categories' },
-      { name: 'Borrowing System', path: '/school-admin/library/borrowing' },
-      { name: 'Reservation System', path: '/school-admin/library/reservations' }
+      { name: 'Book Catalogue', path: '/school-admin/library/catalog' },
+      { name: 'Circulations', path: '/school-admin/library/borrowing' },
+      { name: 'Reservations', path: '/school-admin/library/reservations' }
+    ]
+  },
+  { 
+    name: 'Events', 
+    icon: Calendar,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/events/dashboard' },
+      { name: 'Event Categories', path: '/school-admin/events/categories' },
+      { name: 'Create Event', path: '/school-admin/events/create' },
+      { name: 'Upcoming Events', path: '/school-admin/events/upcoming' }
     ]
   },
   { 
@@ -330,8 +347,9 @@ function App() {
           <HostelProvider>
             <TransportProvider>
               <LibraryProvider>
-                <Router>
-                  <Suspense fallback={<LoadingFallback />}>
+                <EventsProvider>
+                  <Router>
+                    <Suspense fallback={<LoadingFallback />}>
                     <Routes>
                       {/* Public Routes */}
                       <Route path="/" element={<Navigate to="/auth" replace />} />
@@ -450,6 +468,12 @@ function App() {
                         <Route path="/school-admin/library/borrowing" element={<BorrowingSystemPage />} />
                         <Route path="/school-admin/library/reservations" element={<ReservationSystemPage />} />
 
+                        {/* Events */}
+                        <Route path="/school-admin/events/dashboard" element={<EventsDashboardPage />} />
+                        <Route path="/school-admin/events/categories" element={<EventCategoriesPage />} />
+                        <Route path="/school-admin/events/create" element={<CreateEventPage />} />
+                        <Route path="/school-admin/events/upcoming" element={<UpcomingEventsPage />} />
+
                         {/* Finance - Student Accounting */}
                         <Route path="/school-admin/finance/student-accounting/dashboard" element={<StudentFinanceDashboard />} />
                         <Route path="/school-admin/finance/student-accounting/fee-structure" element={<StudentFeeConfigurationPage />} />
@@ -518,8 +542,9 @@ function App() {
                     </Routes>
                   </Suspense>
                 </Router>
-              </LibraryProvider>
-            </TransportProvider>
+                  </EventsProvider>
+                </LibraryProvider>
+              </TransportProvider>
           </HostelProvider>
         </StudentPortalFinanceProvider>
       </FinanceProvider>

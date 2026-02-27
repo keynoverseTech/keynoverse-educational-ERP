@@ -67,7 +67,7 @@ const ReservationSystem: React.FC = () => {
             <div className="p-2.5 bg-amber-600 rounded-xl shadow-lg shadow-amber-500/20">
               <Bookmark className="w-6 h-6 text-white" />
             </div>
-            Reservation System
+            Reservations
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
             Manage book holds and waiting lists for high-demand titles.

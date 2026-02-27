@@ -109,7 +109,7 @@ const BookCatalog: React.FC = () => {
             <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/20">
               <Layers className="w-6 h-6 text-white" />
             </div>
-            Book Catalog
+            Book Catalogue
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
             Manage your library's inventory, categories, and book details.
