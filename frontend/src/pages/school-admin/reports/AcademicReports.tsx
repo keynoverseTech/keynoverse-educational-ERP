@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import ReportFilter, { type FilterState } from './ReportFilter';
 import { Download, FileText, Printer } from 'lucide-react';
 
+type AcademicReportRow = {
+  id: number;
+  name: string;
+  matricNo: string;
+  cgpa: number;
+  coursesFailed: number;
+  status: string;
+};
+
 const AcademicReports: React.FC = () => {
   const [activeTab, setActiveTab] = useState('gpa');
 
@@ -12,7 +21,7 @@ const AcademicReports: React.FC = () => {
     { id: 'graduation', label: 'Graduation Eligibility' },
   ];
 
-  const [reportData, setReportData] = useState<any[]>([]);
+  const [reportData, setReportData] = useState<AcademicReportRow[]>([]);
 
   const handleGenerate = (filters: FilterState) => {
     console.log('Generating report with filters:', filters);

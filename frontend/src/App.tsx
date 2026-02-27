@@ -13,13 +13,17 @@ import {
   FileText,
   Shield,
   Settings as SettingsIcon,
-  DollarSign
+  DollarSign,
+  Bus
 } from 'lucide-react';
 import './App.css';
 
 // Context Providers
 import { HRProvider } from './state/hrAccessControl';
 import { FinanceProvider } from './state/financeContext';
+import { HostelProvider } from './state/hostelContext';
+import { TransportProvider } from './state/transportContext';
+import { StudentPortalFinanceProvider } from './state/studentPortalFinanceContext';
 
 // Components
 import LoadingFallback from './components/LoadingFallback';
@@ -111,8 +115,31 @@ const StudentInvoicesPage = lazy(() => import('./pages/school-admin/finance/stud
 const StudentInvoiceDetailsPage = lazy(() => import('./pages/school-admin/finance/student-accounting/InvoiceDetailsPage'));
 const StudentPaymentsPage = lazy(() => import('./pages/school-admin/finance/student-accounting/PaymentsPage'));
 
+// School Admin - Student Services
+const HostelDashboard = lazy(() => import('./pages/school-admin/student-services/hostel/HostelDashboard'));
+const HostelRooms = lazy(() => import('./pages/school-admin/student-services/hostel/HostelRooms'));
+const HostelAllocations = lazy(() => import('./pages/school-admin/student-services/hostel/HostelAllocations'));
+const HostelConfig = lazy(() => import('./pages/school-admin/student-services/hostel/HostelConfig'));
+
+const TransportDashboard = lazy(() => import('./pages/school-admin/student-services/transport/TransportDashboard'));
+const TransportRoutes = lazy(() => import('./pages/school-admin/student-services/transport/TransportRoutes'));
+const TransportVehicles = lazy(() => import('./pages/school-admin/student-services/transport/TransportVehicles'));
+const TransportSubscriptions = lazy(() => import('./pages/school-admin/student-services/transport/TransportSubscriptions'));
+const TransportConfig = lazy(() => import('./pages/school-admin/student-services/transport/TransportConfig'));
+
 // Portals
 const StudentPortalDashboard = lazy(() => import('./pages/student-portal/Dashboard'));
+const StudentFeesDashboard = lazy(() => import('./pages/student-portal/fees/FeesDashboard'));
+const StudentInvoiceDetails = lazy(() => import('./pages/student-portal/fees/StudentInvoiceDetailsPage'));
+const StudentPaymentCheckout = lazy(() => import('./pages/student-portal/fees/PaymentCheckoutPage'));
+const StudentPaymentConfirmation = lazy(() => import('./pages/student-portal/fees/PaymentConfirmationPage'));
+const StudentReceipts = lazy(() => import('./pages/student-portal/fees/ReceiptsPage'));
+const StudentReceiptDetails = lazy(() => import('./pages/student-portal/fees/ReceiptDetailsPage'));
+const StudentPaymentHistory = lazy(() => import('./pages/student-portal/fees/PaymentHistoryPage'));
+const StudentCourses = lazy(() => import('./pages/student-portal/courses/CoursesPage'));
+const StudentResults = lazy(() => import('./pages/student-portal/results/ResultsPage'));
+const StudentTimetable = lazy(() => import('./pages/student-portal/timetable/TimetablePage'));
+const StudentPortalProfile = lazy(() => import('./pages/student-portal/profile/ProfilePage'));
 const StaffPortalDashboard = lazy(() => import('./pages/staff-portal/Dashboard'));
 const StaffGrading = lazy(() => import('./pages/staff-portal/StaffGrading'));
 
@@ -171,6 +198,14 @@ const schoolAdminItems = [
     subItems: [
       { name: 'All Students', path: '/school-admin/students/list' },
       { name: 'Student Profile', path: '/school-admin/students/profile' }
+    ]
+  },
+  { 
+    name: 'Student Services', 
+    icon: Bus,
+    subItems: [
+      { name: 'Hostel', path: '/school-admin/student-services/hostel' },
+      { name: 'Transport', path: '/school-admin/student-services/transport' }
     ]
   },
   { 
@@ -235,7 +270,15 @@ const studentItems = [
   { name: 'My Courses', path: '/student/courses', icon: BookOpen },
   { name: 'Results', path: '/student/results', icon: ClipboardCheck },
   { name: 'Timetable', path: '/student/timetable', icon: Calendar },
-  { name: 'Fees', path: '/student/fees', icon: Briefcase },
+  {
+    name: 'Fees',
+    icon: DollarSign,
+    subItems: [
+      { name: 'Overview', path: '/student/fees' },
+      { name: 'Payment History', path: '/student/fees/history' },
+      { name: 'Receipts', path: '/student/fees/receipts' },
+    ],
+  },
   { name: 'Profile', path: '/student/profile', icon: Users },
 ];
 
@@ -251,8 +294,11 @@ function App() {
   return (
     <HRProvider>
       <FinanceProvider>
-        <Router>
-          <Suspense fallback={<LoadingFallback />}>
+        <StudentPortalFinanceProvider>
+        <HostelProvider>
+          <TransportProvider>
+            <Router>
+            <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Navigate to="/auth" replace />} />
@@ -338,6 +384,18 @@ function App() {
                 <Route path="/school-admin/students/profile" element={<StudentProfile />} />
                 <Route path="/school-admin/students/create" element={<CreateStudent />} />
 
+                {/* Student Services */}
+                <Route path="/school-admin/student-services/hostel" element={<HostelDashboard />} />
+                <Route path="/school-admin/student-services/hostel/rooms" element={<HostelRooms />} />
+                <Route path="/school-admin/student-services/hostel/allocations" element={<HostelAllocations />} />
+                <Route path="/school-admin/student-services/hostel/config" element={<HostelConfig />} />
+
+                <Route path="/school-admin/student-services/transport" element={<TransportDashboard />} />
+                <Route path="/school-admin/student-services/transport/routes" element={<TransportRoutes />} />
+                <Route path="/school-admin/student-services/transport/vehicles" element={<TransportVehicles />} />
+                <Route path="/school-admin/student-services/transport/subscriptions" element={<TransportSubscriptions />} />
+                <Route path="/school-admin/student-services/transport/config" element={<TransportConfig />} />
+
                 {/* Staff Management */}
                 <Route path="/school-admin/staff/profile" element={<StaffProfile />} />
                 <Route path="/school-admin/staff/create" element={<CreateStaff />} />
@@ -380,7 +438,19 @@ function App() {
                   <Outlet />
                 </DashboardLayout>
               }>
+                <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
                 <Route path="/student/dashboard" element={<StudentPortalDashboard />} />
+                <Route path="/student/courses" element={<StudentCourses />} />
+                <Route path="/student/results" element={<StudentResults />} />
+                <Route path="/student/timetable" element={<StudentTimetable />} />
+                <Route path="/student/fees" element={<StudentFeesDashboard />} />
+                <Route path="/student/fees/invoices/:id" element={<StudentInvoiceDetails />} />
+                <Route path="/student/fees/pay/:invoiceId" element={<StudentPaymentCheckout />} />
+                <Route path="/student/fees/pay/confirm/:intentId" element={<StudentPaymentConfirmation />} />
+                <Route path="/student/fees/receipts" element={<StudentReceipts />} />
+                <Route path="/student/fees/receipts/:receiptId" element={<StudentReceiptDetails />} />
+                <Route path="/student/fees/history" element={<StudentPaymentHistory />} />
+                <Route path="/student/profile" element={<StudentPortalProfile />} />
               </Route>
 
               {/* Staff Portal Routes */}
@@ -403,8 +473,11 @@ function App() {
                 <Route path="/staff/score-upload" element={<ScoreUpload />} />
               </Route>
             </Routes>
-          </Suspense>
-        </Router>
+              </Suspense>
+            </Router>
+          </TransportProvider>
+         </HostelProvider>
+        </StudentPortalFinanceProvider>
       </FinanceProvider>
     </HRProvider>
   );

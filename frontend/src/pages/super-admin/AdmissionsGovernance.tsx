@@ -26,6 +26,8 @@ interface GovernanceControl<T> {
   isLocked: boolean;
 }
 
+type GovernanceControlValue = boolean | string | number;
+
 // --- Centralized Admissions Super Admin Config ---
 const initialGovernanceConfig = {
   session: {
@@ -61,6 +63,71 @@ const initialGovernanceConfig = {
   ]
 };
 
+const GovernanceRow: React.FC<{ 
+  label: string; 
+  control: GovernanceControl<GovernanceControlValue>; 
+  onToggle: () => void; 
+  onChange: (val: GovernanceControlValue) => void;
+  description?: string;
+  renderSourceBadge: (source: ConfigSource) => React.ReactNode;
+}> = ({ label, control, onToggle, onChange, description, renderSourceBadge }) => (
+  <div className="flex items-center justify-between p-4 bg-white dark:bg-[#151e32] border border-gray-100 dark:border-gray-800 rounded-xl hover:shadow-md transition-all group">
+    <div className="flex-1">
+      <div className="flex items-center gap-2 mb-1">
+        <h4 className="text-sm font-bold text-gray-900 dark:text-white">{label}</h4>
+        {renderSourceBadge(control.source)}
+      </div>
+      {description && <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>}
+    </div>
+    
+    <div className="flex items-center gap-4">
+      <div className="flex items-center">
+        {typeof control.value === 'boolean' ? (
+          <button 
+            onClick={() => onChange(!control.value)}
+            disabled={control.isLocked}
+            className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${
+              control.value ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+            } ${control.isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+              control.value ? 'translate-x-6' : 'translate-x-1'
+            }`} />
+          </button>
+        ) : (
+          <input 
+            type="text" 
+            value={String(control.value)} 
+            onChange={(e) => onChange(e.target.value)}
+            disabled={control.isLocked}
+            className="text-xs px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 dark:text-white disabled:opacity-50"
+          />
+        )}
+      </div>
+
+      <div className="flex items-center gap-1 border-l border-gray-100 dark:border-gray-800 pl-4">
+        <button 
+          onClick={onToggle}
+          className={`p-1.5 rounded-lg transition-colors ${
+            control.isLocked 
+              ? 'text-red-600 bg-red-50 dark:bg-red-900/20' 
+              : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+          }`}
+          title={control.isLocked ? "Unlock Setting" : "Lock Setting"}
+        >
+          {control.isLocked ? <Lock size={14} /> : <Unlock size={14} />}
+        </button>
+        <button 
+          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+          title="Reset to Default"
+        >
+          <RefreshCw size={14} />
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 const AdmissionsGovernance: React.FC = () => {
   const [config] = useState(initialGovernanceConfig);
   const [activeTab, setActiveTab] = useState<'overview' | 'form' | 'workflow' | 'policies'>('overview');
@@ -70,7 +137,7 @@ const AdmissionsGovernance: React.FC = () => {
     // Simulated toggle logic
   };
 
-  const handleValueChange = (path: string, newValue: any) => {
+  const handleValueChange = (path: string, newValue: GovernanceControlValue) => {
     console.log(`Super Admin: Overriding ${path} to`, newValue);
     // Simulated change logic
   };
@@ -89,72 +156,6 @@ const AdmissionsGovernance: React.FC = () => {
     );
   };
 
-  const GovernanceRow = ({ label, control, onToggle, onChange, description }: { 
-    label: string, 
-    control: GovernanceControl<any>, 
-    onToggle: () => void, 
-    onChange: (val: any) => void,
-    description?: string 
-  }) => (
-    <div className="flex items-center justify-between p-4 bg-white dark:bg-[#151e32] border border-gray-100 dark:border-gray-800 rounded-xl hover:shadow-md transition-all group">
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <h4 className="text-sm font-bold text-gray-900 dark:text-white">{label}</h4>
-          {getSourceBadge(control.source)}
-        </div>
-        {description && <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>}
-      </div>
-      
-      <div className="flex items-center gap-4">
-        {/* Value Control */}
-        <div className="flex items-center">
-          {typeof control.value === 'boolean' ? (
-            <button 
-              onClick={() => onChange(!control.value)}
-              disabled={control.isLocked}
-              className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${
-                control.value ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
-              } ${control.isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                control.value ? 'translate-x-6' : 'translate-x-1'
-              }`} />
-            </button>
-          ) : (
-            <input 
-              type="text" 
-              value={control.value} 
-              onChange={(e) => onChange(e.target.value)}
-              disabled={control.isLocked}
-              className="text-xs px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 dark:text-white disabled:opacity-50"
-            />
-          )}
-        </div>
-
-        {/* Lock/Reset Controls */}
-        <div className="flex items-center gap-1 border-l border-gray-100 dark:border-gray-800 pl-4">
-          <button 
-            onClick={onToggle}
-            className={`p-1.5 rounded-lg transition-colors ${
-              control.isLocked 
-                ? 'text-red-600 bg-red-50 dark:bg-red-900/20' 
-                : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }`}
-            title={control.isLocked ? "Unlock Setting" : "Lock Setting"}
-          >
-            {control.isLocked ? <Lock size={14} /> : <Unlock size={14} />}
-          </button>
-          <button 
-            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-            title="Reset to Default"
-          >
-            <RefreshCw size={14} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   const renderOverview = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -169,6 +170,7 @@ const AdmissionsGovernance: React.FC = () => {
             onToggle={() => handleToggleLock('session.academicSession')}
             onChange={(val) => handleValueChange('session.academicSession', val)}
             description="Global session identifier for all admissions"
+            renderSourceBadge={getSourceBadge}
           />
           <GovernanceRow 
             label="Admission Intake Status" 
@@ -176,6 +178,7 @@ const AdmissionsGovernance: React.FC = () => {
             onToggle={() => handleToggleLock('session.admissionStatus')}
             onChange={(val) => handleValueChange('session.admissionStatus', val)}
             description="Toggle availability of admission portal school-wide"
+            renderSourceBadge={getSourceBadge}
           />
         </div>
 
@@ -327,6 +330,13 @@ const AdmissionsGovernance: React.FC = () => {
     </div>
   );
 
+  const tabs = [
+    { id: 'overview', label: 'Overview & General', icon: GitMerge },
+    { id: 'form', label: 'Form Builder Control', icon: FileText },
+    { id: 'workflow', label: 'Workflow Governance', icon: GitMerge },
+    { id: 'policies', label: 'Global Policies', icon: Shield }
+  ] as const;
+
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-8">
       {/* Header */}
@@ -360,15 +370,10 @@ const AdmissionsGovernance: React.FC = () => {
 
       {/* Tabs */}
       <div className="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-900/50 rounded-2xl w-fit">
-        {[
-          { id: 'overview', label: 'Overview & General', icon: GitMerge },
-          { id: 'form', label: 'Form Builder Control', icon: FileText },
-          { id: 'workflow', label: 'Workflow Governance', icon: GitMerge },
-          { id: 'policies', label: 'Global Policies', icon: Shield }
-        ].map(tab => (
+        {tabs.map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id)}
             className={`
               flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300
               ${activeTab === tab.id 
@@ -402,6 +407,7 @@ const AdmissionsGovernance: React.FC = () => {
                 onToggle={() => {}}
                 onChange={() => {}}
                 description="If enabled, no applicant below cutoff can be admitted even by VC."
+                renderSourceBadge={getSourceBadge}
               />
               <GovernanceRow 
                 label="Enforce Rolling Admission" 
@@ -409,6 +415,7 @@ const AdmissionsGovernance: React.FC = () => {
                 onToggle={() => {}}
                 onChange={() => {}}
                 description="Force schools to process applications in batches."
+                renderSourceBadge={getSourceBadge}
               />
             </div>
           </div>
