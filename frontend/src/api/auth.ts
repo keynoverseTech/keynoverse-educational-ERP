@@ -24,8 +24,13 @@ export interface AuthApi {
 
 export const authApi: AuthApi = {
   login: async (email, password) => {
-    const response = await client.post<LoginResponse>('/auth/login', { email, password });
-    return response.data;
+    try {
+      const response = await client.post<LoginResponse>('/auth/login', { email, password });
+      return response.data;
+    } catch (error: any) {
+      console.error('Login failed in API:', error.response?.data || error.message);
+      throw error;
+    }
   },
 
   logout: async () => {
@@ -33,9 +38,11 @@ export const authApi: AuthApi = {
     try {
       await client.post('/auth/logout');
     } catch (error: any) {
-      if (error.response && error.response.status === 404) {
-        console.warn('Logout endpoint not found (404), treating as success for local logout.');
-        // 404 means the endpoint doesn't exist, so we can consider it "done" from the client's perspective
+      // 404 (Not Found) or 401 (Unauthorized - already logged out) are acceptable errors
+      // that we can ignore when logging out.
+      const status = error.response?.status;
+      if (status === 404 || status === 401) {
+        console.warn(`Logout endpoint returned ${status}, treating as success for local logout.`);
       } else {
         console.error('Logout failed:', error);
       }

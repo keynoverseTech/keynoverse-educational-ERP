@@ -499,7 +499,7 @@ const StatCard: React.FC<{
       </div>
       
       {chartData && (
-        <div className="w-20 h-12 pb-1">
+        <div className="w-20 h-12 pb-1" style={{ minHeight: '48px', minWidth: '80px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <Bar dataKey="value" fill={chartColor || '#6366f1'} radius={[2, 2, 0, 0]} />
