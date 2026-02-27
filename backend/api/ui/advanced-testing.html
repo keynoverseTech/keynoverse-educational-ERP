@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced API Testing UI</title>
+    <style>
+        /* Add previous styles plus these enhancements */
+        
+        .history-panel {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            padding: 10px;
+            border-left: 3px solid #667eea;
+            background: #f8f9fa;
+            margin-bottom: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .history-item:hover {
+            background: #e9ecef;
+        }
+        
+        .history-method {
+            display: inline-block;
+            width: 50px;
+            font-weight: bold;
+        }
+        
+        .history-status {
+            display: inline-block;
+            width: 50px;
+            text-align: center;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .environment-selector {
+            margin-bottom: 20px;
+        }
+        
+        .environment-btn {
+            padding: 8px 16px;
+            margin-right: 10px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .environment-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .request-config {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .header-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .header-key, .header-value {
+            flex: 1;
+        }
+        
+        .remove-header {
+            background: #f44336;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .add-header {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .collection-item {
+            padding: 10px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .collection-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .collection-item .method {
+            display: inline-block;
+            width: 60px;
+            padding: 3px 8px;
+            border-radius: 3px;
+            color: white;
+            font-size: 11px;
+            text-align: center;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Advanced API Testing UI</h1>
+        
+        <!-- Status Bar (same as before) -->
+        <div class="status-bar">
+            <!-- ... same status bar content ... -->
+        </div>
+        
+        <!-- Environment Selector -->
+        <div class="environment-selector">
+            <button class="environment-btn active" onclick="setEnvironment('local')">Local</button>
+            <button class="environment-btn" onclick="setEnvironment('dev')">Development</button>
+            <button class="environment-btn" onclick="setEnvironment('staging')">Staging</button>
+            <button class="environment-btn" onclick="setEnvironment('prod')">Production</button>
+        </div>
+        
+        <!-- Stats Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalRequests">0</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgResponseTime">0ms</div>
+                <div class="stat-label">Avg Response Time</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <!-- Left Panel - Enhanced -->
+            <div class="left-panel">
+                <!-- Request Builder -->
+                <div class="card">
+                    <h2>🔨 Request Builder</h2>
+                    
+                    <div class="request-config">
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <select id="requestMethod" style="width: 120px;">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                                <option value="PATCH">PATCH</option>
+                            </select>
+                            <input type="text" id="requestEndpoint" placeholder="/api/endpoint" style="flex: 1;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h4>Headers</h4>
+                            <div id="headersContainer">
+                                <div class="header-row">
+                                    <input type="text" class="header-key" placeholder="Header Key" value="Content-Type">
+                                    <input type="text" class="header-value" placeholder="Value" value="application/json">
+                                    <button class="remove-header" onclick="removeHeader(this)">×</button>
+                                </div>
+                                <div class="header-row">
+                                    <input type="text" class="header-key" placeholder="Header Key">
+                                    <input type="text" class="header-value" placeholder="Value">
+                                    <button class="remove-header" onclick="removeHeader(this)">×</button>
+                                </div>
+                            </div>
+                            <button class="add-header" onclick="addHeader()">+ Add Header</button>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <h4>Request Body</h4>
+                            <textarea id="requestBody" placeholder='{
+    "key": "value"
+}'></textarea>
+                        </div>
+                        
+                        <button class="btn" onclick="sendCustomRequest()">Send Request</button>
+                    </div>
+                </div>
+                
+                <!-- Collections -->
+                <div class="card">
+                    <h2>📚 API Collections</h2>
+                    
+                    <div class="collection-list">
+                        <div class="collection-item" onclick="loadCollectionRequest('auth')">
+                            <span class="method method-post">POST</span>
+                            <span>/auth/login</span>
+                        </div>
+                        <div class="collection-item" onclick="loadCollectionRequest('users')">
+                            <span class="method method-get">GET</span>
+                            <span>/users</span>
+                        </div>
+                        <div class="collection-item" onclick="loadCollectionRequest('userById')">
+                            <span class="method method-get">GET</span>
+                            <span>/users/{id}</span>
+                        </div>
+                        <div class="collection-item" onclick="loadCollectionRequest('createUser')">
+                            <span class="method method-post">POST</span>
+                            <span>/auth/register</span>
+                        </div>
+                        <div class="collection-item" onclick="loadCollectionRequest('updateUser')">
+                            <span class="method method-put">PUT</span>
+                            <span>/users/{id}</span>
+                        </div>
+                        <div class="collection-item" onclick="loadCollectionRequest('deleteUser')">
+                            <span class="method method-delete">DELETE</span>
+                            <span>/users/{id}</span>
+                        </div>
+                        <div class="collection-item" onclick="loadCollectionRequest('refreshToken')">
+                            <span class="method method-post">POST</span>
+                            <span>/auth/refresh</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Enhanced -->
+            <div class="right-panel">
+                <!-- Response Area (same as before) -->
+                <div class="response-area">
+                    <!-- ... same response area ... -->
+                </div>
+                
+                <!-- Request History -->
+                <div class="history-panel">
+                    <h3>📜 Request History</h3>
+                    <div id="historyContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced JavaScript with all previous functions plus these additions
+        
+        let requestHistory = JSON.parse(localStorage.getItem('requestHistory') || '[]');
+        let environments = {
+            local: 'http://localhost/api',
+            dev: 'https://dev-api.example.com',
+            staging: 'https://staging-api.example.com',
+            prod: 'https://api.example.com'
+        };
+        let currentEnvironment = 'local';
+        
+        // Update API base URL when environment changes
+        function setEnvironment(env) {
+            currentEnvironment = env;
+            document.querySelectorAll('.environment-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase() === env) {
+                    btn.classList.add('active');
+                }
+            });
+            API_BASE_URL = environments[env];
+            showAlert(`Environment switched to ${env}`, 'success');
+        }
+        
+        // Add custom header row
+        function addHeader() {
+            const container = document.getElementById('headersContainer');
+            const headerRow = document.createElement('div');
+            headerRow.className = 'header-row';
+            headerRow.innerHTML = `
+                <input type="text" class="header-key" placeholder="Header Key">
+                <input type="text" class="header-value" placeholder="Value">
+                <button class="remove-header" onclick="removeHeader(this)">×</button>
+            `;
+            container.appendChild(headerRow);
+        }
+        
+        // Remove header row
+        function removeHeader(button) {
+            button.parentElement.remove();
+        }
+        
+        // Send custom request
+        async function sendCustomRequest() {
+            const method = document.getElementById('requestMethod').value;
+            const endpoint = document.getElementById('requestEndpoint').value;
+            const bodyText = document.getElementById('requestBody').value;
+            
+            // Build headers
+            const headers = {};
+            document.querySelectorAll('.header-row').forEach(row => {
+                const key = row.querySelector('.header-key').value.trim();
+                const value = row.querySelector('.header-value').value.trim();
+                if (key && value) {
+                    headers[key] = value;
+                }
+            });
+            
+            // Add auth token if available
+            if (accessToken) {
+                headers['Authorization'] = `Bearer ${accessToken}`;
+            }
+            
+            let body = null;
+            if (bodyText && method !== 'GET') {
+                try {
+                    body = JSON.parse(bodyText);
+                } catch (e) {
+                    showAlert('Invalid JSON in request body', 'error');
+                    return;
+                }
+            }
+            
+            const startTime = Date.now();
+            const result = await makeCustomRequest(endpoint, method, headers, body);
+            const endTime = Date.now();
+            
+            // Add to history
+            addToHistory({
+                timestamp: new Date().toISOString(),
+                method: method,
+                endpoint: endpoint,
+                status: result.status,
+                time: endTime - startTime,
+                success: result.ok
+            });
+            
+            // Update stats
+            updateStats();
+        }
+        
+        // Make custom request
+        async function makeCustomRequest(endpoint, method, headers, body) {
+            const startTime = Date.now();
+            
+            const options = {
+                method: method,
+                headers: headers
+            };
+            
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                const data = await response.json();
+                const endTime = Date.now();
+                
+                // Update response display
+                document.getElementById('responseStatus').textContent = `Status: ${response.status} ${response.statusText}`;
+                document.getElementById('responseStatus').className = `response-status ${response.ok ? 'status-success' : 'status-error'}`;
+                document.getElementById('responseTime').textContent = `Time: ${endTime - startTime}ms`;
+                document.getElementById('responseBody').textContent = JSON.stringify(data, null, 2);
+                
+                return { ok: response.ok, status: response.status, data };
+            } catch (error) {
+                document.getElementById('responseStatus').textContent = 'Status: Error';
+                document.getElementById('responseStatus').className = 'response-status status-error';
+                document.getElementById('responseBody').textContent = JSON.stringify({ error: error.message }, null, 2);
+                return { ok: false, error: error.message };
+            }
+        }
+        
+        // Load collection request
+        function loadCollectionRequest(type) {
+            switch(type) {
+                case 'auth':
+                    document.getElementById('requestMethod').value = 'POST';
+                    document.getElementById('requestEndpoint').value = '/auth/login';
+                    document.getElementById('requestBody').value = JSON.stringify({
+                        email: 'admin@planetstech.com',
+                        password: 'Password123!'
+                    }, null, 2);
+                    break;
+                case 'users':
+                    document.getElementById('requestMethod').value = 'GET';
+                    document.getElementById('requestEndpoint').value = '/users';
+                    document.getElementById('requestBody').value = '';
+                    break;
+                case 'userById':
+                    const id = prompt('Enter user ID:');
+                    if (id) {
+                        document.getElementById('requestMethod').value = 'GET';
+                        document.getElementById('requestEndpoint').value = `/users/${id}`;
+                        document.getElementById('requestBody').value = '';
+                    }
+                    break;
+                case 'createUser':
+                    document.getElementById('requestMethod').value = 'POST';
+                    document.getElementById('requestEndpoint').value = '/auth/register';
+                    document.getElementById('requestBody').value = JSON.stringify({
+                        first_name: 'John',
+                        last_name: 'Doe',
+                        email: 'john@example.com',
+                        password: 'Password123!',
+                        role: 'user'
+                    }, null, 2);
+                    break;
+                case 'updateUser':
+                    const updateId = prompt('Enter user ID to update:');
+                    if (updateId) {
+                        document.getElementById('requestMethod').value = 'PUT';
+                        document.getElementById('requestEndpoint').value = `/users/${updateId}`;
+                        document.getElementById('requestBody').value = JSON.stringify({
+                            first_name: 'Updated',
+                            last_name: 'Name'
+                        }, null, 2);
+                    }
+                    break;
+                case 'deleteUser':
+                    const deleteId = prompt('Enter user ID to delete:');
+                    if (deleteId) {
+                        if (confirm('Are you sure?')) {
+                            document.getElementById('requestMethod').value = 'DELETE';
+                            document.getElementById('requestEndpoint').value = `/users/${deleteId}`;
+                            document.getElementById('requestBody').value = '';
+                        }
+                    }
+                    break;
+                case 'refreshToken':
+                    document.getElementById('requestMethod').value = 'POST';
+                    document.getElementById('requestEndpoint').value = '/auth/refresh';
+                    document.getElementById('requestBody').value = JSON.stringify({
+                        refresh_token: refreshToken || 'enter-refresh-token'
+                    }, null, 2);
+                    break;
+            }
+        }
+        
+        // Add request to history
+        function addToHistory(request) {
+            requestHistory.unshift(request);
+            if (requestHistory.length > 50) {
+                requestHistory.pop();
+            }
+            localStorage.setItem('requestHistory', JSON.stringify(requestHistory));
+            renderHistory();
+        }
+        
+        // Render request history
+        function renderHistory() {
+            const container = document.getElementById('historyContainer');
+            container.innerHTML = '';
+            
+            requestHistory.forEach(req => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.onclick = () => loadHistoryRequest(req);
+                
+                const statusClass = req.status >= 200 && req.status < 300 ? 'status-success' : 'status-error';
+                
+                historyItem.innerHTML = `
+                    <div>
+                        <span class="history-method">${req.method}</span>
+                        <span class="history-status ${statusClass}">${req.status}</span>
+                        <span style="margin-left: 10px;">${req.endpoint}</span>
+                        <span style="float: right; color: #999;">${req.time}ms</span>
+                    </div>
+                    <div style="font-size: 10px; color: #999; margin-top: 5px;">
+                        ${new Date(req.timestamp).toLocaleString()}
+                    </div>
+                `;
+                
+                container.appendChild(historyItem);
+            });
+        }
+        
+        // Load request from history
+        function loadHistoryRequest(request) {
+            document.getElementById('requestMethod').value = request.method;
+            document.getElementById('requestEndpoint').value = request.endpoint;
+            // Note: We can't restore the body from history easily
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const total = requestHistory.length;
+            document.getElementById('totalRequests').textContent = total;
+            
+            if (total > 0) {
+                const successful = requestHistory.filter(r => r.success).length;
+                const successRate = Math.round((successful / total) * 100);
+                document.getElementById('successRate').textContent = successRate + '%';
+                
+                const avgTime = Math.round(requestHistory.reduce((acc, r) => acc + r.time, 0) / total);
+                document.getElementById('avgResponseTime').textContent = avgTime + 'ms';
+            }
+        }
+        
+        // Clear history
+        function clearHistory() {
+            if (confirm('Clear all request history?')) {
+                requestHistory = [];
+                localStorage.removeItem('requestHistory');
+                renderHistory();
+                updateStats();
+            }
+        }
+        
+        // Export history as JSON
+        function exportHistory() {
+            const dataStr = JSON.stringify(requestHistory, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'api-history.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHistory();
+            updateStats();
+        });
+    </script>
+</body>
+</html>

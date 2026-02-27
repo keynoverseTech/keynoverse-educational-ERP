@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing UI - User Authentication System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .status-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f44336;
+        }
+
+        .status-indicator.authenticated {
+            background: #4caf50;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .token-info {
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-logout {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-small {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-small:hover {
+            background: #45a049;
+        }
+
+        .btn-danger {
+            background: #f44336;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .endpoint-list {
+            margin-top: 20px;
+        }
+
+        .endpoint-item {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .endpoint-method {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .method-get { background: #61affe; color: white; }
+        .method-post { background: #49cc90; color: white; }
+        .method-put { background: #fca130; color: white; }
+        .method-delete { background: #f93e3e; color: white; }
+        .method-patch { background: #50e3c2; color: white; }
+
+        .endpoint-path {
+            font-family: monospace;
+            color: #333;
+        }
+
+        .response-area {
+            margin-top: 20px;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .response-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .status-success { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-warning { background: #fff3cd; color: #856404; }
+
+        .response-body {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .json-key { color: #9cdcfe; }
+        .json-string { color: #ce9178; }
+        .json-number { color: #b5cea8; }
+        .json-boolean { color: #569cd6; }
+        .json-null { color: #569cd6; }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .alert {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 API Testing UI - User Authentication System</h1>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="auth-status">
+                <span class="status-indicator" id="authIndicator"></span>
+                <span id="authStatusText">Not Authenticated</span>
+            </div>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span id="userEmail"></span>
+                <span class="token-info" id="userRole"></span>
+                <span class="token-info" id="tokenPreview"></span>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Authentication Card -->
+                <div class="card">
+                    <h2>🔑 Authentication</h2>
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchTab('login')">Login</div>
+                        <div class="tab" onclick="switchTab('register')">Register</div>
+                        <div class="tab" onclick="switchTab('refresh')">Refresh Token</div>
+                    </div>
+
+                    <!-- Login Form -->
+                    <div id="loginForm" class="form-container">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="loginEmail" placeholder="Enter email" value="admin@planetstech.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="loginPassword" placeholder="Enter password" value="Password123!">
+                        </div>
+                        <button class="btn" onclick="login()">Login</button>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="registerForm" class="form-container hidden">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" id="regFirstName" placeholder="First name">
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" id="regLastName" placeholder="Last name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="regEmail" placeholder="Email">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="regPassword" placeholder="Password (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special)">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select id="regRole">
+                                <option value="user">User</option>
+                                <option value="student">Student</option>
+                                <option value="staff">Staff</option>
+                                <option value="institutions">Institutions</option>
+                                <option value="nbte">NBTE</option>
+                                <option value="planets_tech">PlanetsTech</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="register()">Register</button>
+                    </div>
+
+                    <!-- Refresh Token Form -->
+                    <div id="refreshForm" class="form-container hidden">
+                        <div class="form-group">
+                            <label>Refresh Token</label>
+                            <textarea id="refreshToken" placeholder="Enter refresh token"></textarea>
+                        </div>
+                        <button class="btn" onclick="refreshToken()">Refresh Access Token</button>
+                    </div>
+                </div>
+
+                <!-- User Management Card -->
+                <div class="card">
+                    <h2>👥 User Management</h2>
+                    
+                    <div class="endpoint-list">
+                        <div class="endpoint-item">
+                            <div>
+                                <span class="endpoint-method method-get">GET</span>
+                                <span class="endpoint-path">/api/users</span>
+                            </div>
+                            <button class="btn-small" onclick="getAllUsers()" id="getAllUsersBtn">Execute</button>
+                        </div>
+                        
+                        <div class="endpoint-item">
+                            <div>
+                                <span class="endpoint-method method-get">GET</span>
+                                <span class="endpoint-path">/api/users/{id}</span>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="getUserId" placeholder="User ID" style="width: 100px;">
+                                <button class="btn-small" onclick="getUserById()">Execute</button>
+                            </div>
+                        </div>
+
+                        <div class="endpoint-item">
+                            <div>
+                                <span class="endpoint-method method-get">GET</span>
+                                <span class="endpoint-path">/api/users/me</span>
+                            </div>
+                            <button class="btn-small" onclick="getCurrentUser()">Execute</button>
+                        </div>
+
+                        <div class="endpoint-item">
+                            <div>
+                                <span class="endpoint-method method-put">PUT</span>
+                                <span class="endpoint-path">/api/users/{id}</span>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="updateUserId" placeholder="User ID" style="width: 100px;">
+                                <button class="btn-small" onclick="showUpdateForm()">Update</button>
+                            </div>
+                        </div>
+
+                        <div class="endpoint-item">
+                            <div>
+                                <span class="endpoint-method method-delete">DELETE</span>
+                                <span class="endpoint-path">/api/users/{id}</span>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="deleteUserId" placeholder="User ID" style="width: 100px;">
+                                <button class="btn-small btn-danger" onclick="deleteUser()">Delete</button>
+                            </div>
+                        </div>
+
+                        <div class="endpoint-item">
+                            <div>
+                                <span class="endpoint-method method-patch">PATCH</span>
+                                <span class="endpoint-path">/api/users/{id}/role</span>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="roleUserId" placeholder="User ID" style="width: 80px;">
+                                <select id="newRole" style="width: 120px;">
+                                    <option value="user">User</option>
+                                    <option value="student">Student</option>
+                                    <option value="staff">Staff</option>
+                                    <option value="institutions">Institutions</option>
+                                    <option value="nbte">NBTE</option>
+                                    <option value="planets_tech">PlanetsTech</option>
+                                </select>
+                                <button class="btn-small" onclick="changeUserRole()">Change</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Response -->
+            <div class="right-panel">
+                <h2>📡 API Response</h2>
+                
+                <!-- Update Form (Hidden by default) -->
+                <div id="updateForm" class="hidden" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                    <h3 style="margin-bottom: 15px;">Update User</h3>
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" id="updateFirstName" placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" id="updateLastName" placeholder="Last name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="updateEmail" placeholder="Email">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-small" onclick="updateUser()">Update User</button>
+                        <button class="btn-small btn-danger" onclick="hideUpdateForm()">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="response-area">
+                    <div class="response-header">
+                        <span class="response-status" id="responseStatus">Ready</span>
+                        <div>
+                            <span id="responseTime"></span>
+                            <button class="btn-small" onclick="clearResponse()" style="margin-left: 10px;">Clear</button>
+                        </div>
+                    </div>
+                    <pre class="response-body" id="responseBody">{
+    "message": "Ready to make API calls"
+}</pre>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h3>📋 Quick Tips</h3>
+                    <ul style="margin-left: 20px; color: #666;">
+                        <li>Login first to get access token</li>
+                        <li>Token is automatically stored and sent with requests</li>
+                        <li>Default admin: admin@planetstech.com / Password123!</li>
+                        <li>Check response for error details</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost/api'; // Change this to your API URL
+        let accessToken = localStorage.getItem('accessToken');
+        let refreshToken = localStorage.getItem('refreshToken');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+        // Initialize UI
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('refreshForm').classList.add('hidden');
+            
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.remove('hidden');
+            } else if (tab === 'register') {
+                document.getElementById('registerForm').classList.remove('hidden');
+            } else if (tab === 'refresh') {
+                document.getElementById('refreshForm').classList.remove('hidden');
+                document.getElementById('refreshToken').value = refreshToken || '';
+            }
+        }
+
+        // Update authentication UI
+        function updateAuthUI() {
+            const indicator = document.getElementById('authIndicator');
+            const statusText = document.getElementById('authStatusText');
+            const userInfo = document.getElementById('userInfo');
+            
+            if (accessToken && currentUser) {
+                indicator.classList.add('authenticated');
+                statusText.textContent = `Authenticated as ${currentUser.role}`;
+                userInfo.style.display = 'flex';
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userRole').textContent = `Role: ${currentUser.role}`;
+                document.getElementById('tokenPreview').textContent = `Token: ${accessToken.substring(0, 20)}...`;
+            } else {
+                indicator.classList.remove('authenticated');
+                statusText.textContent = 'Not Authenticated';
+                userInfo.style.display = 'none';
+            }
+        }
+
+        // Make API request
+        async function makeRequest(endpoint, method, body = null, authenticated = true) {
+            const startTime = Date.now();
+            
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (authenticated && accessToken) {
+                headers['Authorization'] = `Bearer ${accessToken}`;
+            }
+            
+            const options = {
+                method: method,
+                headers: headers
+            };
+            
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                const data = await response.json();
+                const endTime = Date.now();
+                
+                // Update response display
+                document.getElementById('responseStatus').textContent = `Status: ${response.status} ${response.statusText}`;
+                document.getElementById('responseStatus').className = `response-status ${response.ok ? 'status-success' : 'status-error'}`;
+                document.getElementById('responseTime').textContent = `Time: ${endTime - startTime}ms`;
+                document.getElementById('responseBody').textContent = JSON.stringify(data, null, 2);
+                
+                return { ok: response.ok, status: response.status, data };
+            } catch (error) {
+                document.getElementById('responseStatus').textContent = 'Status: Error';
+                document.getElementById('responseStatus').className = 'response-status status-error';
+                document.getElementById('responseBody').textContent = JSON.stringify({ error: error.message }, null, 2);
+                return { ok: false, error: error.message };
+            }
+        }
+
+        // Authentication functions
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const result = await makeRequest('/auth/login', 'POST', { email, password }, false);
+            
+            if (result.ok && result.data.access_token) {
+                accessToken = result.data.access_token;
+                refreshToken = result.data.refresh_token;
+                currentUser = result.data.user;
+                
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                updateAuthUI();
+                showAlert('Login successful!', 'success');
+            }
+        }
+
+        async function register() {
+            const userData = {
+                first_name: document.getElementById('regFirstName').value,
+                last_name: document.getElementById('regLastName').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                role: document.getElementById('regRole').value
+            };
+            
+            await makeRequest('/auth/register', 'POST', userData, false);
+        }
+
+        async function refreshToken() {
+            const token = document.getElementById('refreshToken').value;
+            
+            const result = await makeRequest('/auth/refresh', 'POST', { refresh_token: token }, false);
+            
+            if (result.ok && result.data.access_token) {
+                accessToken = result.data.access_token;
+                refreshToken = result.data.refresh_token;
+                
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                
+                updateAuthUI();
+                showAlert('Token refreshed successfully!', 'success');
+            }
+        }
+
+        async function logout() {
+            if (refreshToken) {
+                await makeRequest('/auth/logout', 'POST', { refresh_token: refreshToken });
+            }
+            
+            accessToken = null;
+            refreshToken = null;
+            currentUser = null;
+            
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('currentUser');
+            
+            updateAuthUI();
+            showAlert('Logged out successfully', 'success');
+        }
+
+        // User management functions
+        async function getAllUsers() {
+            await makeRequest('/users', 'GET');
+        }
+
+        async function getUserById() {
+            const id = document.getElementById('getUserId').value;
+            if (!id) {
+                showAlert('Please enter a user ID', 'error');
+                return;
+            }
+            await makeRequest(`/users/${id}`, 'GET');
+        }
+
+        async function getCurrentUser() {
+            await makeRequest('/auth/me', 'GET');
+        }
+
+        function showUpdateForm() {
+            const id = document.getElementById('updateUserId').value;
+            if (!id) {
+                showAlert('Please enter a user ID', 'error');
+                return;
+            }
+            document.getElementById('updateForm').classList.remove('hidden');
+            document.getElementById('updateForm').dataset.userId = id;
+        }
+
+        function hideUpdateForm() {
+            document.getElementById('updateForm').classList.add('hidden');
+        }
+
+        async function updateUser() {
+            const id = document.getElementById('updateForm').dataset.userId;
+            const updateData = {};
+            
+            const firstName = document.getElementById('updateFirstName').value;
+            const lastName = document.getElementById('updateLastName').value;
+            const email = document.getElementById('updateEmail').value;
+            
+            if (firstName) updateData.first_name = firstName;
+            if (lastName) updateData.last_name = lastName;
+            if (email) updateData.email = email;
+            
+            if (Object.keys(updateData).length === 0) {
+                showAlert('Please fill at least one field to update', 'error');
+                return;
+            }
+            
+            await makeRequest(`/users/${id}`, 'PUT', updateData);
+            hideUpdateForm();
+        }
+
+        async function deleteUser() {
+            const id = document.getElementById('deleteUserId').value;
+            if (!id) {
+                showAlert('Please enter a user ID', 'error');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this user?')) {
+                await makeRequest(`/users/${id}`, 'DELETE');
+            }
+        }
+
+        async function changeUserRole() {
+            const id = document.getElementById('roleUserId').value;
+            const role = document.getElementById('newRole').value;
+            
+            if (!id) {
+                showAlert('Please enter a user ID', 'error');
+                return;
+            }
+            
+            await makeRequest(`/users/${id}/role`, 'PATCH', { role });
+        }
+
+        // Utility functions
+        function clearResponse() {
+            document.getElementById('responseStatus').textContent = 'Ready';
+            document.getElementById('responseStatus').className = 'response-status';
+            document.getElementById('responseTime').textContent = '';
+            document.getElementById('responseBody').textContent = '{
+    "message": "Ready to make API calls"
+}';
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const statusBar = document.querySelector('.status-bar');
+            statusBar.parentNode.insertBefore(alertDiv, statusBar.nextSibling);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // Syntax highlighting for JSON (simplified)
+        function highlightJSON(json) {
+            // This is a simplified version - in production, use a library
+            return json;
+        }
+    </script>
+</body>
+</html>
