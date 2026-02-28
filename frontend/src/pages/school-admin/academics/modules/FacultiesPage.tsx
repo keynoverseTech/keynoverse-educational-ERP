@@ -128,7 +128,7 @@ export const FacultiesPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                   <select 
                     value={currentFaculty.status || 'Active'}
-                    onChange={e => setCurrentFaculty({...currentFaculty, status: e.target.value as Faculty['status']})}
+                    onChange={e => setCurrentFaculty({...currentFaculty, status: e.target.value as any})}
                     className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   >
                     <option value="Active">Active</option>
