@@ -4,7 +4,6 @@ import {
   TrendingUp, 
   Users, 
   CreditCard, 
-  Calendar,
   Download
 } from 'lucide-react';
 import { 
@@ -141,13 +140,14 @@ const FinanceDashboard: React.FC = () => {
                   tickFormatter={(value) => `₦${value / 1000000}M`}
                 />
                 <Tooltip 
+                  cursor={{ fill: 'transparent' }}
                   contentStyle={{ 
                     backgroundColor: '#fff', 
                     borderRadius: '12px', 
                     border: 'none', 
                     boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' 
                   }}
-                  formatter={(value: number) => [`₦${value.toLocaleString()}`, 'Revenue']}
+                  formatter={(value: any) => [`₦${Number(value).toLocaleString()}`, 'Revenue']}
                 />
                 <Area 
                   type="monotone" 
