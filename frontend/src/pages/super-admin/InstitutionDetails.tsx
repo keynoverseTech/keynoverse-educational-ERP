@@ -12,7 +12,8 @@ import {
   FileText,
   Ban,
   Edit,
-  BookOpen
+  BookOpen,
+  Key
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,6 +29,7 @@ const InstitutionDetails: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
+  const [showCredentials, setShowCredentials] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -166,6 +168,13 @@ const InstitutionDetails: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => setShowCredentials(!showCredentials)}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl text-sm font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors shadow-sm"
+                  >
+                    <Key size={16} />
+                    <span>Credentials</span>
+                  </button>
                   <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
                     <Edit size={16} />
                     <span>Edit</span>
@@ -176,6 +185,33 @@ const InstitutionDetails: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Credentials Panel */}
+              {showCredentials && (
+                <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Portal Login Credentials</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-500">Admin Email</label>
+                      <div className="font-mono text-sm text-gray-900 dark:text-white select-all bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg border border-gray-100 dark:border-gray-700">
+                        {institution.email}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-500">Initial Password</label>
+                      <div className="font-mono text-sm text-gray-900 dark:text-white select-all bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg border border-gray-100 dark:border-gray-700">
+                        Password123!
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-500">Login URL</label>
+                      <div className="font-mono text-sm text-blue-600 dark:text-blue-400 select-all bg-blue-50/50 dark:bg-blue-900/10 px-3 py-2 rounded-lg border border-blue-100 dark:border-blue-900/20 truncate">
+                        https://gha.portal.edu.ng
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Navigation Tabs */}
               <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-900/50 rounded-xl w-fit mt-4">

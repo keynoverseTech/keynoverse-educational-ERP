@@ -12,17 +12,30 @@ import {
   XCircle,
   ChevronLeft,
   Save,
-  AlertTriangle
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Copy,
+  Check
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RegistrationSuccess, RegistrationRejected } from '../../components/RegistrationStatus';
 
 const NewRegistration: React.FC = () => {
   const navigate = useNavigate();
-  const [password, setPassword] = useState('');
-  const [status, setStatus] = useState<'idle' | 'success' | 'rejected'>('idle');
-  const [isSimulatedRejection, setIsSimulatedRejection] = useState(false); // For demonstration
   
+  // Form State
+  const [instituteName, setInstituteName] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [directorEmail, setDirectorEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+  // UI State
+  const [status, setStatus] = useState<'idle' | 'review' | 'success' | 'rejected'>('idle');
+  const [isSimulatedRejection, setIsSimulatedRejection] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+
   // Password validation checks
   const passwordChecks = {
     length: password.length >= 8,
@@ -34,26 +47,153 @@ const NewRegistration: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate API call
-    console.log('Form submitted');
-    
-    // For demonstration: Toggle between success and rejection based on checkbox
     if (isSimulatedRejection) {
       setStatus('rejected');
     } else {
-      setStatus('success');
+      setStatus('review');
     }
   };
 
+  const handleConfirmAndSend = () => {
+    // Simulate API call
+    console.log('Sending credentials to email...');
+    setStatus('success');
+  };
+
+  const copyToClipboard = () => {
+    const text = `Institute: ${instituteName}\nPortal Admin: ${adminEmail}\nPassword: ${password}\nLogin URL: https://${instituteName.toLowerCase().replace(/\s+/g, '-')}.portal.edu.ng`;
+    navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const CredentialsCard = ({ mode = 'review' }: { mode?: 'review' | 'view' }) => (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden max-w-2xl w-full mx-auto animate-in zoom-in-95 duration-300">
+      <div className="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <CheckCircle2 className="text-green-500" />
+          {mode === 'review' ? 'Registration Approved' : 'Login Credentials'}
+        </h3>
+        <p className="text-sm text-gray-500 mt-1">
+          {mode === 'review' 
+            ? 'Review the generated login details before sending them to the institute.'
+            : 'These are the generated login credentials for the institute.'}
+        </p>
+      </div>
+      
+      <div className="p-8 space-y-6">
+        <div className="space-y-4">
+          <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Institute Name</span>
+              <span className="font-medium text-gray-900 dark:text-white">{instituteName || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Portal Admin Email</span>
+              <span className="font-medium text-gray-900 dark:text-white">{adminEmail || 'N/A'}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Password</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-medium text-gray-900 dark:text-white">
+                  {showPassword ? password : '••••••••'}
+                </span>
+                <button 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                >
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
+              <span className="text-sm text-gray-500">Login URL</span>
+              <span className="font-mono text-sm text-blue-600 dark:text-blue-400 truncate max-w-[250px]">
+                https://{instituteName.toLowerCase().replace(/\s+/g, '-') || 'schoolname'}.portal.edu.ng
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            onClick={copyToClipboard}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all"
+          >
+            {isCopied ? <Check size={18} /> : <Copy size={18} />}
+            <span>{isCopied ? 'Copied!' : 'Copy Details'}</span>
+          </button>
+          
+          <button
+            onClick={handleConfirmAndSend}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20"
+          >
+            <Mail size={18} />
+            <span>Send Email & Finish</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (status === 'review') {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-6">
+        <CredentialsCard mode="review" />
+      </div>
+    );
+  }
+
   if (status === 'success') {
     return (
-      <div className="max-w-5xl mx-auto py-12">
+      <div className="max-w-5xl mx-auto py-12 relative space-y-8">
         <RegistrationSuccess 
           title="Institute Registered Successfully"
-          message="The institute has been successfully onboarded and the admin account has been created. An email with credentials has been sent to the Director of ICT."
+          message={`The institute has been successfully onboarded. Credentials have been sent to ${adminEmail}.`}
           actionLabel="View Institution Details"
           onAction={() => navigate('/super-admin/institutions/INST-2023-001')}
         />
+        
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-6">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              Generated Login Credentials
+            </h3>
+            
+            <div className="space-y-4 bg-white dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700/50">
+              <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-800">
+                <span className="text-sm text-gray-500">Portal Admin</span>
+                <span className="font-medium text-gray-900 dark:text-white select-all">{adminEmail}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-800">
+                <span className="text-sm text-gray-500">Password</span>
+                <div className="flex items-center gap-3">
+                  <span className="font-mono font-medium text-gray-900 dark:text-white select-all">{password}</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-500">Login URL</span>
+                <a 
+                  href={`https://${instituteName.toLowerCase().replace(/\s+/g, '-')}.portal.edu.ng`} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline truncate max-w-[250px]"
+                >
+                  https://{instituteName.toLowerCase().replace(/\s+/g, '-')}.portal.edu.ng
+                </a>
+              </div>
+            </div>
+
+            <button
+              onClick={copyToClipboard}
+              className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all border border-gray-200 dark:border-gray-700"
+            >
+              {isCopied ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
+              <span>{isCopied ? 'Copied to Clipboard' : 'Copy All Credentials'}</span>
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -101,8 +241,11 @@ const NewRegistration: React.FC = () => {
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                   type="text" 
+                  value={instituteName}
+                  onChange={(e) => setInstituteName(e.target.value)}
                   placeholder="e.g. Federal Polytechnic, Nekede"
                   className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white"
+                  required
                 />
               </div>
             </div>
@@ -136,6 +279,8 @@ const NewRegistration: React.FC = () => {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                   type="email" 
+                  value={directorEmail}
+                  onChange={(e) => setDirectorEmail(e.target.value)}
                   placeholder="director.ict@example.com"
                   className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white"
                 />
@@ -181,8 +326,11 @@ const NewRegistration: React.FC = () => {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                   type="email" 
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
                   placeholder="admin@portal.edu.ng"
                   className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 dark:text-white"
+                  required
                 />
               </div>
             </div>

@@ -15,7 +15,9 @@ import {
   Image as ImageIcon,
   X,
   AlertTriangle,
-  Info
+  Info,
+  Lock,
+  Copy
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -74,9 +76,6 @@ const ApplicationDetails: React.FC = () => {
     }, 1000);
   };
 
-  const currentStyles = getStatusStyles(appStatus);
-
-  // Mock Data matched to the image
   const application = {
     id: 'REG-2024-8842',
     institution: 'Future Leaders Preparatory Academy',
@@ -117,6 +116,21 @@ const ApplicationDetails: React.FC = () => {
         date: '2h ago'
       }
     ]
+  };
+
+  const currentStyles = getStatusStyles(appStatus);
+
+  // Mock Credentials
+  const credentials = {
+    adminEmail: application.contact.email,
+    password: 'Password123!',
+    loginUrl: `https://${application.institution.toLowerCase().replace(/\s+/g, '-')}.portal.edu.ng`
+  };
+
+  const copyCredentials = () => {
+    const text = `Institute: ${application.institution}\nPortal Admin: ${credentials.adminEmail}\nPassword: ${credentials.password}\nLogin URL: ${credentials.loginUrl}`;
+    navigator.clipboard.writeText(text);
+    alert('Credentials copied to clipboard!');
   };
 
   return (
@@ -182,10 +196,40 @@ const ApplicationDetails: React.FC = () => {
               )}
               
               {modalOpen === 'approve' && (
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
-                  Are you sure you want to approve <span className="font-bold text-gray-900 dark:text-white">{application.institution}</span>? 
-                  An automated email with login credentials will be sent to <span className="font-bold">{application.contact.email}</span>.
-                </p>
+                <div className="space-y-4">
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                    Are you sure you want to approve <span className="font-bold text-gray-900 dark:text-white">{application.institution}</span>? 
+                    An automated email with login credentials will be sent to <span className="font-bold">{application.contact.email}</span>.
+                  </p>
+
+                  <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 p-4">
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <Lock size={14} className="text-blue-600 dark:text-blue-400" />
+                      Credentials to be Generated
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Portal Admin:</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{credentials.adminEmail}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Password:</span>
+                        <span className="font-mono font-medium text-gray-900 dark:text-white">{credentials.password}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Login URL:</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 truncate max-w-[200px]">{credentials.loginUrl}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={copyCredentials}
+                      className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-[#1e293b] border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    >
+                      <Copy size={14} />
+                      Copy Credentials
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -490,6 +534,39 @@ const ApplicationDetails: React.FC = () => {
                 </div>
               </div>
             </section>
+
+            {/* Login Credentials Section - Visible when Approved */}
+            {appStatus === 'APPROVED' && (
+              <section className="bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 p-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                  <Lock size={20} className="text-blue-600 dark:text-blue-400" />
+                  Generated Login Credentials
+                </h2>
+                <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-800">
+                    <span className="text-sm text-gray-500">Portal Admin</span>
+                    <span className="font-medium text-gray-900 dark:text-white select-all">{credentials.adminEmail}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-gray-800">
+                    <span className="text-sm text-gray-500">Password</span>
+                    <span className="font-mono font-medium text-gray-900 dark:text-white select-all">{credentials.password}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">Login URL</span>
+                    <a href={credentials.loginUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate max-w-[200px]">
+                      {credentials.loginUrl}
+                    </a>
+                  </div>
+                </div>
+                <button 
+                  onClick={copyCredentials}
+                  className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <Copy size={16} />
+                  Copy Credentials
+                </button>
+              </section>
+            )}
 
             {/* Primary Contact Person Card */}
             <section className="bg-white dark:bg-[#151e32] rounded-xl border border-gray-200 dark:border-gray-800 p-6">
