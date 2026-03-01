@@ -14,8 +14,7 @@ import {
   Settings as SettingsIcon,
   DollarSign,
   MessageSquare,
-  Bus,
-  Shield
+  Bus
 } from 'lucide-react';
 import './App.css';
 
@@ -56,7 +55,6 @@ const ReportsLayout = lazy(() => import('./pages/super-admin/reports/ReportsLayo
 const SuperAdminFinanceDashboard = lazy(() => import('./pages/super-admin/finance/FinanceDashboard'));
 const SuperAdminRevenue = lazy(() => import('./pages/super-admin/finance/Revenue'));
 const SuperAdminSubscriptionPlans = lazy(() => import('./pages/super-admin/finance/SubscriptionPlans'));
-const AdmissionsGovernance = lazy(() => import('./pages/super-admin/AdmissionsGovernance'));
 
 // School Admin - General
 const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard'));
@@ -172,7 +170,7 @@ const superAdminItems = [
   { name: 'Overview', path: '/super-admin/dashboard', icon: LayoutDashboard },
   { name: 'Registrations', path: '/super-admin/applications', icon: ClipboardCheck },
   { name: 'All Institutes', path: '/super-admin/institutions', icon: Building2 },
-  { name: 'Configuration', path: '/super-admin/config', icon: SettingsIcon },
+  { name: 'Program Governance', path: '/super-admin/academic-catalog', icon: BookOpen },
   { 
     name: 'Finance', 
     icon: DollarSign, 
@@ -182,9 +180,8 @@ const superAdminItems = [
       { name: 'Subscription Plans', path: '/super-admin/finance/plans' }
     ]
   },
-  { name: 'Admissions Governance', path: '/super-admin/admissions-governance', icon: Shield },
-  { name: 'Program Governance', path: '/super-admin/academic-catalog', icon: BookOpen },
   { name: 'Reports', path: '/super-admin/reports', icon: FileText },
+  { name: 'Configuration', path: '/super-admin/config', icon: SettingsIcon }
 ];
 
 const schoolAdminItems = [
@@ -388,7 +385,6 @@ function App() {
                             <Route path="/super-admin/finance/dashboard" element={<SuperAdminFinanceDashboard />} />
                             <Route path="/super-admin/finance/revenue" element={<SuperAdminRevenue />} />
                             <Route path="/super-admin/finance/plans" element={<SuperAdminSubscriptionPlans />} />
-                            <Route path="/super-admin/admissions-governance" element={<AdmissionsGovernance />} />
                             <Route path="/super-admin/reports" element={<ReportsLayout />} />
                           </Route>
 

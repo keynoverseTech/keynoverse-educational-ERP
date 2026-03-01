@@ -20,7 +20,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   role = 'Administrator',
   roleSubtitle = 'Super Admin Access',
   userInitials = 'SA',
-  sidebarTitle,
+  sidebarTitle = 'Planets Tech Global',
   sidebarLogo
 }) => {
   const navigate = useNavigate();
