@@ -40,7 +40,7 @@ const AuthSelection: React.FC = () => {
                     
                     {/* Super Admin Card */}
                     <button 
-                        onClick={() => navigate('/super-admin/login')}
+                        onClick={() => navigate('/auth/super-admin')}
                         className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] animate-fade-in-up"
                         style={{ animationDelay: '100ms' }}
                     >
@@ -60,7 +60,7 @@ const AuthSelection: React.FC = () => {
 
                     {/* School Admin Card */}
                     <button 
-                        onClick={() => navigate('/school-admin/login')}
+                        onClick={() => navigate('/auth/school-admin')}
                         className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-emerald-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)] animate-fade-in-up"
                         style={{ animationDelay: '200ms' }}
                     >

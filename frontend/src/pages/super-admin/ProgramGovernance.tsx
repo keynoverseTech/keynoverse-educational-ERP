@@ -46,8 +46,8 @@ const mockInstitutions: Institution[] = [
 const initialProgrammes: GlobalProgramme[] = [
   { 
     id: 'gp-1', 
-    name: 'B.Eng Computer Engineering', 
-    degreeType: 'B.Eng', 
+    name: 'HND Computer Engineering', 
+    degreeType: 'HND', 
     status: 'active',
     institutionId: 'inst-1',
     yearGranted: '2023',
@@ -58,8 +58,8 @@ const initialProgrammes: GlobalProgramme[] = [
   },
   { 
     id: 'gp-2', 
-    name: 'B.Sc Biochemistry', 
-    degreeType: 'B.Sc', 
+    name: 'HND Biochemistry', 
+    degreeType: 'HND', 
     status: 'active',
     institutionId: 'inst-1',
     yearGranted: '2022',
@@ -123,10 +123,10 @@ const ProgramGovernance: React.FC = () => {
     }
     setCurrentItem({
       institutionId: selectedInstitutionId,
-      degreeType: 'B.Sc',
+      degreeType: 'HND',
       status: 'active',
       accreditationStatus: 'Approved'
-    }); 
+    });
     setIsModalOpen(true);
   };
 
@@ -325,7 +325,7 @@ const ProgramGovernance: React.FC = () => {
                     value={currentItem?.name || ''}
                     onChange={e => setCurrentItem({...currentItem, name: e.target.value})}
                     className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-                    placeholder="e.g. B.Sc Computer Science"
+                    placeholder="e.g. HND Computer Science"
                   />
                 </div>
                 
@@ -338,7 +338,7 @@ const ProgramGovernance: React.FC = () => {
                       value={currentItem?.degreeType || ''}
                       onChange={e => setCurrentItem({...currentItem, degreeType: e.target.value})}
                       className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-                      placeholder="e.g. B.Sc"
+                      placeholder="e.g. HND"
                     />
                   </div>
                   <div>

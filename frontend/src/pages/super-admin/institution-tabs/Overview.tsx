@@ -369,9 +369,6 @@ const Overview: React.FC = () => {
                   <div className={`p-2.5 rounded-xl ${module.active ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}`}>
                     <module.icon size={22} className={module.active ? 'text-gray-900 dark:text-white' : 'text-gray-400'} />
                   </div>
-                  <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${module.active ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${module.active ? 'translate-x-5' : 'translate-x-1'}`} />
-                  </div>
                 </div>
                 <h3 className="font-bold text-gray-900 dark:text-white mb-1.5 text-base">{module.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 flex-grow leading-relaxed">{module.description}</p>

@@ -11,11 +11,11 @@ import {
   Calendar,
   Users,
   FileText,
-  Shield,
   Settings as SettingsIcon,
   DollarSign,
   MessageSquare,
-  Bus
+  Bus,
+  Shield
 } from 'lucide-react';
 import './App.css';
 
@@ -51,12 +51,12 @@ const InstitutionDetails = lazy(() => import('./pages/super-admin/InstitutionDet
 const InstitutionConfig = lazy(() => import('./pages/super-admin/InstitutionConfig'));
 const SubAdmins = lazy(() => import('./pages/super-admin/SubAdmins'));
 const SystemLogs = lazy(() => import('./pages/super-admin/SystemLogs'));
-const AdmissionsGovernance = lazy(() => import('./pages/super-admin/AdmissionsGovernance'));
 const ProgramGovernance = lazy(() => import('./pages/super-admin/ProgramGovernance'));
 const ReportsLayout = lazy(() => import('./pages/super-admin/reports/ReportsLayout'));
 const SuperAdminFinanceDashboard = lazy(() => import('./pages/super-admin/finance/FinanceDashboard'));
 const SuperAdminRevenue = lazy(() => import('./pages/super-admin/finance/Revenue'));
 const SuperAdminSubscriptionPlans = lazy(() => import('./pages/super-admin/finance/SubscriptionPlans'));
+const AdmissionsGovernance = lazy(() => import('./pages/super-admin/AdmissionsGovernance'));
 
 // School Admin - General
 const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard'));
@@ -366,36 +366,36 @@ function App() {
                       <Suspense fallback={<LoadingFallback />}>
                         <Routes>
                           {/* Public Routes */}
-                          <Route path="/" element={<Navigate to="/auth/select" replace />} />
-                          <Route path="/auth/select" element={<AuthSelection />} />
-                          <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-                          <Route path="/school-admin/login" element={<SchoolAdminLogin />} />
+                          <Route path="/" element={<Navigate to="/auth" replace />} />
+                          <Route path="/auth" element={<AuthSelection />} />
+                          <Route path="/auth/super-admin" element={<SuperAdminLogin />} />
+                          <Route path="/auth/school-admin" element={<SchoolAdminLogin />} />
 
-                      {/* Super Admin Routes */}
-                      <Route element={
-                        <DashboardLayout sidebarItems={superAdminItems}>
-                          <Outlet />
-                        </DashboardLayout>
-                      }>
-                        <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
-                        <Route path="/super-admin/institutions" element={<Institutions />} />
-                        <Route path="/super-admin/new-registration" element={<NewRegistration />} />
-                        <Route path="/super-admin/applications" element={<Applications />} />
-                        <Route path="/super-admin/sub-admins" element={<SubAdmins />} />
-                        <Route path="/super-admin/admissions-governance" element={<AdmissionsGovernance />} />
-                        <Route path="/super-admin/academic-catalog" element={<ProgramGovernance />} />
-                        <Route path="/super-admin/system-logs" element={<SystemLogs />} />
-                        <Route path="/super-admin/config" element={<InstitutionConfig />} />
-                        <Route path="/super-admin/finance/dashboard" element={<SuperAdminFinanceDashboard />} />
-                        <Route path="/super-admin/finance/revenue" element={<SuperAdminRevenue />} />
-                        <Route path="/super-admin/finance/plans" element={<SuperAdminSubscriptionPlans />} />
-                        <Route path="/super-admin/reports" element={<ReportsLayout />} />
-                      </Route>
+                          {/* Super Admin Routes */}
+                          <Route element={
+                            <DashboardLayout sidebarItems={superAdminItems}>
+                              <Outlet />
+                            </DashboardLayout>
+                          }>
+                            <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+                            <Route path="/super-admin/institutions" element={<Institutions />} />
+                            <Route path="/super-admin/new-registration" element={<NewRegistration />} />
+                            <Route path="/super-admin/applications" element={<Applications />} />
+                            <Route path="/super-admin/sub-admins" element={<SubAdmins />} />
+                            <Route path="/super-admin/academic-catalog" element={<ProgramGovernance />} />
+                            <Route path="/super-admin/system-logs" element={<SystemLogs />} />
+                            <Route path="/super-admin/config" element={<InstitutionConfig />} />
+                            <Route path="/super-admin/finance/dashboard" element={<SuperAdminFinanceDashboard />} />
+                            <Route path="/super-admin/finance/revenue" element={<SuperAdminRevenue />} />
+                            <Route path="/super-admin/finance/plans" element={<SuperAdminSubscriptionPlans />} />
+                            <Route path="/super-admin/admissions-governance" element={<AdmissionsGovernance />} />
+                            <Route path="/super-admin/reports" element={<ReportsLayout />} />
+                          </Route>
 
-                      <Route path="/super-admin/applications/:id" element={<ApplicationDetails />} />
-                      <Route path="/super-admin/institutions/:id" element={<InstitutionDetails />} />
+                          <Route path="/super-admin/applications/:id" element={<ApplicationDetails />} />
+                          <Route path="/super-admin/institutions/:id" element={<InstitutionDetails />} />
 
-                      {/* School Admin Routes */}
+                          {/* School Admin Routes */}
                       <Route
                         element={
                           <DashboardLayout
@@ -556,17 +556,17 @@ function App() {
                         <Route path="/staff/grading" element={<StaffGrading />} />
                         <Route path="/staff/score-upload" element={<ScoreUpload />} />
                       </Route>
-                      </Routes>
-                    </Suspense>
-                  </Router>
-                  </AuthProvider>
-                </EventsProvider>
-              </LibraryProvider>
-            </TransportProvider>
-          </HostelProvider>
-        </StudentPortalFinanceProvider>
-      </FinanceProvider>
-    </HRProvider>
+                    </Routes>
+                  </Suspense>
+                </Router>
+              </AuthProvider>
+            </EventsProvider>
+          </LibraryProvider>
+        </TransportProvider>
+      </HostelProvider>
+    </StudentPortalFinanceProvider>
+  </FinanceProvider>
+</HRProvider>
   );
 }
 

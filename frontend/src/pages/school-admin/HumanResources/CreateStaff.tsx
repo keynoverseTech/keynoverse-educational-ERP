@@ -419,7 +419,7 @@ const CreateStaff: React.FC = () => {
 
               <div>
                 <label className={labelClass}>Qualifications</label>
-                <input value={qualifications} onChange={e => setQualifications(e.target.value)} className={inputClass} placeholder="e.g. B.Sc Computer Science, M.Sc Data Science, PhD AI" />
+                <input value={qualifications} onChange={e => setQualifications(e.target.value)} className={inputClass} placeholder="e.g. HND Computer Science, M.Sc Data Science, PhD AI" />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Separate multiple qualifications with commas</p>
               </div>
             </div>

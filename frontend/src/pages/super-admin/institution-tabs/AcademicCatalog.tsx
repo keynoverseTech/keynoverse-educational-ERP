@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   GraduationCap, 
-  Plus, 
   Search,
   MoreVertical,
   ShieldCheck,
@@ -29,8 +28,8 @@ interface Programme {
 const initialProgrammes: Programme[] = [
   { 
     id: 'gp-1', 
-    name: 'B.Eng Computer Engineering', 
-    degreeType: 'B.Eng', 
+    name: 'PHD Computer Engineering', 
+    degreeType: 'ND,HND', 
     status: 'active',
     yearGranted: '2023',
     accreditationStatus: 'Approved',
@@ -40,8 +39,8 @@ const initialProgrammes: Programme[] = [
   },
   { 
     id: 'gp-2', 
-    name: 'B.Sc Biochemistry', 
-    degreeType: 'B.Sc', 
+    name: 'HND Biochemistry', 
+    degreeType: 'HND', 
     status: 'active',
     yearGranted: '2022',
     accreditationStatus: 'Approved',
@@ -88,18 +87,12 @@ const AcademicCatalog: React.FC = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input 
             type="text"
-            placeholder="Search programmes..."
+            placeholder="Search approved programmes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 pr-4 py-2 bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white w-full"
           />
         </div>
-        <button 
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
-        >
-          <Plus size={16} />
-          Add Programme
-        </button>
       </div>
 
       {/* Grid */}
@@ -168,7 +161,7 @@ const AcademicCatalog: React.FC = () => {
           <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400 mb-4">
             <Search size={32} />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">No programmes found</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">No approved programmes found</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search</p>
         </div>
       )}

@@ -31,7 +31,7 @@ const mockStudents: Student[] = [
     matricNo: 'ENG/2021/001',
     email: 'alex.j@uni.edu',
     department: 'Computer Engineering',
-    programme: 'B.Eng Computer Engineering',
+    programme: 'HND Computer Engineering',
     level: '400',
     status: 'Active'
   },
@@ -41,7 +41,7 @@ const mockStudents: Student[] = [
     matricNo: 'SCI/2022/045',
     email: 'sarah.w@uni.edu',
     department: 'Computer Science',
-    programme: 'B.Sc Computer Science',
+    programme: 'HND Computer Science',
     level: '300',
     status: 'Active'
   },
@@ -61,7 +61,7 @@ const mockStudents: Student[] = [
     matricNo: 'ACC/2023/089',
     email: 'emily.d@uni.edu',
     department: 'Accounting',
-    programme: 'B.Sc Accounting',
+    programme: 'HND Accounting',
     level: '200',
     status: 'Suspended'
   },
@@ -71,7 +71,7 @@ const mockStudents: Student[] = [
     matricNo: 'ENG/2019/023',
     email: 'j.wilson@uni.edu',
     department: 'Mechanical Engineering',
-    programme: 'B.Eng Mechanical Engineering',
+    programme: 'PHD Mechanical Engineering',
     level: 'Graduate',
     status: 'Graduated'
   }

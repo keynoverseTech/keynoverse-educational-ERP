@@ -59,8 +59,8 @@ const CourseRegistrationConfig: React.FC = () => {
     'Management': ['Accounting', 'Business Admin']
   };
   const programmes: Record<string, string[]> = {
-    'Computer Science': ['B.Sc. Computer Science', 'B.Sc. Info Tech'],
-    'Mathematics': ['B.Sc. Mathematics', 'B.Sc. Statistics'],
+    'Computer Science': ['HND Computer Science', 'HND Info Tech'],
+    'Mathematics': ['HND Mathematics', 'HND Statistics'],
     // Add others as needed
   };
 

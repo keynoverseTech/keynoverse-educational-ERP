@@ -58,7 +58,7 @@ const StudentPortalFinanceContext = createContext<StudentPortalFinanceContextVal
 const defaultStudent: StudentProfile = {
   id: 'std_123',
   fullName: 'Samuel John',
-  programme: 'B.Sc. Computer Science',
+  programme: 'HND Computer Science',
   level: '400',
 };
 
