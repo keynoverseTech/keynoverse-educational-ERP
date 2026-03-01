@@ -54,7 +54,7 @@ const InstitutionDetails: React.FC = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'modules', label: 'ERP Modules', icon: Layers },
-    { id: 'academic', label: 'Program Governance', icon: BookOpen },
+    { id: 'academic', label: 'Approved Programmes', icon: BookOpen },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'subscription', label: 'Subscription', icon: CreditCard },
     { id: 'audit', label: 'Audit Trail', icon: FileText },

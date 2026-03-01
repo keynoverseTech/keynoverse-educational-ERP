@@ -81,9 +81,9 @@ const departments: Department[] = [
 ];
 
 const programmes: Programme[] = [
-  { id: 'prog-1', name: 'B.Sc. Computer Science', departmentId: 'dept-1', maxLevel: 400 },
-  { id: 'prog-2', name: 'B.Sc. Mathematics', departmentId: 'dept-2', maxLevel: 400 },
-  { id: 'prog-3', name: 'B.Eng. Electrical Engineering', departmentId: 'dept-3', maxLevel: 500 },
+  { id: 'prog-1', name: 'HND Computer Science', departmentId: 'dept-1', maxLevel: 400 },
+  { id: 'prog-2', name: 'HND Mathematics', departmentId: 'dept-2', maxLevel: 400 },
+  { id: 'prog-3', name: 'PHD Electrical Engineering', departmentId: 'dept-3', maxLevel: 500 },
 ];
 
 const levels: Level[] = [

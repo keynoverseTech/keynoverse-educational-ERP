@@ -11,7 +11,6 @@ import {
   Calendar,
   Users,
   FileText,
-  Shield,
   Settings as SettingsIcon,
   DollarSign,
   MessageSquare,
@@ -51,7 +50,6 @@ const InstitutionDetails = lazy(() => import('./pages/super-admin/InstitutionDet
 const InstitutionConfig = lazy(() => import('./pages/super-admin/InstitutionConfig'));
 const SubAdmins = lazy(() => import('./pages/super-admin/SubAdmins'));
 const SystemLogs = lazy(() => import('./pages/super-admin/SystemLogs'));
-const AdmissionsGovernance = lazy(() => import('./pages/super-admin/AdmissionsGovernance'));
 const ProgramGovernance = lazy(() => import('./pages/super-admin/ProgramGovernance'));
 const ReportsLayout = lazy(() => import('./pages/super-admin/reports/ReportsLayout'));
 
@@ -170,7 +168,6 @@ const superAdminItems = [
   { name: 'Registrations', path: '/super-admin/applications', icon: ClipboardCheck },
   { name: 'All Institutes', path: '/super-admin/institutions', icon: Building2 },
   { name: 'Configuration', path: '/super-admin/config', icon: SettingsIcon },
-  { name: 'Admissions Governance', path: '/super-admin/admissions-governance', icon: Shield },
   { name: 'Program Governance', path: '/super-admin/academic-catalog', icon: BookOpen },
   { name: 'Reports', path: '/super-admin/reports', icon: FileText },
 ];
@@ -370,7 +367,6 @@ function App() {
                         <Route path="/super-admin/new-registration" element={<NewRegistration />} />
                         <Route path="/super-admin/applications" element={<Applications />} />
                         <Route path="/super-admin/sub-admins" element={<SubAdmins />} />
-                        <Route path="/super-admin/admissions-governance" element={<AdmissionsGovernance />} />
                         <Route path="/super-admin/academic-catalog" element={<ProgramGovernance />} />
                         <Route path="/super-admin/system-logs" element={<SystemLogs />} />
                         <Route path="/super-admin/config" element={<InstitutionConfig />} />
