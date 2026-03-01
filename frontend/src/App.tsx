@@ -354,10 +354,10 @@ function App() {
                       <Suspense fallback={<LoadingFallback />}>
                         <Routes>
                           {/* Public Routes */}
-                          <Route path="/" element={<Navigate to="/auth/select" replace />} />
-                          <Route path="/auth/select" element={<AuthSelection />} />
-                          <Route path="/super-admin/login" element={<SuperAdminLogin />} />
-                          <Route path="/school-admin/login" element={<SchoolAdminLogin />} />
+                          <Route path="/" element={<Navigate to="/auth" replace />} />
+                          <Route path="/auth" element={<AuthSelection />} />
+                          <Route path="/auth/super-admin" element={<SuperAdminLogin />} />
+                          <Route path="/auth/school-admin" element={<SchoolAdminLogin />} />
 
                       {/* Super Admin Routes */}
                       <Route element={
