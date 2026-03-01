@@ -25,7 +25,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // Initialize sidebar as open on desktop (default)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   

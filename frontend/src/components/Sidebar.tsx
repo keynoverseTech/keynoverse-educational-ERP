@@ -155,9 +155,9 @@ const Sidebar: React.FC<SidebarProps> = ({ items, isOpen, onClose, title = "Keyn
 
       <div className={`
         bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 flex flex-col
-        fixed top-0 left-0 h-screen z-40 transition-transform duration-300 ease-in-out w-64
-        lg:sticky lg:top-0 lg:translate-x-0
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out
+        lg:sticky lg:top-0
+        ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 lg:w-0 lg:translate-x-0 lg:overflow-hidden'}
       `}>
         {/* Logo Section */}
         <div className="p-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
