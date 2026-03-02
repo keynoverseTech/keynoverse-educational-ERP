@@ -31,6 +31,7 @@ import { EventsProvider } from './state/eventsProvider';
 import { AlumniProvider } from './state/alumniState';
 import { ReceptionProvider } from './state/receptionContext';
 import { AttendanceProvider } from './state/academics/attendanceContext';
+import { HelpDeskProvider } from './state/helpdeskContext';
 
 // Components
 import LoadingFallback from './components/LoadingFallback';
@@ -93,6 +94,12 @@ const AcademicCalendar = lazy(() => import('./pages/school-admin/academics/Acade
 const LevelPromotion = lazy(() => import('./pages/school-admin/academics/LevelPromotion'));
 const AttendanceDashboard = lazy(() => import('./pages/school-admin/academics/attendance/AttendanceDashboard'));
 const MarkAttendance = lazy(() => import('./pages/school-admin/academics/attendance/MarkAttendance'));
+
+// School Admin - HelpDesk
+const HelpDeskDashboard = lazy(() => import('./pages/school-admin/HelpDesk/HelpDeskDashboard'));
+const TicketCategories = lazy(() => import('./pages/school-admin/HelpDesk/TicketCategories'));
+const CreateTicket = lazy(() => import('./pages/school-admin/HelpDesk/CreateTicket'));
+const TicketWorkflow = lazy(() => import('./pages/school-admin/HelpDesk/TicketWorkflow'));
 
 // School Admin - Examinations
 const AssessmentConfiguration = lazy(() => import('./pages/school-admin/examinations/AssessmentConfiguration'));
@@ -337,6 +344,16 @@ const schoolAdminItems = [
         { name: 'Mail Log', path: '/school-admin/reception/mail' }
     ]
   },
+  {
+    name: 'HelpDesk',
+    icon: MessageSquare,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/helpdesk/dashboard' },
+      { name: 'Ticket Categories', path: '/school-admin/helpdesk/categories' },
+      { name: 'New Ticket', path: '/school-admin/helpdesk/create' },
+      { name: 'Tickets', path: '/school-admin/helpdesk/tickets' }
+    ]
+  },
   { 
     name: 'Reports',  
     path: '/school-admin/reports', 
@@ -405,7 +422,8 @@ function App() {
     <HRProvider>
       <ReceptionProvider>
         <AttendanceProvider>
-          <AlumniProvider>
+          <HelpDeskProvider>
+            <AlumniProvider>
       <FinanceProvider>
         <StudentPortalFinanceProvider>
           <HostelProvider>
@@ -489,6 +507,12 @@ function App() {
                         <Route path="/school-admin/academics/calendar" element={<AcademicCalendar />} />
                         <Route path="/school-admin/academics/attendance" element={<AttendanceDashboard />} />
                         <Route path="/school-admin/academics/attendance/mark/:id" element={<MarkAttendance />} />
+
+                        {/* HelpDesk */}
+                        <Route path="/school-admin/helpdesk/dashboard" element={<HelpDeskDashboard />} />
+                        <Route path="/school-admin/helpdesk/categories" element={<TicketCategories />} />
+                        <Route path="/school-admin/helpdesk/create" element={<CreateTicket />} />
+                        <Route path="/school-admin/helpdesk/tickets" element={<TicketWorkflow />} />
 
                         {/* Examinations */}
                         <Route path="/school-admin/examinations/dashboard" element={<ExaminationDashboard />} />
@@ -637,6 +661,7 @@ function App() {
     </StudentPortalFinanceProvider>
   </FinanceProvider>
   </AlumniProvider>
+  </HelpDeskProvider>
   </AttendanceProvider>
   </ReceptionProvider>
 </HRProvider>

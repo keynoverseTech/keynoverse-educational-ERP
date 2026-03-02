@@ -15,6 +15,8 @@ export interface AttendanceSession {
   courseCode: string;
   courseTitle: string;
   lecturerName: string;
+  department: string;
+  program: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -43,6 +45,8 @@ const MOCK_SESSIONS: AttendanceSession[] = [
     courseCode: 'CSC 301',
     courseTitle: 'Operating Systems',
     lecturerName: 'Dr. Alan Turing',
+    department: 'Computer Science',
+    program: 'B.Sc. Computer Science',
     date: '2024-03-20',
     startTime: '10:00',
     endTime: '12:00',

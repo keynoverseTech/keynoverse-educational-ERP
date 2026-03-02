@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, FileText, Search, CreditCard, Check } from 'lucide-react';
+import { Plus, FileText, Search, CreditCard } from 'lucide-react';
 import { useHR } from '../../../state/hrAccessControl';
 import type { SalaryAdvanceRequest, Staff } from '../../../state/hrAccessControl';
 

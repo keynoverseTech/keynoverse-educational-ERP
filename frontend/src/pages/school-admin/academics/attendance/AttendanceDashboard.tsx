@@ -7,11 +7,15 @@ const AttendanceDashboard: React.FC = () => {
   const { sessions, createSession } = useAttendance();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterDepartment, setFilterDepartment] = useState('All');
+  const [filterProgram, setFilterProgram] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newSession, setNewSession] = useState({
     courseCode: '',
     courseTitle: '',
     lecturerName: '',
+    department: '',
+    program: '',
     date: new Date().toISOString().split('T')[0],
     startTime: '',
     endTime: ''
@@ -23,10 +27,18 @@ const AttendanceDashboard: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const filteredSessions = sessions.filter(s => 
-    s.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.lecturerName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSessions = sessions.filter(s => {
+    const matchesSearch = s.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.lecturerName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDept = filterDepartment === 'All' ? true : s.department === filterDepartment;
+    const matchesProg = filterProgram === 'All' ? true : s.program === filterProgram;
+    
+    return matchesSearch && matchesDept && matchesProg;
+  });
+
+  // Extract unique departments and programs for filters
+  const departments = ['All', ...new Set(sessions.map(s => s.department).filter(Boolean))];
+  const programs = ['All', ...new Set(sessions.map(s => s.program).filter(Boolean))];
 
   return (
     <div className="space-y-6">
@@ -44,8 +56,8 @@ const AttendanceDashboard: React.FC = () => {
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-        <div className="relative">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
@@ -55,6 +67,24 @@ const AttendanceDashboard: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <select
+          className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={filterDepartment}
+          onChange={(e) => setFilterDepartment(e.target.value)}
+        >
+          {departments.map(dept => (
+            <option key={dept} value={dept}>{dept === 'All' ? 'All Departments' : dept}</option>
+          ))}
+        </select>
+        <select
+          className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={filterProgram}
+          onChange={(e) => setFilterProgram(e.target.value)}
+        >
+          {programs.map(prog => (
+            <option key={prog} value={prog}>{prog === 'All' ? 'All Programs' : prog}</option>
+          ))}
+        </select>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -135,6 +165,28 @@ const AttendanceDashboard: React.FC = () => {
                   value={newSession.lecturerName}
                   onChange={(e) => setNewSession({ ...newSession, lecturerName: e.target.value })}
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={newSession.department}
+                    onChange={(e) => setNewSession({ ...newSession, department: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Program</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={newSession.program}
+                    onChange={(e) => setNewSession({ ...newSession, program: e.target.value })}
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
