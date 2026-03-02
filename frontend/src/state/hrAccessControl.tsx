@@ -97,6 +97,13 @@ export interface LeaveRequest {
   createdAt: string;
 }
 
+export interface StaffSchedule {
+  staffId: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+}
+
 interface HRContextValue {
   staff: Staff[];
   setStaff: React.Dispatch<React.SetStateAction<Staff[]>>;
@@ -116,6 +123,8 @@ interface HRContextValue {
   setLeaveTypes: React.Dispatch<React.SetStateAction<LeaveType[]>>;
   leaveRequests: LeaveRequest[];
   setLeaveRequests: React.Dispatch<React.SetStateAction<LeaveRequest[]>>;
+  schedules: StaffSchedule[];
+  setSchedules: React.Dispatch<React.SetStateAction<StaffSchedule[]>>;
   hasPermission: (staffId: string, permissionKey: string) => boolean;
 }
 
@@ -297,6 +306,19 @@ const initialStaff: Staff[] = [
     status: 'inactive',
     dateEmployed: '2018-03-20',
   },
+  {
+    id: 'staff_4',
+    staffId: 'STF/2019/210',
+    firstName: 'Michael',
+    lastName: 'Ade',
+    email: 'michael.ade@uni.edu',
+    phone: '+234 807 321 4455',
+    departmentId: 'dept_registry',
+    designationId: 'des_registrar',
+    roleId: 'role_admin_officer',
+    status: 'active',
+    dateEmployed: '2019-07-15',
+  },
 ];
 
 const initialOverrides: StaffPermissionOverride[] = [
@@ -322,6 +344,7 @@ export const HRProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [staffOverrides, setStaffOverrides] = useState<StaffPermissionOverride[]>(initialOverrides);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>(initialLeaveTypes);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(initialLeaveRequests);
+  const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
 
   const hasPermission = useCallback(
     (staffId: string, permissionKey: string) => {
@@ -375,6 +398,8 @@ export const HRProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setLeaveTypes,
         leaveRequests,
         setLeaveRequests,
+        schedules,
+        setSchedules,
         hasPermission,
       }}
     >

@@ -106,6 +106,7 @@ const StaffProfile = lazy(() => import('./pages/school-admin/HumanResources/Staf
 const CreateStaff = lazy(() => import('./pages/school-admin/HumanResources/CreateStaff'));
 const HRDashboard = lazy(() => import('./pages/school-admin/HumanResources/HRDashboard'));
 const HRConfig = lazy(() => import('./pages/school-admin/HumanResources/HRConfig'));
+const StaffSchedules = lazy(() => import('./pages/school-admin/HumanResources/StaffSchedules'));
 const PermissionsManagement = lazy(() => import('./pages/school-admin/HumanResources/PermissionsManagement'));
 const LeaveRequest = lazy(() => import('./pages/school-admin/HumanResources/LeaveRequest'));
 const LeaveApprovals = lazy(() => import('./pages/school-admin/HumanResources/LeaveApprovals'));
@@ -308,6 +309,7 @@ const schoolAdminItems = [
     icon: Briefcase,
     subItems: [
       { name: 'HR Dashboard', path: '/school-admin/human-resources/dashboard' },
+      { name: 'Staff Schedules', path: '/school-admin/human-resources/staff-schedules' },
       { name: 'Staff Profile', path: '/school-admin/staff/profile' },
       { name: 'Add Staff', path: '/school-admin/staff/create' },
       { name: 'Leave Request', path: '/school-admin/human-resources/leave/request' },
@@ -466,6 +468,7 @@ function App() {
 
                         {/* HR */}
                         <Route path="/school-admin/human-resources/dashboard" element={<HRDashboard />} />
+                        <Route path="/school-admin/human-resources/staff-schedules" element={<StaffSchedules />} />
                         <Route path="/school-admin/human-resources/config" element={<HRConfig />} />
                         <Route path="/school-admin/human-resources/permissions" element={<PermissionsManagement />} />
                         <Route path="/school-admin/human-resources/leave/request" element={<LeaveRequest />} />
