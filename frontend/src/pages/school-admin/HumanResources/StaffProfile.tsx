@@ -21,10 +21,10 @@ import {
   Clock,
   IdCard
 } from 'lucide-react';
-import type { Staff } from '../../../state/hrAccessControl';
 import { useHR } from '../../../state/hrAccessControl';
+import type { Staff } from '../../../state/hrAccessControl';
 
-type StaffProfileTab = 'profile' | 'employment' | 'bank' | 'roles' | 'account' | 'leave' | 'audit';
+type StaffProfileTab = 'profile' | 'employment' | 'bank' | 'roles' | 'account' | 'leave' | 'schedule' | 'audit';
 
 const StaffProfile: React.FC = () => {
   const {
@@ -34,8 +34,9 @@ const StaffProfile: React.FC = () => {
     roles,
     setStaff,
     leaveTypes,
-    leaveRequests
-  } = useHR();
+    leaveRequests,
+    schedules
+  } = useHR() as any;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
@@ -50,7 +51,7 @@ const StaffProfile: React.FC = () => {
   }, [location.state]);
 
   const selectedStaff: Staff | null =
-    staff.find(s => s.id === selectedStaffId) || null;
+    staff.find((s: Staff) => s.id === selectedStaffId) || null;
 
   const handleSearch = (e?: React.FormEvent | React.KeyboardEvent) => {
     e?.preventDefault();
@@ -59,7 +60,7 @@ const StaffProfile: React.FC = () => {
       return;
     }
     const found =
-      staff.find(s => {
+      staff.find((s: Staff) => {
         const name = `${s.firstName} ${s.lastName}`.toLowerCase();
         return (
           name.includes(term) || s.staffId.toLowerCase().includes(term)
@@ -82,22 +83,22 @@ const StaffProfile: React.FC = () => {
 
   const handleRoleChange = (roleId: string) => {
     if (!selectedStaff) return;
-    setStaff(prev => prev.map(s => 
+    setStaff((prev: Staff[]) => prev.map((s: Staff) => 
       s.id === selectedStaff.id ? { ...s, roleId } : s
     ));
   };
 
   const handleAccountStatusChange = (status: 'active' | 'inactive') => {
     if (!selectedStaff) return;
-    setStaff(prev => prev.map(s => 
+    setStaff((prev: Staff[]) => prev.map((s: Staff) => 
       s.id === selectedStaff.id ? { ...s, status } : s
     ));
   };
 
   const calculateUsedLeave = (staffId: string, leaveTypeId: string) => {
     return leaveRequests
-      .filter(req => req.staffId === staffId && req.leaveTypeId === leaveTypeId && req.status === 'Approved')
-      .reduce((total, req) => {
+      .filter((req: any) => req.staffId === staffId && req.leaveTypeId === leaveTypeId && req.status === 'Approved')
+      .reduce((total: number, req: any) => {
         const start = new Date(req.startDate);
         const end = new Date(req.endDate);
         const days = Math.ceil(Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -174,7 +175,7 @@ const StaffProfile: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
                   <span className="text-white/80 text-sm">Active Now</span>
-                  <span className="text-2xl font-black">{staff.filter(s => s.status === 'active').length}</span>
+                  <span className="text-2xl font-black">{staff.filter((s: Staff) => s.status === 'active').length}</span>
                 </div>
               </div>
             </div>
@@ -182,7 +183,7 @@ const StaffProfile: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
               <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Recent Profiles</h4>
               <div className="space-y-3">
-                {staff.slice(0, 4).map(s => (
+                {staff.slice(0, 4).map((s: Staff) => (
                   <button
                     key={s.id}
                     onClick={() => setSelectedStaffId(s.id)}
@@ -211,12 +212,12 @@ const StaffProfile: React.FC = () => {
   }
 
   const department = departments.find(
-    d => d.id === selectedStaff.departmentId
+    (d: any) => d.id === selectedStaff.departmentId
   );
   const designation = designations.find(
-    d => d.id === selectedStaff.designationId
+    (d: any) => d.id === selectedStaff.designationId
   );
-  const role = roles.find(r => r.id === selectedStaff.roleId);
+  const role = roles.find((r: any) => r.id === selectedStaff.roleId);
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -311,7 +312,7 @@ const StaffProfile: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Navigation Sidebar */}
         <div className="lg:col-span-1 space-y-2">
-          {(['profile', 'employment', 'bank', 'roles', 'account', 'leave', 'audit'] as const).map(
+          {(['profile', 'employment', 'bank', 'roles', 'account', 'leave', 'schedule', 'audit'] as const).map(
             tabId => {
               const label =
                 tabId === 'profile'
@@ -326,6 +327,8 @@ const StaffProfile: React.FC = () => {
                   ? 'Account Security'
                   : tabId === 'leave'
                   ? 'Leave Tracking'
+                  : tabId === 'schedule'
+                  ? 'Staff Schedule'
                   : 'Activity Logs';
               const icon =
                 tabId === 'profile'
@@ -340,6 +343,8 @@ const StaffProfile: React.FC = () => {
                   ? Lock
                   : tabId === 'leave'
                   ? Calendar
+                  : tabId === 'schedule'
+                  ? Clock
                   : Clock;
               
               const isActive = activeTab === tabId;
@@ -510,7 +515,7 @@ const StaffProfile: React.FC = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {roles.map(r => (
+                  {roles.map((r: any) => (
                     <button
                       key={r.id}
                       onClick={() => handleRoleChange(r.id)}
@@ -613,7 +618,7 @@ const StaffProfile: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {leaveTypes.map(type => {
+                  {leaveTypes.map((type: any) => {
                     const used = calculateUsedLeave(selectedStaff.id, type.id);
                     const remaining = type.maxDays - used;
                     const percentage = Math.round((used / type.maxDays) * 100);
@@ -644,6 +649,90 @@ const StaffProfile: React.FC = () => {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'schedule' && selectedStaff && (
+              <div className="p-10 space-y-8">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Staff Schedule
+                  </h3>
+                  <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                    <Clock className="w-5 h-5 text-blue-600" />
+                  </div>
+                </div>
+
+                {/* Academic schedule mock (if in Academic department) */}
+                {departments.find((d: any) => d.id === selectedStaff.departmentId)?.type === 'Academic' ? (
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                      <Calendar size={16} className="text-blue-600" />
+                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Lecture Timetable</span>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead className="bg-gray-50 dark:bg-gray-900/40">
+                          <tr>
+                            <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider w-40">Day</th>
+                            <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Schedule</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                          {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(day => (
+                            <tr key={day} className="group hover:bg-gray-50 dark:hover:bg-gray-900/20">
+                              <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{day}</td>
+                              <td className="px-6 py-4">
+                                <div className="flex flex-wrap gap-3">
+                                  {/* Minimal mock for display */}
+                                  <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded-r-lg w-64">
+                                    <div className="text-xs font-bold text-blue-600 dark:text-blue-400">08:00 - 10:00</div>
+                                    <div className="text-sm font-bold text-gray-900 dark:text-white">Course Session</div>
+                                    <div className="text-[11px] text-gray-500">Main Hall</div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Non-academic saved schedules */}
+                <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                    <Clock size={16} className="text-indigo-600" />
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Assigned Schedules</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead className="bg-gray-50 dark:bg-gray-900/40">
+                        <tr>
+                          <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Day</th>
+                          <th className="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Time</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                        {schedules.filter((s: any) => s.staffId === selectedStaff.id).length === 0 ? (
+                          <tr>
+                            <td className="px-6 py-6 text-gray-500" colSpan={2}>No schedules assigned.</td>
+                          </tr>
+                        ) : (
+                          schedules
+                            .filter((s: any) => s.staffId === selectedStaff.id)
+                            .map((s: any, idx: number) => (
+                              <tr key={`${selectedStaff.id}-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-900/20">
+                                <td className="px-6 py-4">{s.day}</td>
+                                <td className="px-6 py-4">{s.startTime} - {s.endTime}</td>
+                              </tr>
+                            ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
