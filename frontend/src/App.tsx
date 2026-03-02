@@ -317,13 +317,7 @@ const schoolAdminItems = [
       { name: 'Configuration', path: '/school-admin/human-resources/config' }
     ]
   },
-  { 
-    name: 'Subscription', 
-    icon: CreditCard,
-    subItems: [
-      { name: 'My Plan', path: '/school-admin/subscription' }
-    ]
-  },
+  { name: 'Subscription', path: '/school-admin/subscription', icon: CreditCard },
   { 
     name: 'Settings', 
     icon: SettingsIcon,
