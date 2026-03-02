@@ -18,7 +18,13 @@ import {
   Search,
   Globe,
   Sliders,
-  Construction
+  Construction,
+  MessageSquare,
+  Calendar,
+  DollarSign,
+  BookOpen,
+  Bus,
+  Briefcase,
 } from 'lucide-react';
 
 interface Module {
@@ -82,6 +88,66 @@ const GlobalModules: React.FC = () => {
           locked: false
         },
         {
+          id: 'communication',
+          title: 'Communication Centre',
+          description: 'Announcements, direct messaging, and notifications.',
+          icon: MessageSquare,
+          color: 'bg-pink-500',
+          active: true,
+          critical: false,
+          locked: false
+        },
+        {
+          id: 'events',
+          title: 'Events Management',
+          description: 'Event scheduling, calendars, and upcoming events.',
+          icon: Calendar,
+          color: 'bg-red-500',
+          active: true,
+          critical: false,
+          locked: false
+        },
+        {
+          id: 'finance',
+          title: 'Finance & Accounting',
+          description: 'Student fees, invoices, payments, and administrative accounting.',
+          icon: DollarSign,
+          color: 'bg-green-600',
+          active: true,
+          critical: true,
+          locked: false
+        },
+        {
+          id: 'human_resources',
+          title: 'Human Resources',
+          description: 'HR records, payroll, leave management, and staff profiles.',
+          icon: Briefcase,
+          color: 'bg-rose-600',
+          active: true,
+          critical: true,
+          locked: false
+        },
+        {
+          id: 'library',
+          title: 'Library Management',
+          description: 'Book catalog, borrowing system, and reservations.',
+          icon: BookOpen,
+          color: 'bg-amber-600',
+          active: true,
+          critical: false,
+          locked: false
+        },
+        {
+          id: 'student_services',
+          title: 'Student Services',
+          description: 'Hostel allocation, transport routes, and subscriptions.',
+          icon: Bus,
+          color: 'bg-yellow-500',
+          active: true,
+          critical: false,
+          locked: false
+        },
+        {
           id: 'reports',
           title: 'Reports & Analytics',
           description: 'Comprehensive reporting dashboard and data visualization.',
@@ -89,6 +155,16 @@ const GlobalModules: React.FC = () => {
           color: 'bg-orange-600',
           active: true,
           critical: false,
+          locked: false
+        },
+        {
+          id: 'student',
+          title: 'Student Management',
+          description: 'Student profiles, discipline records, and alumni tracking.',
+          icon: School,
+          color: 'bg-cyan-600',
+          active: true,
+          critical: true,
           locked: false
         },
         {

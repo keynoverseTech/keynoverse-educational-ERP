@@ -1,22 +1,11 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, Users } from 'lucide-react';
-
-interface Programme {
-  id: string;
-  name: string;
-  degreeType: string;
-  isGlobal?: boolean;
-  studentCapacity?: number;
-  currentUsers?: number;
-  expirationDate?: string;
-}
+import { mockProgrammes } from '../../../../data/mockData';
+import type { Programme } from '../../../../data/mockData';
 
 export const ProgrammesPage: React.FC = () => {
   // Only show local programmes created by this institution
-  const [programmes] = useState<Programme[]>([
-    { id: '1', name: 'ND Computer Science', degreeType: 'ND', isGlobal: true, studentCapacity: 120, currentUsers: 45, expirationDate: '2028-12-31' },
-    { id: '2', name: 'HND Software Engineering', degreeType: 'HND', isGlobal: true, studentCapacity: 80, currentUsers: 62, expirationDate: '2027-06-30' },
-  ]);
+  const [programmes] = useState<Programme[]>(mockProgrammes);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
