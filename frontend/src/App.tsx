@@ -14,7 +14,8 @@ import {
   Settings as SettingsIcon,
   DollarSign,
   MessageSquare,
-  Bus
+  Bus,
+  CreditCard
 } from 'lucide-react';
 import './App.css';
 
@@ -60,6 +61,7 @@ const SuperAdminSubscriptionPlans = lazy(() => import('./pages/super-admin/finan
 const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard'));
 const BasicReports = lazy(() => import('./pages/school-admin/reports/BasicReports'));
 const Settings = lazy(() => import('./pages/school-admin/settings-modules/Settings'));
+const SubscriptionPage = lazy(() => import('./pages/school-admin/subscription/SubscriptionPage'));
 
 // School Admin - Admissions
 const AdmissionsDashboard = lazy(() => import('./pages/school-admin/admissions/AdmissionsDashboard'));
@@ -316,6 +318,13 @@ const schoolAdminItems = [
     ]
   },
   { 
+    name: 'Subscription', 
+    icon: CreditCard,
+    subItems: [
+      { name: 'My Plan', path: '/school-admin/subscription' }
+    ]
+  },
+  { 
     name: 'Settings', 
     icon: SettingsIcon,
     subItems: [
@@ -502,6 +511,7 @@ function App() {
                         
                         {/* Other Pages */}
                         <Route path="/school-admin/reports" element={<BasicReports />} />
+                        <Route path="/school-admin/subscription" element={<SubscriptionPage />} />
                         <Route path="/school-admin/settings" element={<Settings />} />
                       </Route>
 
