@@ -27,6 +27,9 @@ import { HostelProvider } from './state/hostelContext';
 import { TransportProvider } from './state/transportContext';
 import { StudentPortalFinanceProvider } from './state/studentPortalFinanceContext';
 import { EventsProvider } from './state/eventsProvider';
+import { AlumniProvider } from './state/alumniState';
+import { ReceptionProvider } from './state/receptionContext';
+import { AttendanceProvider } from './state/academics/attendanceContext';
 
 // Components
 import LoadingFallback from './components/LoadingFallback';
@@ -86,6 +89,8 @@ const CourseRegistration = lazy(() => import('./pages/school-admin/academics/Cou
 const LecturesTimetable = lazy(() => import('./pages/school-admin/academics/LecturesTimetable'));
 const AcademicCalendar = lazy(() => import('./pages/school-admin/academics/AcademicCalendar'));
 const LevelPromotion = lazy(() => import('./pages/school-admin/academics/LevelPromotion'));
+const AttendanceDashboard = lazy(() => import('./pages/school-admin/academics/attendance/AttendanceDashboard'));
+const MarkAttendance = lazy(() => import('./pages/school-admin/academics/attendance/MarkAttendance'));
 
 // School Admin - Examinations
 const AssessmentConfiguration = lazy(() => import('./pages/school-admin/examinations/AssessmentConfiguration'));
@@ -110,6 +115,8 @@ const StaffSchedules = lazy(() => import('./pages/school-admin/HumanResources/St
 const PermissionsManagement = lazy(() => import('./pages/school-admin/HumanResources/PermissionsManagement'));
 const LeaveRequest = lazy(() => import('./pages/school-admin/HumanResources/LeaveRequest'));
 const LeaveApprovals = lazy(() => import('./pages/school-admin/HumanResources/LeaveApprovals'));
+const SalaryAdjustments = lazy(() => import('./pages/school-admin/HumanResources/SalaryAdjustments'));
+const SalaryAdvances = lazy(() => import('./pages/school-admin/HumanResources/SalaryAdvances'));
 
 // School Admin - Communication Centre
 const AnnouncementsPage = lazy(() => import('./pages/school-admin/communication-centre/Announcements'));
@@ -127,6 +134,20 @@ const EventsDashboardPage = lazy(() => import('./pages/school-admin/events/Event
 const EventCategoriesPage = lazy(() => import('./pages/school-admin/events/EventCategories'));
 const CreateEventPage = lazy(() => import('./pages/school-admin/events/CreateEvent'));
 const UpcomingEventsPage = lazy(() => import('./pages/school-admin/events/UpcomingEvents'));
+
+// School Admin - Alumni
+const AlumniDashboard = lazy(() => import('./pages/school-admin/Alumni/AlumniDashboard'));
+const AlumniList = lazy(() => import('./pages/school-admin/Alumni/AlumniList'));
+const AlumniProfile = lazy(() => import('./pages/school-admin/Alumni/AlumniProfile'));
+const EmploymentInfo = lazy(() => import('./pages/school-admin/Alumni/EmploymentInfo'));
+const TranscriptRequests = lazy(() => import('./pages/school-admin/Alumni/TranscriptRequests'));
+const AlumniCommunication = lazy(() => import('./pages/school-admin/Alumni/AlumniCommunication'));
+
+// School Admin - Reception
+const VisitorsLog = lazy(() => import('./pages/school-admin/Reception/VisitorsLog'));
+const Appointments = lazy(() => import('./pages/school-admin/Reception/Appointments'));
+const EnquiriesLog = lazy(() => import('./pages/school-admin/Reception/EnquiriesLog'));
+const MailLog = lazy(() => import('./pages/school-admin/Reception/MailLog'));
 
 // School Admin - Finance
 const GeneralLedgerPage = lazy(() => import('./pages/school-admin/finance/administrative-accounting/GeneralLedger'));
@@ -196,7 +217,8 @@ const schoolAdminItems = [
       { name: 'Course Management', path: '/school-admin/academics/courses-management' },
       { name: 'Course Registration', path: '/school-admin/academics/registration' },
       { name: 'Level Promotion', path: '/school-admin/academics/promotion' },
-      { name: 'Academic Calendar', path: '/school-admin/academics/calendar' }
+      { name: 'Academic Calendar', path: '/school-admin/academics/calendar' },
+      { name: 'Attendance', path: '/school-admin/academics/attendance' }
     ]
   },
   { 
@@ -291,8 +313,30 @@ const schoolAdminItems = [
       { name: 'Direct Messaging', path: '/school-admin/communication-centre/direct-messaging' }
     ]
   },
+  {
+    name: 'Alumni',
+    icon: GraduationCap,
+    subItems: [
+        { name: 'Dashboard', path: '/school-admin/alumni/dashboard' },
+        { name: 'Alumni List', path: '/school-admin/alumni/list' },
+        { name: 'Alumni Profile', path: '/school-admin/alumni/profile' },
+        { name: 'Employment Info', path: '/school-admin/alumni/employment' },
+        { name: 'Transcript Requests', path: '/school-admin/alumni/transcripts' },
+        { name: 'Communication', path: '/school-admin/alumni/communication' }
+    ]
+  },
+  {
+    name: 'Reception',
+    icon: Users,
+    subItems: [
+        { name: 'Visitors Log', path: '/school-admin/reception/visitors' },
+        { name: 'Appointments', path: '/school-admin/reception/appointments' },
+        { name: 'Enquiries Log', path: '/school-admin/reception/enquiries' },
+        { name: 'Mail Log', path: '/school-admin/reception/mail' }
+    ]
+  },
   { 
-    name: 'Reports', 
+    name: 'Reports',  
     path: '/school-admin/reports', 
     icon: FileText,
     subItems: [
@@ -314,6 +358,8 @@ const schoolAdminItems = [
       { name: 'Add Staff', path: '/school-admin/staff/create' },
       { name: 'Leave Request', path: '/school-admin/human-resources/leave/request' },
       { name: 'Leave Approvals', path: '/school-admin/human-resources/leave/approvals' },
+      { name: 'Salary Adjustments', path: '/school-admin/human-resources/salary/adjustments' },
+      { name: 'Salary Advances', path: '/school-admin/human-resources/salary/advances' },
       { name: 'Configuration', path: '/school-admin/human-resources/config' }
     ]
   },
@@ -354,6 +400,9 @@ const staffItems = [
 function App() {
   return (
     <HRProvider>
+      <ReceptionProvider>
+        <AttendanceProvider>
+          <AlumniProvider>
       <FinanceProvider>
         <StudentPortalFinanceProvider>
           <HostelProvider>
@@ -435,6 +484,8 @@ function App() {
                         <Route path="/school-admin/academics/registration" element={<CourseRegistration />} />
                         <Route path="/school-admin/academics/promotion" element={<LevelPromotion />} />
                         <Route path="/school-admin/academics/calendar" element={<AcademicCalendar />} />
+                        <Route path="/school-admin/academics/attendance" element={<AttendanceDashboard />} />
+                        <Route path="/school-admin/academics/attendance/mark/:id" element={<MarkAttendance />} />
 
                         {/* Examinations */}
                         <Route path="/school-admin/examinations/dashboard" element={<ExaminationDashboard />} />
@@ -473,9 +524,25 @@ function App() {
                         <Route path="/school-admin/human-resources/permissions" element={<PermissionsManagement />} />
                         <Route path="/school-admin/human-resources/leave/request" element={<LeaveRequest />} />
                         <Route path="/school-admin/human-resources/leave/approvals" element={<LeaveApprovals />} />
+                        <Route path="/school-admin/human-resources/salary/adjustments" element={<SalaryAdjustments />} />
+                        <Route path="/school-admin/human-resources/salary/advances" element={<SalaryAdvances />} />
 
                         <Route path="/school-admin/communication-centre/announcements" element={<AnnouncementsPage />} />
                         <Route path="/school-admin/communication-centre/direct-messaging" element={<DirectMessagingPage />} />
+
+                        {/* Alumni */}
+                        <Route path="/school-admin/alumni/dashboard" element={<AlumniDashboard />} />
+                        <Route path="/school-admin/alumni/list" element={<AlumniList />} />
+                        <Route path="/school-admin/alumni/profile" element={<AlumniProfile />} />
+                        <Route path="/school-admin/alumni/employment" element={<EmploymentInfo />} />
+                        <Route path="/school-admin/alumni/transcripts" element={<TranscriptRequests />} />
+                        <Route path="/school-admin/alumni/communication" element={<AlumniCommunication />} />
+
+                        {/* Reception */}
+                        <Route path="/school-admin/reception/visitors" element={<VisitorsLog />} />
+                        <Route path="/school-admin/reception/appointments" element={<Appointments />} />
+                        <Route path="/school-admin/reception/enquiries" element={<EnquiriesLog />} />
+                        <Route path="/school-admin/reception/mail" element={<MailLog />} />
 
                         {/* Library */}
                         <Route path="/school-admin/library/dashboard" element={<LibraryDashboardPage />} />
@@ -565,6 +632,9 @@ function App() {
       </HostelProvider>
     </StudentPortalFinanceProvider>
   </FinanceProvider>
+  </AlumniProvider>
+  </AttendanceProvider>
+  </ReceptionProvider>
 </HRProvider>
   );
 }

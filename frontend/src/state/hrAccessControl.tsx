@@ -104,6 +104,34 @@ export interface StaffSchedule {
   endTime: string;
 }
 
+export type SalaryAdjustmentStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface SalaryAdjustmentRequest {
+  id: string;
+  staffId: string;
+  currentSalary: number;
+  requestedSalary: number;
+  reason: string;
+  status: SalaryAdjustmentStatus;
+  requestDate: string;
+  approvalDate?: string;
+  comments?: string;
+}
+
+export type SalaryAdvanceStatus = 'Pending' | 'Approved' | 'Rejected';
+
+export interface SalaryAdvanceRequest {
+  id: string;
+  staffId: string;
+  amount: number;
+  reason: string;
+  repaymentMonths: number;
+  status: SalaryAdvanceStatus;
+  requestDate: string;
+  approvalDate?: string;
+  comments?: string;
+}
+
 interface HRContextValue {
   staff: Staff[];
   setStaff: React.Dispatch<React.SetStateAction<Staff[]>>;
@@ -125,6 +153,10 @@ interface HRContextValue {
   setLeaveRequests: React.Dispatch<React.SetStateAction<LeaveRequest[]>>;
   schedules: StaffSchedule[];
   setSchedules: React.Dispatch<React.SetStateAction<StaffSchedule[]>>;
+  salaryAdjustments: SalaryAdjustmentRequest[];
+  setSalaryAdjustments: React.Dispatch<React.SetStateAction<SalaryAdjustmentRequest[]>>;
+  salaryAdvances: SalaryAdvanceRequest[];
+  setSalaryAdvances: React.Dispatch<React.SetStateAction<SalaryAdvanceRequest[]>>;
   hasPermission: (staffId: string, permissionKey: string) => boolean;
 }
 
@@ -345,6 +377,8 @@ export const HRProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>(initialLeaveTypes);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(initialLeaveRequests);
   const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
+  const [salaryAdjustments, setSalaryAdjustments] = useState<SalaryAdjustmentRequest[]>([]);
+  const [salaryAdvances, setSalaryAdvances] = useState<SalaryAdvanceRequest[]>([]);
 
   const hasPermission = useCallback(
     (staffId: string, permissionKey: string) => {
@@ -400,6 +434,10 @@ export const HRProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setLeaveRequests,
         schedules,
         setSchedules,
+        salaryAdjustments,
+        setSalaryAdjustments,
+        salaryAdvances,
+        setSalaryAdvances,
         hasPermission,
       }}
     >
