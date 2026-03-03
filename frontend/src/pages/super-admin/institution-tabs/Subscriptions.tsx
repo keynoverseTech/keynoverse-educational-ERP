@@ -7,11 +7,13 @@ import {
   HardDrive, 
   Activity,
   Gem,
-  Bell
+  Ban,
+  CheckCircle
 } from 'lucide-react';
 
 const Subscriptions: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<'Active' | 'Suspended' | 'Expiring Soon'>('Active');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20,21 +22,31 @@ const Subscriptions: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleSuspend = () => {
+    if (window.confirm('Are you sure you want to suspend this institution? Access will be revoked immediately.')) {
+      setSubscriptionStatus('Suspended');
+    }
+  };
+
+  const handleReactivate = () => {
+    setSubscriptionStatus('Active');
+  };
+
   const billingHistory = [
     {
-      id: 'INV-2023-001',
-      date: 'Oct 12, 2023',
+      id: 'INV-2025-001',
+      date: 'Oct 12, 2025',
       description: 'Enterprise Yearly Subscription',
-      amount: '$12,000.00',
+      amount: '₦200,000,000',
       status: 'Paid',
       paymentMethod: 'Mastercard ending in 4242',
       invoice: '#'
     },
     {
-      id: 'INV-2023-002',
-      date: 'Sep 15, 2023',
+      id: 'INV-2025-002',
+      date: 'Sep 15, 2025',
       description: 'Storage Add-on (500GB)',
-      amount: '$150.00',
+      amount: '₦1,500,000',
       status: 'Paid',
       paymentMethod: 'Mastercard ending in 4242',
       invoice: '#'
@@ -110,33 +122,56 @@ const Subscriptions: React.FC = () => {
       ) : (
         <>
       {/* Enterprise Plan Card */}
-      <div className="bg-white dark:bg-[#151e32] rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+      <div className={`rounded-2xl border p-6 shadow-sm transition-all ${
+        subscriptionStatus === 'Suspended' 
+          ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800' 
+          : 'bg-white dark:bg-[#151e32] border-gray-200 dark:border-gray-800'
+      }`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-xl bg-blue-600/10 flex items-center justify-center flex-shrink-0">
-              <Gem className="text-blue-600 dark:text-blue-500" size={32} />
+            <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              subscriptionStatus === 'Suspended' ? 'bg-red-100 dark:bg-red-900/30 text-red-600' : 'bg-blue-600/10 text-blue-600 dark:text-blue-500'
+            }`}>
+              {subscriptionStatus === 'Suspended' ? <Ban size={32} /> : <Gem size={32} />}
             </div>
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">Enterprise Yearly</h2>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-500 text-[10px] font-bold uppercase tracking-wide border border-emerald-200 dark:border-emerald-500/20">
-                  Active
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${
+                  subscriptionStatus === 'Suspended' 
+                    ? 'bg-red-100 dark:bg-red-900/20 text-red-600 border-red-200'
+                    : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-500 border-emerald-200 dark:border-emerald-500/20'
+                }`}>
+                  {subscriptionStatus}
                 </span>
               </div>
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">Comprehensive ERP access for large institutions.</p>
               <div className="flex items-center gap-3 text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Renews on <span className="font-bold text-gray-900 dark:text-white">Oct 12, 2024</span></span>
+                <span className="text-gray-500 dark:text-gray-400">Renews on <span className="font-bold text-gray-900 dark:text-white">Oct 12, 2026</span></span>
                 <span className="h-4 w-px bg-gray-300 dark:bg-gray-700"></span>
-                <span className="text-gray-500 dark:text-gray-400"><span className="font-bold text-gray-900 dark:text-white">$12,000.00</span> / year</span>
+                <span className="text-gray-500 dark:text-gray-400"><span className="font-bold text-gray-900 dark:text-white">₦200,000,000</span> / year</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 flex items-center gap-2">
-              <Bell size={16} />
-              Send a Reminder
-            </button>
+            {subscriptionStatus === 'Active' ? (
+              <button 
+                onClick={handleSuspend}
+                className="px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20 flex items-center gap-2"
+              >
+                <Ban size={16} />
+                Suspend Access
+              </button>
+            ) : (
+              <button 
+                onClick={handleReactivate}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 flex items-center gap-2"
+              >
+                <CheckCircle size={16} />
+                Reactivate
+              </button>
+            )}
           </div>
         </div>
       </div>

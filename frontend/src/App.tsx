@@ -15,7 +15,10 @@ import {
   DollarSign,
   MessageSquare,
   Bus,
-  CreditCard
+  CreditCard,
+  IdCard,
+  Stethoscope,
+  ShoppingBag
 } from 'lucide-react';
 import './App.css';
 
@@ -62,6 +65,7 @@ const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard')
 const BasicReports = lazy(() => import('./pages/school-admin/reports/BasicReports'));
 const Settings = lazy(() => import('./pages/school-admin/settings-modules/Settings'));
 const SubscriptionPage = lazy(() => import('./pages/school-admin/subscription/SubscriptionPage'));
+const HealthDashboard = lazy(() => import('./pages/school-admin/health-clinic/HealthDashboard'));
 
 // School Admin - Admissions
 const AdmissionsDashboard = lazy(() => import('./pages/school-admin/admissions/AdmissionsDashboard'));
@@ -151,6 +155,18 @@ const TransportRoutes = lazy(() => import('./pages/school-admin/student-services
 const TransportVehicles = lazy(() => import('./pages/school-admin/student-services/transport/TransportVehicles'));
 const TransportSubscriptions = lazy(() => import('./pages/school-admin/student-services/transport/TransportSubscriptions'));
 const TransportConfig = lazy(() => import('./pages/school-admin/student-services/transport/TransportConfig'));
+
+// School Admin - ID Cards
+const StaffIDCardDashboard = lazy(() => import('./pages/school-admin/id-cards/StaffIDCardDashboard'));
+const StudentIDCardDashboard = lazy(() => import('./pages/school-admin/id-cards/StudentIDCardDashboard'));
+const IDCardTemplateDesigner = lazy(() => import('./pages/school-admin/id-cards/components/IDCardTemplateDesigner'));
+
+// School Admin - Procurement
+const ProcurementDashboard = lazy(() => import('./pages/school-admin/procurement/ProcurementDashboard'));
+const PurchaseRequests = lazy(() => import('./pages/school-admin/procurement/PurchaseRequests'));
+const PurchaseOrders = lazy(() => import('./pages/school-admin/procurement/PurchaseOrders'));
+const InventoryManagement = lazy(() => import('./pages/school-admin/procurement/InventoryManagement'));
+const AssetManagement = lazy(() => import('./pages/school-admin/procurement/AssetManagement'));
 
 // Portals
 const StudentPortalDashboard = lazy(() => import('./pages/student-portal/Dashboard'));
@@ -316,7 +332,30 @@ const schoolAdminItems = [
       { name: 'Add Staff', path: '/school-admin/staff/create' },
       { name: 'Leave Request', path: '/school-admin/human-resources/leave/request' },
       { name: 'Leave Approvals', path: '/school-admin/human-resources/leave/approvals' },
+      { name: 'Permissions Management', path: '/school-admin/human-resources/permissions' },
       { name: 'Configuration', path: '/school-admin/human-resources/config' }
+    ]
+  },
+  {
+    name: 'ID Cards',
+    icon: IdCard,
+    subItems: [
+      { name: 'Staff ID Cards', path: '/school-admin/id-cards/staff' },
+      { name: 'Staff Template', path: '/school-admin/id-cards/staff/template' },
+      { name: 'Student ID Cards', path: '/school-admin/id-cards/students' },
+      { name: 'Student Template', path: '/school-admin/id-cards/students/template' },
+    ]
+  },
+  { name: 'Health & Clinic', path: '/school-admin/health', icon: Stethoscope },
+  {
+    name: 'Procurement',
+    icon: ShoppingBag,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/procurement/dashboard' },
+      { name: 'Purchase Requests', path: '/school-admin/procurement/requests' },
+      { name: 'Purchase Orders', path: '/school-admin/procurement/orders' },
+      { name: 'Inventory', path: '/school-admin/procurement/inventory' },
+      { name: 'Fixed Assets', path: '/school-admin/procurement/assets' }
     ]
   },
   { name: 'Subscription', path: '/school-admin/subscription', icon: CreditCard },
@@ -469,6 +508,19 @@ function App() {
                         <Route path="/school-admin/staff/profile" element={<StaffProfile />} />
                         <Route path="/school-admin/staff/create" element={<CreateStaff />} />
 
+                        {/* ID Cards */}
+                        <Route path="/school-admin/id-cards/staff" element={<StaffIDCardDashboard />} />
+                        <Route path="/school-admin/id-cards/staff/template" element={<IDCardTemplateDesigner type="Staff" />} />
+                        <Route path="/school-admin/id-cards/students" element={<StudentIDCardDashboard />} />
+                        <Route path="/school-admin/id-cards/students/template" element={<IDCardTemplateDesigner type="Student" />} />
+
+                        {/* Procurement */}
+                        <Route path="/school-admin/procurement/dashboard" element={<ProcurementDashboard />} />
+                        <Route path="/school-admin/procurement/requests" element={<PurchaseRequests />} />
+                        <Route path="/school-admin/procurement/orders" element={<PurchaseOrders />} />
+                        <Route path="/school-admin/procurement/inventory" element={<InventoryManagement />} />
+                        <Route path="/school-admin/procurement/assets" element={<AssetManagement />} />
+
                         {/* HR */}
                         <Route path="/school-admin/human-resources/dashboard" element={<HRDashboard />} />
                         <Route path="/school-admin/human-resources/staff-schedules" element={<StaffSchedules />} />
@@ -509,6 +561,7 @@ function App() {
                         {/* Other Pages */}
                         <Route path="/school-admin/reports" element={<BasicReports />} />
                         <Route path="/school-admin/subscription" element={<SubscriptionPage />} />
+                        <Route path="/school-admin/health" element={<HealthDashboard />} />
                         <Route path="/school-admin/settings" element={<Settings />} />
                       </Route>
 
