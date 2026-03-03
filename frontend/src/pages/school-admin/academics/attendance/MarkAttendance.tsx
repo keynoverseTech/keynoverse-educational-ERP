@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { QrCode, Link, Check, X, User, ArrowLeft, RefreshCw, Lock, Save } from 'lucide-react';
+import { Link, Check, X, ArrowLeft, RefreshCw, Lock, Save } from 'lucide-react';
 import { useAttendance } from '../../../../state/academics/attendanceContext';
+// @ts-ignore
 import QRCode from 'react-qr-code';
 
 const MarkAttendance: React.FC = () => {

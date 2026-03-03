@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useAlumni } from '../../../state/alumniState';
 import type { TranscriptStatus } from '../../../state/alumniState';
 

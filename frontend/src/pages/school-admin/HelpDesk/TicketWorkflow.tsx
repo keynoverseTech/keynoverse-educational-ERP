@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Search, Filter, CheckCircle, Clock, AlertCircle, Eye } from 'lucide-react';
-import { useHelpDesk, Ticket } from '../../../state/helpdeskContext';
-import { useNavigate } from 'react-router-dom';
+import { Search, Filter, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { useHelpDesk } from '../../../state/helpdeskContext';
+import type { Ticket } from '../../../state/helpdeskContext';
 
 const TicketWorkflow: React.FC = () => {
   const { tickets, updateTicketStatus } = useHelpDesk();
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [priorityFilter, setPriorityFilter] = useState('All');

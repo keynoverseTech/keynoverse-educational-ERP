@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Calendar, BookOpen, Briefcase, FileText, Building2, Globe } from 'lucide-react';
 import { useAlumni } from '../../../state/alumniState';
-import type { Alumni } from '../../../state/alumniState';
 
 type Tab = 'overview' | 'employment' | 'transcripts';
 

@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Eye, MoreHorizontal, User } from 'lucide-react';
 import { useAlumni } from '../../../state/alumniState';
-import type { Alumni } from '../../../state/alumniState';
 import { useNavigate } from 'react-router-dom';
 
 const AlumniList: React.FC = () => {
