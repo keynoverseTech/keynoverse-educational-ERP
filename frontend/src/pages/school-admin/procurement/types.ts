@@ -46,6 +46,13 @@ export interface InventoryItem {
   lastUpdated: string;
 }
 
+export interface MaintenanceRecord {
+  date: string;
+  description: string;
+  cost: number;
+  technician: string;
+}
+
 export interface Asset {
   id: string;
   assetTag: string;
@@ -56,12 +63,7 @@ export interface Asset {
   custodian: string; // Person responsible
   purchaseDate: string;
   purchaseCost: number;
-  maintenanceLog: Array<{
-    date: string;
-    description: string;
-    cost: number;
-    technician: string;
-  }>;
+  maintenanceLog: MaintenanceRecord[];
 }
 
 export interface StockMovement {

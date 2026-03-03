@@ -68,12 +68,14 @@ export const procurementService = {
   saveAsset: (asset: Asset) => {
     const assets = get<Asset>(STORAGE_KEYS.ASSETS);
     const index = assets.findIndex(a => a.id === asset.id);
-    if (index >= 0) {
-      assets[index] = asset;
-    } else {
-      assets.push(asset);
-    }
+    if (index >= 0) assets[index] = asset;
+    else assets.push(asset);
     save(STORAGE_KEYS.ASSETS, assets);
+  },
+  deleteAsset: (id: string) => {
+    const assets = get<Asset>(STORAGE_KEYS.ASSETS);
+    const filtered = assets.filter(a => a.id !== id);
+    save(STORAGE_KEYS.ASSETS, filtered);
   },
 
   // Stock Movements
@@ -81,6 +83,43 @@ export const procurementService = {
     const movements = get<StockMovement>(STORAGE_KEYS.STOCK_MOVEMENTS);
     movements.push(movement);
     save(STORAGE_KEYS.STOCK_MOVEMENTS, movements);
+  },
+  getMovements: (itemId?: string) => {
+    const movements = get<StockMovement>(STORAGE_KEYS.STOCK_MOVEMENTS);
+    return itemId ? movements.filter(m => m.itemId === itemId) : movements;
+  },
+
+  // Helpers
+  generatePOFromPR: (pr: PurchaseRequest, supplierName: string) => {
+    const po: PurchaseOrder = {
+      id: `PO-${Date.now()}`,
+      prId: pr.id,
+      supplierName: supplierName,
+      orderDate: new Date().toISOString(),
+      status: 'Sent',
+      items: pr.items.map(item => ({
+        itemName: item.itemName,
+        quantity: item.quantity,
+        unitPrice: item.estimatedCost, // Default to estimated cost
+        total: item.quantity * item.estimatedCost
+      })),
+      totalCost: pr.totalEstimatedCost
+    };
+    
+    // 1. Create the PO
+    const orders = get<PurchaseOrder>(STORAGE_KEYS.ORDERS);
+    orders.push(po);
+    save(STORAGE_KEYS.ORDERS, orders);
+
+    // 2. Update PR status
+    const requests = get<PurchaseRequest>(STORAGE_KEYS.REQUESTS);
+    const index = requests.findIndex(r => r.id === pr.id);
+    if (index >= 0) {
+      requests[index].status = 'Ordered';
+      requests[index].poId = po.id;
+      save(STORAGE_KEYS.REQUESTS, requests);
+    }
+    return po;
   },
 
   // Seed Data (for demo)

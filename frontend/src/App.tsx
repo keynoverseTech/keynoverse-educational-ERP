@@ -90,6 +90,9 @@ const ProgrammesPage = lazy(() => import('./pages/school-admin/academics/modules
 const LevelsPage = lazy(() => import('./pages/school-admin/academics/modules/LevelsPage').then(module => ({ default: module.LevelsPage })));
 const CoursesPage = lazy(() => import('./pages/school-admin/academics/modules/CoursesPage').then(module => ({ default: module.CoursesPage })));
 const CourseRegistrationConfig = lazy(() => import('./pages/school-admin/academics/modules/CourseRegistrationConfig'));
+const CourseMaterialsDashboard = lazy(() => import('./pages/school-admin/academics/modules/CourseMaterials/CourseMaterialsDashboard'));
+const ArchivedMaterials = lazy(() => import('./pages/school-admin/academics/modules/CourseMaterials/ArchivedMaterials'));
+const DownloadLog = lazy(() => import('./pages/school-admin/academics/modules/CourseMaterials/DownloadLog'));
 const RegistrationApprovals = lazy(() => import('./pages/school-admin/academics/RegistrationApprovals'));
 const CourseManagement = lazy(() => import('./pages/school-admin/Courses'));
 const CourseRegistration = lazy(() => import('./pages/school-admin/academics/CourseRegistration'));
@@ -240,6 +243,7 @@ const schoolAdminItems = [
       { name: 'Dashboard', path: '/school-admin/academics/dashboard' },
       { name: 'Configure Academic', path: '/school-admin/academics/configure' },
       { name: 'Course Management', path: '/school-admin/academics/courses-management' },
+      { name: 'Course Materials', path: '/school-admin/academics/course-materials' },
       { name: 'Course Registration', path: '/school-admin/academics/registration' },
       { name: 'Level Promotion', path: '/school-admin/academics/promotion' },
       { name: 'Academic Calendar', path: '/school-admin/academics/calendar' },
@@ -540,6 +544,9 @@ function App() {
                         <Route path="/school-admin/academics/registration-config" element={<CourseRegistrationConfig />} />
                         <Route path="/school-admin/academics/registration-approvals" element={<RegistrationApprovals />} />
                         <Route path="/school-admin/academics/courses-management" element={<CourseManagement />} />
+                        <Route path="/school-admin/academics/course-materials" element={<CourseMaterialsDashboard />} />
+                        <Route path="/school-admin/academics/course-materials/archive" element={<ArchivedMaterials />} />
+                        <Route path="/school-admin/academics/course-materials/log" element={<DownloadLog />} />
                         <Route path="/school-admin/academics/lectures-timetable" element={<LecturesTimetable />} />
                         <Route path="/school-admin/academics/registration" element={<CourseRegistration />} />
                         <Route path="/school-admin/academics/promotion" element={<LevelPromotion />} />

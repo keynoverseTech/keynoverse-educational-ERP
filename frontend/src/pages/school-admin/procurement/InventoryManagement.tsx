@@ -6,15 +6,20 @@ import {
   AlertTriangle, 
   Plus, 
   Minus,
-  History
+  History,
+  XCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+  CheckCircle
 } from 'lucide-react';
 import { procurementService } from './service';
-import type { InventoryItem } from './types';
+import type { InventoryItem, StockMovement } from './types';
 
 const InventoryManagement: React.FC = () => {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [adjustmentModal, setAdjustmentModal] = useState<{ isOpen: boolean, item?: InventoryItem, type: 'In' | 'Out' }>({ isOpen: false, type: 'In' });
+  const [historyModal, setHistoryModal] = useState<{ isOpen: boolean, item?: InventoryItem, movements: StockMovement[] }>({ isOpen: false, movements: [] });
   const [adjustQty, setAdjustQty] = useState(1);
   const [adjustReason, setAdjustReason] = useState('');
 
@@ -59,6 +64,11 @@ const InventoryManagement: React.FC = () => {
     setAdjustmentModal({ isOpen: false, type: 'In' });
     setAdjustQty(1);
     setAdjustReason('');
+  };
+
+  const openHistory = (item: InventoryItem) => {
+    const movements = procurementService.getMovements(item.id);
+    setHistoryModal({ isOpen: true, item, movements });
   };
 
   const filteredInventory = inventory.filter(item => 
@@ -123,8 +133,8 @@ const InventoryManagement: React.FC = () => {
                       <AlertTriangle size={12} /> Low Stock
                     </span>
                   ) : (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-green-100 text-green-700">
-                      In Stock
+                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-green-100 text-green-700 inline-flex items-center gap-1">
+                      <CheckCircle size={12} /> In Stock
                     </span>
                   )}
                 </td>
@@ -144,7 +154,11 @@ const InventoryManagement: React.FC = () => {
                     >
                       <Minus size={18} />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-blue-600 rounded-lg" title="History">
+                    <button 
+                      onClick={() => openHistory(item)}
+                      className="p-2 text-gray-400 hover:text-blue-600 rounded-lg" 
+                      title="History"
+                    >
                       <History size={18} />
                     </button>
                   </div>
@@ -164,7 +178,7 @@ const InventoryManagement: React.FC = () => {
 
       {/* Adjustment Modal */}
       {adjustmentModal.isOpen && adjustmentModal.item && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-[#151e32] w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
             <h2 className="text-xl font-bold mb-1 flex items-center gap-2">
               {adjustmentModal.type === 'In' ? <Plus className="text-green-600" /> : <Minus className="text-red-600" />}
@@ -209,6 +223,79 @@ const InventoryManagement: React.FC = () => {
                 }`}
               >
                 Confirm {adjustmentModal.type === 'In' ? 'Receipt' : 'Issuance'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* History Modal */}
+      {historyModal.isOpen && historyModal.item && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#151e32] w-full max-w-2xl rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+                  <History className="text-blue-600" /> Stock Movement History
+                </h2>
+                <p className="text-sm text-gray-500">History for <span className="font-bold text-gray-700 dark:text-gray-300">{historyModal.item.name}</span></p>
+              </div>
+              <button 
+                onClick={() => setHistoryModal({ isOpen: false, movements: [] })}
+                className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg"
+              >
+                <XCircle size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {historyModal.movements.length === 0 ? (
+                <div className="p-12 text-center text-gray-500 italic bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
+                  No movement history recorded for this item.
+                </div>
+              ) : (
+                <div className="border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
+                      <tr>
+                        <th className="p-3 text-xs font-bold text-gray-500 uppercase">Date</th>
+                        <th className="p-3 text-xs font-bold text-gray-500 uppercase">Type</th>
+                        <th className="p-3 text-xs font-bold text-gray-500 uppercase text-center">Qty</th>
+                        <th className="p-3 text-xs font-bold text-gray-500 uppercase">Reason / By</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {[...historyModal.movements].reverse().map((mv) => (
+                        <tr key={mv.id} className="text-sm">
+                          <td className="p-3 text-gray-600 dark:text-gray-400">
+                            {new Date(mv.date).toLocaleDateString()}<br/>
+                            <span className="text-[10px] opacity-60">{new Date(mv.date).toLocaleTimeString()}</span>
+                          </td>
+                          <td className="p-3">
+                            <span className={`inline-flex items-center gap-1 font-bold ${mv.type === 'In' ? 'text-green-600' : 'text-red-600'}`}>
+                              {mv.type === 'In' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                              {mv.type}
+                            </span>
+                          </td>
+                          <td className="p-3 text-center font-bold text-gray-900 dark:text-white">{mv.quantity}</td>
+                          <td className="p-3">
+                            <div className="font-medium text-gray-700 dark:text-gray-300">{mv.reason}</div>
+                            <div className="text-[10px] text-gray-400">By: {mv.performedBy}</div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end mt-8">
+              <button 
+                onClick={() => setHistoryModal({ isOpen: false, movements: [] })}
+                className="px-6 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+              >
+                Close
               </button>
             </div>
           </div>
