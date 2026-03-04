@@ -275,8 +275,8 @@ const schoolAdminItems = [
     icon: UserPlus,
     subItems: [
       { name: 'Dashboard', path: '/school-admin/admissions/dashboard' },
-      { name: 'Configure Admissions', path: '/school-admin/admissions/configure' },
-      { name: 'Intake Management', path: '/school-admin/admissions/intake' },
+      { name: 'Admission Setup', path: '/school-admin/admissions/configure' },
+      { name: 'Intake', path: '/school-admin/admissions/intake' },
       { name: 'Create Admission', path: '/school-admin/admissions/create' },
       { name: 'Multiple Imports', path: '/school-admin/admissions/imports' }
     ]
@@ -319,6 +319,7 @@ const schoolAdminItems = [
     name: 'Finance', 
     icon: DollarSign,
     subItems: [
+      { name: 'Bank Accounts', path: '/school-admin/finance/accounts' },
       {
         name: 'Student Accounting',
         subItems: [
@@ -334,8 +335,7 @@ const schoolAdminItems = [
           { name: 'General Ledger', path: '/school-admin/finance/administrative-accounting/ledger' },
           { name: 'Payroll Disbursement', path: '/school-admin/finance/administrative-accounting/disbursement' }
         ]
-      },
-      { name: 'Bank Accounts', path: '/school-admin/finance/accounts' }
+      }
     ]
   },
   { 
