@@ -336,9 +336,6 @@ export const CoursesPage: React.FC = () => {
                   <td className="p-4 font-medium text-gray-900 dark:text-white">
                     <div className="flex items-center gap-2">
                       <span>{course.title}</span>
-                      {course.isGlobal && (
-                        <span className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-[9px] font-black uppercase rounded border border-purple-100 dark:border-purple-900/30">Global</span>
-                      )}
                     </div>
                   </td>
                   <td className="p-4">

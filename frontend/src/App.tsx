@@ -140,6 +140,7 @@ const PayrollManagement = lazy(() => import('./pages/school-admin/HumanResources
 // School Admin - Communication Centre
 const AnnouncementsPage = lazy(() => import('./pages/school-admin/communication-centre/Announcements'));
 const DirectMessagingPage = lazy(() => import('./pages/school-admin/communication-centre/DirectMessaging'));
+const InboxPage = lazy(() => import('./pages/school-admin/communication-centre/Inbox').then(module => ({ default: module.default })));
 
 // School Admin - Library
 const LibraryDashboardPage = lazy(() => import('./pages/school-admin/library/LibraryDashboard'));
@@ -363,6 +364,7 @@ const schoolAdminItems = [
     name: 'Communication Centre', 
     icon: MessageSquare,
     subItems: [
+      { name: 'Inbox', path: '/school-admin/communication-centre/inbox' },
       { name: 'Announcements', path: '/school-admin/communication-centre/announcements' },
       { name: 'Direct Messaging', path: '/school-admin/communication-centre/direct-messaging' }
     ]
@@ -658,6 +660,7 @@ function App() {
 
                         <Route path="/school-admin/communication-centre/announcements" element={<AnnouncementsPage />} />
                         <Route path="/school-admin/communication-centre/direct-messaging" element={<DirectMessagingPage />} />
+                        <Route path="/school-admin/communication-centre/inbox" element={<InboxPage />} />
 
                         {/* Alumni */}
                         <Route path="/school-admin/alumni/dashboard" element={<AlumniDashboard />} />
