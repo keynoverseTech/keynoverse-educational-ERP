@@ -63,6 +63,7 @@ const ReportsLayout = lazy(() => import('./pages/super-admin/reports/ReportsLayo
 const SuperAdminFinanceDashboard = lazy(() => import('./pages/super-admin/finance/FinanceDashboard'));
 const SuperAdminRevenue = lazy(() => import('./pages/super-admin/finance/Revenue'));
 const SuperAdminSubscriptionPlans = lazy(() => import('./pages/super-admin/finance/SubscriptionPlans'));
+const SuperAdminAcademicsOverview = lazy(() => import('./pages/super-admin/institution-tabs/academics-overview/AcademicsOverviewDashboard'));
 
 // School Admin - General
 const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard'));
@@ -216,7 +217,7 @@ const StudentCourses = lazy(() => import('./pages/student-portal/courses/Courses
 const StudentResults = lazy(() => import('./pages/student-portal/results/ResultsPage'));
 const StudentTimetable = lazy(() => import('./pages/student-portal/timetable/TimetablePage'));
 const StudentPortalProfile = lazy(() => import('./pages/student-portal/profile/ProfilePage'));
-const StaffPortalDashboard = lazy(() => import('./pages/staff-portal/Dashboard'));
+const StaffPortal = lazy(() => import('./pages/staff-portal/StaffPortal'));
 const StaffGrading = lazy(() => import('./pages/staff-portal/StaffGrading'));
 
 // Navigation Config
@@ -522,8 +523,9 @@ const studentItems = [
 
 const staffItems = [
   { name: 'Dashboard', path: '/staff/dashboard', icon: LayoutDashboard },
+  { name: 'Course Materials', path: '/staff/materials', icon: FileText },
+  { name: 'Grading & Results', path: '/staff/grading', icon: ClipboardCheck },
   { name: 'My Classes', path: '/staff/classes', icon: Users },
-  { name: 'Grading', path: '/staff/grading', icon: ClipboardCheck },
   { name: 'Timetable', path: '/staff/timetable', icon: Calendar },
   { name: 'Profile', path: '/staff/profile', icon: Briefcase },
 ];
@@ -571,6 +573,7 @@ function App() {
                             <Route path="/super-admin/reports" element={<ReportsLayout />} />
                           </Route>
 
+                          <Route path="/super-admin/academics-overview" element={<SuperAdminAcademicsOverview />} />
                           <Route path="/super-admin/applications/:id" element={<ApplicationDetails />} />
                           <Route path="/super-admin/institutions/:id" element={<InstitutionDetails />} />
 
@@ -796,9 +799,10 @@ function App() {
                           </DashboardLayout>
                         }
                       >
-                        <Route path="/staff/dashboard" element={<StaffPortalDashboard />} />
-                        <Route path="/staff/grading" element={<StaffGrading />} />
-                        <Route path="/staff/score-upload" element={<ScoreUpload />} />
+                        <Route index element={<Navigate to="dashboard" replace />} />
+                        <Route path="dashboard" element={<StaffPortal />} />
+                        <Route path="materials" element={<StaffPortal />} />
+                        <Route path="grading" element={<StaffGrading />} />
                       </Route>
                     </Routes>
                   </Suspense>

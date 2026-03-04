@@ -23,6 +23,8 @@ import {
   School
 } from 'lucide-react';
 
+import AcademicsOverviewDashboard from './academics-overview/AcademicsOverviewDashboard';
+
 interface ModuleStat {
   label: string;
   value: string;
@@ -56,6 +58,8 @@ const Overview: React.FC = () => {
   const handleViewModule = (module: ModuleData) => {
     if (module.id === 'admissions') {
       navigate('/super-admin/admissions-governance');
+    } else if (module.id === 'academics') {
+      navigate('/super-admin/academics-overview');
     } else {
       setSelectedModule(module);
     }
@@ -434,7 +438,7 @@ const Overview: React.FC = () => {
       {/* Module Details Modal */}
       {selectedModule && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200">
             <div className={`p-6 ${selectedModule.color} relative overflow-hidden`}>
               <div className="absolute top-0 right-0 p-32 bg-white/10 rounded-full transform translate-x-10 -translate-y-10 blur-2xl"></div>
               <div className="relative z-10 flex justify-between items-start">
@@ -452,50 +456,46 @@ const Overview: React.FC = () => {
               <p className="text-blue-100 relative z-10 text-sm mt-1">{selectedModule.description}</p>
             </div>
             
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="p-6 bg-gray-50 dark:bg-gray-900/50 max-h-[60vh] overflow-y-auto">
+              {selectedModule.id === 'academics' ? (
+                <AcademicsOverviewDashboard />
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {selectedModule.stats.map((stat, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
+                      </div>
+                      {stat.trend && (
+                        <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg ${
+                          stat.trendUp 
+                            ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                            : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                        }`}>
+                          <BarChart3 size={14} />
+                          {stat.trend}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 bg-white dark:bg-[#1e293b] border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <Activity size={16} />
                   <span>Last synced: <span className="font-medium text-gray-900 dark:text-white">{selectedModule.lastSync}</span></span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                  </span>
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-500">Live System</span>
+                <div className="flex gap-3">
+                  <button className="py-2 px-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">
+                    View Logs
+                  </button>
+                  <button className="py-2 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors text-sm shadow-lg shadow-blue-500/20">
+                    Configure Module
+                  </button>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 mb-6">
-                {selectedModule.stats.map((stat, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
-                    </div>
-                    {stat.trend && (
-                      <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg ${
-                        stat.trendUp 
-                          ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                          : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                      }`}>
-                        <BarChart3 size={14} />
-                        {stat.trend}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-3">
-                <button className="flex-1 py-2.5 px-4 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">
-                  View Logs
-                </button>
-                <button className="flex-1 py-2.5 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors text-sm shadow-lg shadow-blue-500/20">
-                  Configure Module
-                </button>
-              </div>
             </div>
           </div>
         </div>

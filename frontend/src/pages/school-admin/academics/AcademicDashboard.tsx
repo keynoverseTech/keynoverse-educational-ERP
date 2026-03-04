@@ -40,7 +40,7 @@ export const AcademicDashboard: React.FC = () => {
       title: 'Configure Structure', 
       desc: 'Manage faculties, departments, and programmes', 
       icon: Settings, 
-      path: '/school-admin/academics/structure',
+      path: '/school-admin/academics/configure',
       color: 'bg-blue-600'
     },
     { 
@@ -64,6 +64,20 @@ export const AcademicDashboard: React.FC = () => {
       path: '/school-admin/academics/promotion',
       color: 'bg-orange-600'
     },
+    { 
+      title: 'Course Materials', 
+      desc: 'Manage course materials and resources', 
+      icon: BookOpen, 
+      path: '/school-admin/academics/course-materials',
+      color: 'bg-teal-600'
+    },
+    { 
+      title: 'Attendance', 
+      desc: 'Track and manage student attendance', 
+      icon: Clock, 
+      path: '/school-admin/academics/attendance',
+      color: 'bg-indigo-600'
+    }
   ];
 
   return (
