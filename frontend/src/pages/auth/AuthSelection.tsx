@@ -100,7 +100,7 @@ const AuthSelection: React.FC = () => {
 
                     {/* Student Portal Card */}
                     <button 
-                        onClick={() => navigate('/student/dashboard')}
+                        onClick={() => navigate('/auth/student')}
                         className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-orange-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] animate-fade-in-up"
                         style={{ animationDelay: '400ms' }}
                     >

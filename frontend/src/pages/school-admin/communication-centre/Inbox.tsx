@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import { 
   Inbox as InboxIcon, 
   Search, 
-  Filter, 
   Megaphone, 
   MessageSquare, 
-  Clock, 
   User, 
-  MoreVertical,
   Star,
   Trash2,
   Archive,

@@ -7,7 +7,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import AcademicConfiguration from './AcademicConfiguration';
 import CoursesList from './CoursesList';
 import TimetableView from './TimetableView';
-import AttendanceView from './AttendanceView';
+import AttendanceReport from './AttendanceReport';
 import { useNavigate } from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
@@ -132,7 +132,7 @@ const AcademicsOverviewDashboard: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => navigate('/super-admin/dashboard')}
+                onClick={() => navigate(-1)}
                 className="group flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all text-gray-500 dark:text-gray-400"
               >
                 <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -387,7 +387,7 @@ const AcademicsOverviewDashboard: React.FC = () => {
 
           {activeTab === 'attendance' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <AttendanceView />
+              <AttendanceReport />
             </div>
           )}
         </div>

@@ -13,17 +13,15 @@ import {
   History,
   Calendar,
   Briefcase,
-  Eye,
   X,
   Activity,
   BarChart3,
   FileSignature,
   Layout,
   User,
-  School
+  School,
+  ArrowRight
 } from 'lucide-react';
-
-import AcademicsOverviewDashboard from './academics-overview/AcademicsOverviewDashboard';
 
 interface ModuleStat {
   label: string;
@@ -60,6 +58,8 @@ const Overview: React.FC = () => {
       navigate('/super-admin/admissions-governance');
     } else if (module.id === 'academics') {
       navigate('/super-admin/academics-overview');
+    } else if (module.id === 'staff') {
+      navigate('/super-admin/hr-overview');
     } else {
       setSelectedModule(module);
     }
@@ -209,7 +209,7 @@ const Overview: React.FC = () => {
     },
     {
       id: 'staff',
-      title: 'Staff Management',
+      title: 'Human Resources',
       description: 'HR records, payroll, and leave management.',
       icon: Users,
       color: 'bg-pink-600',
@@ -366,32 +366,35 @@ const Overview: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {modules.map((module) => (
-              <div key={module.id} className="bg-white dark:bg-[#151e32] rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm hover:shadow-md transition-all group flex flex-col h-full">
-                <div className="flex justify-between items-start mb-3">
-                  <div className={`p-2.5 rounded-xl ${module.active ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}`}>
-                    <module.icon size={22} className={module.active ? 'text-gray-900 dark:text-white' : 'text-gray-400'} />
+              <div key={module.id} className="bg-white dark:bg-[#151e32] rounded-xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm hover:shadow-lg transition-all group flex flex-col h-full hover:-translate-y-1 duration-300">
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`p-3 rounded-2xl ${module.active ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}`}>
+                    <module.icon size={24} className={module.active ? 'text-gray-900 dark:text-white' : 'text-gray-400'} />
+                  </div>
+                  <div className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${module.active ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-500'}`}>
+                    {module.active ? 'Active' : 'Inactive'}
                   </div>
                 </div>
-                <h3 className="font-bold text-gray-900 dark:text-white mb-1.5 text-base">{module.title}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 flex-grow leading-relaxed">{module.description}</p>
-                <div className="flex items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-800 mt-auto justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${module.active ? 'bg-emerald-500' : 'bg-gray-400'}`}></span>
-                    <span className={`text-xs font-bold ${module.active ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-500'}`}>
-                      {module.active ? 'Active' : 'Inactive'}
+                <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-lg">{module.title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 flex-grow leading-relaxed line-clamp-2">{module.description}</p>
+                
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-800 mt-auto">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400 font-medium flex items-center gap-1">
+                      <Activity size={12} />
+                      Synced {module.lastSync}
                     </span>
+                    {module.active && (
+                      <button 
+                        onClick={() => handleViewModule(module)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors text-xs font-bold"
+                      >
+                        Open Module <ArrowRight size={12} />
+                      </button>
+                    )}
                   </div>
-                  {module.active && (
-                    <button 
-                      onClick={() => handleViewModule(module)}
-                      className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
-                      title="View Details"
-                    >
-                      <Eye size={16} />
-                    </button>
-                  )}
                 </div>
               </div>
             ))}
@@ -457,30 +460,26 @@ const Overview: React.FC = () => {
             </div>
             
             <div className="p-6 bg-gray-50 dark:bg-gray-900/50 max-h-[60vh] overflow-y-auto">
-              {selectedModule.id === 'academics' ? (
-                <AcademicsOverviewDashboard />
-              ) : (
-                <div className="grid grid-cols-1 gap-4">
-                  {selectedModule.stats.map((stat, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
-                        <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
-                      </div>
-                      {stat.trend && (
-                        <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg ${
-                          stat.trendUp 
-                            ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                            : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                        }`}>
-                          <BarChart3 size={14} />
-                          {stat.trend}
-                        </div>
-                      )}
+              <div className="grid grid-cols-1 gap-4">
+                {selectedModule.stats.map((stat, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
                     </div>
-                  ))}
-                </div>
-              )}
+                    {stat.trend && (
+                      <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg ${
+                        stat.trendUp 
+                          ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                          : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        <BarChart3 size={14} />
+                        {stat.trend}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="p-4 bg-white dark:bg-[#1e293b] border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">

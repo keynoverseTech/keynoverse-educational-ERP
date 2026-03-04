@@ -41,12 +41,14 @@ import LoadingFallback from './components/LoadingFallback';
 
 // Layouts
 import DashboardLayout from './layouts/DashboardLayout';
+import FullScreenLayout from './layouts/FullScreenLayout';
 
 // Lazy Load Pages
 // Auth
 const AuthSelection = lazy(() => import('./pages/auth/AuthSelection'));
 const SuperAdminLogin = lazy(() => import('./pages/auth/SuperAdminLogin'));
 const SchoolAdminLogin = lazy(() => import('./pages/auth/SchoolAdminLogin'));
+const StudentLogin = lazy(() => import('./pages/auth/StudentLogin'));
 
 // Super Admin
 const SuperAdminDashboard = lazy(() => import('./pages/super-admin/Dashboard'));
@@ -64,6 +66,8 @@ const SuperAdminFinanceDashboard = lazy(() => import('./pages/super-admin/financ
 const SuperAdminRevenue = lazy(() => import('./pages/super-admin/finance/Revenue'));
 const SuperAdminSubscriptionPlans = lazy(() => import('./pages/super-admin/finance/SubscriptionPlans'));
 const SuperAdminAcademicsOverview = lazy(() => import('./pages/super-admin/institution-tabs/academics-overview/AcademicsOverviewDashboard'));
+const SuperAdminHROverview = lazy(() => import('./pages/super-admin/institution-tabs/hr-overview/HROverviewDashboard'));
+const SuperAdminStaffProfile = lazy(() => import('./pages/super-admin/institution-tabs/hr-overview/StaffProfile'));
 
 // School Admin - General
 const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard'));
@@ -214,9 +218,12 @@ const StudentReceipts = lazy(() => import('./pages/student-portal/fees/ReceiptsP
 const StudentReceiptDetails = lazy(() => import('./pages/student-portal/fees/ReceiptDetailsPage'));
 const StudentPaymentHistory = lazy(() => import('./pages/student-portal/fees/PaymentHistoryPage'));
 const StudentCourses = lazy(() => import('./pages/student-portal/courses/CoursesPage'));
+const StudentCourseMaterials = lazy(() => import('./pages/student-portal/courses/StudentCourseMaterials'));
 const StudentResults = lazy(() => import('./pages/student-portal/results/ResultsPage'));
 const StudentTimetable = lazy(() => import('./pages/student-portal/timetable/TimetablePage'));
 const StudentPortalProfile = lazy(() => import('./pages/student-portal/profile/ProfilePage'));
+const StudentBookCatalog = lazy(() => import('./pages/student-portal/library/StudentBookCatalog'));
+const StudentBorrowingHistory = lazy(() => import('./pages/student-portal/library/StudentBorrowingHistory'));
 const StaffPortal = lazy(() => import('./pages/staff-portal/StaffPortal'));
 const StaffGrading = lazy(() => import('./pages/staff-portal/StaffGrading'));
 
@@ -480,15 +487,21 @@ const schoolAdminItems = [
 
 const studentItems = [
   { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
-  { name: 'My Courses', path: '/student/courses', icon: BookOpen },
+  { 
+    name: 'My Courses', 
+    icon: BookOpen,
+    subItems: [
+      { name: 'Enrolled Courses', path: '/student/courses' },
+      { name: 'Course Materials', path: '/student/courses/materials' }
+    ]
+  },
   { name: 'Results', path: '/student/results', icon: ClipboardCheck },
   { name: 'Timetable', path: '/student/timetable', icon: Calendar },
   {
     name: 'Communication',
     icon: MessageSquare,
     subItems: [
-      { name: 'Inbox', path: '/student/communication/inbox' },
-      { name: 'Announcements', path: '/student/communication/announcements' }
+      { name: 'Inbox', path: '/student/communication/inbox' }
     ]
   },
   {
@@ -552,6 +565,7 @@ function App() {
                           <Route path="/auth" element={<AuthSelection />} />
                           <Route path="/auth/super-admin" element={<SuperAdminLogin />} />
                           <Route path="/auth/school-admin" element={<SchoolAdminLogin />} />
+                          <Route path="/auth/student" element={<StudentLogin />} />
 
                           {/* Super Admin Routes */}
                           <Route element={
@@ -573,7 +587,31 @@ function App() {
                             <Route path="/super-admin/reports" element={<ReportsLayout />} />
                           </Route>
 
-                          <Route path="/super-admin/academics-overview" element={<SuperAdminAcademicsOverview />} />
+                          <Route 
+                            path="/super-admin/academics-overview" 
+                            element={
+                              <FullScreenLayout title="Academics Overview">
+                                <SuperAdminAcademicsOverview />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
+                            path="/super-admin/hr-overview" 
+                            element={
+                              <FullScreenLayout title="Human Resources Overview">
+                                <SuperAdminHROverview />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
+                            path="/super-admin/hr-overview/staff-profile" 
+                            element={
+                              <FullScreenLayout title="Staff Profile">
+                                <SuperAdminStaffProfile />
+                              </FullScreenLayout>
+                            } 
+                          />
+
                           <Route path="/super-admin/applications/:id" element={<ApplicationDetails />} />
                           <Route path="/super-admin/institutions/:id" element={<InstitutionDetails />} />
 
@@ -754,6 +792,7 @@ function App() {
                         <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
                         <Route path="/student/dashboard" element={<StudentPortalDashboard />} />
                         <Route path="/student/courses" element={<StudentCourses />} />
+                        <Route path="/student/courses/materials" element={<StudentCourseMaterials />} />
                         <Route path="/student/results" element={<StudentResults />} />
                         <Route path="/student/timetable" element={<StudentTimetable />} />
                         <Route path="/student/fees" element={<StudentFeesDashboard />} />
@@ -767,11 +806,10 @@ function App() {
 
                         {/* Student Communication */}
                         <Route path="/student/communication/inbox" element={<InboxPage />} />
-                        <Route path="/student/communication/announcements" element={<AnnouncementsPage />} />
                         
                         {/* Student Library */}
-                        <Route path="/student/library/catalog" element={<BookCatalogPage />} />
-                        <Route path="/student/library/borrows" element={<BorrowingSystemPage />} />
+                        <Route path="/student/library/catalog" element={<StudentBookCatalog />} />
+                        <Route path="/student/library/borrows" element={<StudentBorrowingHistory />} />
 
                         {/* Student Services */}
                         <Route path="/student/services/hostel" element={<HostelDashboard />} />
