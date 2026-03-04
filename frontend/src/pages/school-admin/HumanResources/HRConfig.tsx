@@ -5,8 +5,7 @@ import {
   Shield, 
   Settings,
   LayoutGrid,
-  Calendar,
-  DollarSign
+  Calendar
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import RolesManagement from './RolesManagement';
@@ -14,9 +13,8 @@ import PermissionsManagement from './PermissionsManagement';
 import HRDesignations from './HRDesignations';
 import HRDepartments from './HRDepartments';
 import LeaveTypes from './LeaveTypes';
-import PayrollManagement from './PayrollManagement';
 
-type HRTab = 'roles' | 'permissions' | 'designations' | 'departments' | 'leave-types' | 'payroll';
+type HRTab = 'roles' | 'permissions' | 'designations' | 'departments' | 'leave-types';
 
 const HRConfig: React.FC = () => {
   const [activeTab, setActiveTab] = useState<HRTab>('roles');
@@ -34,7 +32,6 @@ const HRConfig: React.FC = () => {
     { id: 'designations', label: 'Designations', icon: IdCard },
     { id: 'departments', label: 'Departments', icon: Building2 },
     { id: 'leave-types', label: 'Leave Types', icon: Calendar },
-    { id: 'payroll', label: 'Payroll', icon: DollarSign },
   ];
 
   const renderContent = () => {
@@ -49,8 +46,6 @@ const HRConfig: React.FC = () => {
         return <HRDepartments />;
       case 'leave-types':
         return <LeaveTypes />;
-      case 'payroll':
-        return <PayrollManagement />;
       default:
         return <RolesManagement />;
     }
@@ -62,7 +57,7 @@ const HRConfig: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <LayoutGrid className="w-7 h-7 text-blue-600" />
-            HR Configuration
+            HR Setup
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             Manage system roles, permissions, designations, and departmental structures.

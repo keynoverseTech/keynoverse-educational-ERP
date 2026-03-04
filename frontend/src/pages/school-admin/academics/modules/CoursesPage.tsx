@@ -63,6 +63,7 @@ interface Course {
   assignedStaffId?: string;
   prerequisites?: Prerequisite[];
   isGlobal?: boolean;
+  type: 'core' | 'elective' | 'general';
 }
 
 // --- Mock Data ---
@@ -107,10 +108,10 @@ const staffMembers: Staff[] = [
 ];
 
 const initialCourses: Course[] = [
-  { id: 'crs-1', code: 'CSC101', title: 'Introduction to Computer Science', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-1', status: 'active', assignedStaffId: 'stf-1', prerequisites: [], isGlobal: true },
-  { id: 'crs-2', code: 'CSC102', title: 'Introduction to Programming', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-2', status: 'active', assignedStaffId: 'stf-3', prerequisites: [{ courseId: 'crs-1', minGrade: 'C' }], isGlobal: true },
-  { id: 'crs-3', code: 'MTH101', title: 'General Mathematics I', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-1', status: 'active', prerequisites: [], isGlobal: true },
-  { id: 'crs-4', code: 'EEE201', title: 'Circuit Theory I', creditUnits: 4, programmeId: 'prog-3', levelId: 'lvl-200', semesterId: 'sem-1', status: 'active', assignedStaffId: 'stf-4', prerequisites: [], isGlobal: false },
+  { id: 'crs-1', code: 'CSC101', title: 'Introduction to Computer Science', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-1', status: 'active', assignedStaffId: 'stf-1', prerequisites: [], isGlobal: true, type: 'core' },
+  { id: 'crs-2', code: 'CSC102', title: 'Introduction to Programming', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-2', status: 'active', assignedStaffId: 'stf-3', prerequisites: [{ courseId: 'crs-1', minGrade: 'C' }], isGlobal: true, type: 'core' },
+  { id: 'crs-3', code: 'MTH101', title: 'General Mathematics I', creditUnits: 3, programmeId: 'prog-1', levelId: 'lvl-100', semesterId: 'sem-1', status: 'active', prerequisites: [], isGlobal: true, type: 'general' },
+  { id: 'crs-4', code: 'EEE201', title: 'Circuit Theory I', creditUnits: 4, programmeId: 'prog-3', levelId: 'lvl-200', semesterId: 'sem-1', status: 'active', assignedStaffId: 'stf-4', prerequisites: [], isGlobal: false, type: 'elective' },
 ];
 
 // --- Component ---
@@ -214,8 +215,8 @@ export const CoursesPage: React.FC = () => {
             <BookOpen size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Courses Catalog</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">View and manage courses and credit units.</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Course Catalogue</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">View and manage course catalogue, codes, and credit units.</p>
           </div>
         </div>
         <button 
@@ -318,6 +319,7 @@ export const CoursesPage: React.FC = () => {
               <tr>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase">Code</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase">Course Title</th>
+                <th className="p-4 text-xs font-bold text-gray-500 uppercase">Type</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase">Units</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase">Level</th>
                 <th className="p-4 text-xs font-bold text-gray-500 uppercase">Semester</th>
@@ -338,6 +340,17 @@ export const CoursesPage: React.FC = () => {
                         <span className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-[9px] font-black uppercase rounded border border-purple-100 dark:border-purple-900/30">Global</span>
                       )}
                     </div>
+                  </td>
+                  <td className="p-4">
+                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${
+                      course.type === 'core' 
+                        ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/30' 
+                        : course.type === 'elective'
+                        ? 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/30'
+                        : 'bg-gray-50 text-gray-700 border-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
+                    }`}>
+                      {course.type}
+                    </span>
                   </td>
                   <td className="p-4 text-gray-600 dark:text-gray-400 font-medium">
                     {course.creditUnits} Units
@@ -441,6 +454,20 @@ export const CoursesPage: React.FC = () => {
                     onChange={e => setCurrentCourse({...currentCourse, creditUnits: parseInt(e.target.value)})}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Course Type</label>
+                <select 
+                  required
+                  className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  value={currentCourse.type || 'core'}
+                  onChange={e => setCurrentCourse({...currentCourse, type: e.target.value as any})}
+                >
+                  <option value="core">Core (Compulsory)</option>
+                  <option value="elective">Elective (Optional)</option>
+                  <option value="general">General (For Everyone)</option>
+                </select>
               </div>
 
               <div>

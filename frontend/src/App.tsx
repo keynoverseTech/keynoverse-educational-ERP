@@ -90,17 +90,19 @@ const ProgrammesPage = lazy(() => import('./pages/school-admin/academics/modules
 const LevelsPage = lazy(() => import('./pages/school-admin/academics/modules/LevelsPage').then(module => ({ default: module.LevelsPage })));
 const CoursesPage = lazy(() => import('./pages/school-admin/academics/modules/CoursesPage').then(module => ({ default: module.CoursesPage })));
 const CourseRegistrationConfig = lazy(() => import('./pages/school-admin/academics/modules/CourseRegistrationConfig'));
+const CoursePrerequisites = lazy(() => import('./pages/school-admin/academics/CoursePrerequisites'));
 const CourseMaterialsDashboard = lazy(() => import('./pages/school-admin/academics/modules/CourseMaterials/CourseMaterialsDashboard'));
 const ArchivedMaterials = lazy(() => import('./pages/school-admin/academics/modules/CourseMaterials/ArchivedMaterials'));
 const DownloadLog = lazy(() => import('./pages/school-admin/academics/modules/CourseMaterials/DownloadLog'));
 const RegistrationApprovals = lazy(() => import('./pages/school-admin/academics/RegistrationApprovals'));
-const CourseManagement = lazy(() => import('./pages/school-admin/Courses'));
 const CourseRegistration = lazy(() => import('./pages/school-admin/academics/CourseRegistration'));
 const LecturesTimetable = lazy(() => import('./pages/school-admin/academics/LecturesTimetable'));
 const AcademicCalendar = lazy(() => import('./pages/school-admin/academics/AcademicCalendar'));
 const LevelPromotion = lazy(() => import('./pages/school-admin/academics/LevelPromotion'));
 const AttendanceDashboard = lazy(() => import('./pages/school-admin/academics/attendance/AttendanceDashboard'));
 const MarkAttendance = lazy(() => import('./pages/school-admin/academics/attendance/MarkAttendance'));
+const AttendanceReport = lazy(() => import('./pages/school-admin/academics/attendance/AttendanceReport'));
+const CGPAMonitoring = lazy(() => import('./pages/school-admin/academics/CGPAMonitoring'));
 
 // School Admin - HelpDesk
 const HelpDeskDashboard = lazy(() => import('./pages/school-admin/HelpDesk/HelpDeskDashboard'));
@@ -133,6 +135,7 @@ const LeaveRequest = lazy(() => import('./pages/school-admin/HumanResources/Leav
 const LeaveApprovals = lazy(() => import('./pages/school-admin/HumanResources/LeaveApprovals'));
 const SalaryAdjustments = lazy(() => import('./pages/school-admin/HumanResources/SalaryAdjustments'));
 const SalaryAdvances = lazy(() => import('./pages/school-admin/HumanResources/SalaryAdvances'));
+const PayrollManagement = lazy(() => import('./pages/school-admin/HumanResources/PayrollManagement'));
 
 // School Admin - Communication Centre
 const AnnouncementsPage = lazy(() => import('./pages/school-admin/communication-centre/Announcements'));
@@ -241,13 +244,30 @@ const schoolAdminItems = [
     icon: BookOpen,
     subItems: [
       { name: 'Dashboard', path: '/school-admin/academics/dashboard' },
-      { name: 'Configure Academic', path: '/school-admin/academics/configure' },
-      { name: 'Course Management', path: '/school-admin/academics/courses-management' },
-      { name: 'Course Materials', path: '/school-admin/academics/course-materials' },
-      { name: 'Course Registration', path: '/school-admin/academics/registration' },
-      { name: 'Level Promotion', path: '/school-admin/academics/promotion' },
-      { name: 'Academic Calendar', path: '/school-admin/academics/calendar' },
-      { name: 'Attendance', path: '/school-admin/academics/attendance' }
+      { name: 'Academic Setup', path: '/school-admin/academics/configure' },
+      { 
+        name: 'Courses',
+        subItems: [
+          { name: 'Course Catalogue', path: '/school-admin/academics/courses' },
+          { name: 'Course Registrations', path: '/school-admin/academics/registration' },
+          { name: 'Course Materials', path: '/school-admin/academics/course-materials' },
+        ]
+      },
+      { 
+        name: 'Timetable & Attendance',
+        subItems: [
+          { name: 'Timetable', path: '/school-admin/academics/lectures-timetable' },
+          { name: 'Attendance Sessions', path: '/school-admin/academics/attendance' },
+          { name: 'Attendance Report', path: '/school-admin/academics/attendance/report' }
+        ]
+      },
+      {
+        name: 'Academic Progress',
+        subItems: [
+          { name: 'Level Promotion', path: '/school-admin/academics/promotion' },
+          { name: 'CGPA Monitoring', path: '/school-admin/academics/cgpa-monitoring' }
+        ]
+      }
     ]
   },
   { 
@@ -262,16 +282,21 @@ const schoolAdminItems = [
     ]
   },
   { 
-    name: 'Examinations', 
+    name: 'Assessment & Results', 
     icon: ClipboardCheck,
     subItems: [
       { name: 'Dashboard', path: '/school-admin/examinations/dashboard' },
-      { name: 'Exam Cycle', path: '/school-admin/examinations/cycle' },
-      { name: 'Configuration', path: '/school-admin/examinations/assessment-config' },
+      { name: 'Assessment Setup', path: '/school-admin/examinations/assessment-config' },
+      { name: 'Assessment Cycle', path: '/school-admin/examinations/cycle' },
       { name: 'Timetable', path: '/school-admin/examinations/timetable' },
-      { name: 'Score Upload', path: '/school-admin/examinations/scores' },
-      { name: 'Result Processing', path: '/school-admin/examinations/processing' },
-      { name: 'Publication', path: '/school-admin/examinations/publication' },
+      {
+        name: 'Result Computation',
+        subItems: [
+          { name: 'Marks Entry', path: '/school-admin/examinations/scores' },
+          { name: 'Result Compilation', path: '/school-admin/examinations/processing' },
+          { name: 'Result Release', path: '/school-admin/examinations/publication' }
+        ]
+      }
     ]
   },
   { 
@@ -391,16 +416,31 @@ const schoolAdminItems = [
     name: 'Human Resources', 
     icon: Briefcase,
     subItems: [
-      { name: 'HR Dashboard', path: '/school-admin/human-resources/dashboard' },
-      { name: 'Staff Schedules', path: '/school-admin/human-resources/staff-schedules' },
-      { name: 'Staff Profile', path: '/school-admin/staff/profile' },
-      { name: 'Add Staff', path: '/school-admin/staff/create' },
-      { name: 'Leave Request', path: '/school-admin/human-resources/leave/request' },
-      { name: 'Leave Approvals', path: '/school-admin/human-resources/leave/approvals' },
-      { name: 'Salary Adjustments', path: '/school-admin/human-resources/salary/adjustments' },
-      { name: 'Salary Advances', path: '/school-admin/human-resources/salary/advances' },
-      { name: 'Permissions Management', path: '/school-admin/human-resources/permissions' },
-      { name: 'Configuration', path: '/school-admin/human-resources/config' }
+      { name: 'Dashboard', path: '/school-admin/human-resources/dashboard' },
+      { name: 'HR Setup', path: '/school-admin/human-resources/config' },
+      {
+        name: 'Staff',
+        subItems: [
+          { name: 'Add Staff', path: '/school-admin/staff/create' },
+          { name: 'Staff Profile', path: '/school-admin/staff/profile' },
+          { name: 'Staff Schedules', path: '/school-admin/human-resources/staff-schedules' }
+        ]
+      },
+      {
+        name: 'Payroll & Compensation',
+        subItems: [
+          { name: 'Payroll', path: '/school-admin/human-resources/payroll' },
+          { name: 'Salary Adjustments', path: '/school-admin/human-resources/salary/adjustments' },
+          { name: 'Salary Advances', path: '/school-admin/human-resources/salary/advances' }
+        ]
+      },
+      {
+        name: 'Leave & Attendance',
+        subItems: [
+          { name: 'Leave Request', path: '/school-admin/human-resources/leave/request' },
+          { name: 'Leave Approvals', path: '/school-admin/human-resources/leave/approvals' }
+        ]
+      }
     ]
   },
   {
@@ -542,8 +582,8 @@ function App() {
                         <Route path="/school-admin/academics/levels" element={<LevelsPage />} />
                         <Route path="/school-admin/academics/courses" element={<CoursesPage />} />
                         <Route path="/school-admin/academics/registration-config" element={<CourseRegistrationConfig />} />
+                        <Route path="/school-admin/academics/prerequisites" element={<CoursePrerequisites />} />
                         <Route path="/school-admin/academics/registration-approvals" element={<RegistrationApprovals />} />
-                        <Route path="/school-admin/academics/courses-management" element={<CourseManagement />} />
                         <Route path="/school-admin/academics/course-materials" element={<CourseMaterialsDashboard />} />
                         <Route path="/school-admin/academics/course-materials/archive" element={<ArchivedMaterials />} />
                         <Route path="/school-admin/academics/course-materials/log" element={<DownloadLog />} />
@@ -552,7 +592,9 @@ function App() {
                         <Route path="/school-admin/academics/promotion" element={<LevelPromotion />} />
                         <Route path="/school-admin/academics/calendar" element={<AcademicCalendar />} />
                         <Route path="/school-admin/academics/attendance" element={<AttendanceDashboard />} />
+                        <Route path="/school-admin/academics/attendance/report" element={<AttendanceReport />} />
                         <Route path="/school-admin/academics/attendance/mark/:id" element={<MarkAttendance />} />
+                        <Route path="/school-admin/academics/cgpa-monitoring" element={<CGPAMonitoring />} />
 
                         {/* HelpDesk */}
                         <Route path="/school-admin/helpdesk/dashboard" element={<HelpDeskDashboard />} />
@@ -612,6 +654,7 @@ function App() {
                         <Route path="/school-admin/human-resources/leave/approvals" element={<LeaveApprovals />} />
                         <Route path="/school-admin/human-resources/salary/adjustments" element={<SalaryAdjustments />} />
                         <Route path="/school-admin/human-resources/salary/advances" element={<SalaryAdvances />} />
+                        <Route path="/school-admin/human-resources/payroll" element={<PayrollManagement />} />
 
                         <Route path="/school-admin/communication-centre/announcements" element={<AnnouncementsPage />} />
                         <Route path="/school-admin/communication-centre/direct-messaging" element={<DirectMessagingPage />} />
