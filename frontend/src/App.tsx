@@ -241,6 +241,14 @@ const superAdminItems = [
 const schoolAdminItems = [
   { name: 'Overview', path: '/school-admin/dashboard', icon: LayoutDashboard },
   { 
+    name: 'Student Management', 
+    icon: GraduationCap,
+    subItems: [
+      { name: 'All Students', path: '/school-admin/students/list' },
+      { name: 'Student Profile', path: '/school-admin/students/profile' }
+    ]
+  },
+  { 
     name: 'Academics', 
     icon: BookOpen,
     subItems: [
@@ -272,17 +280,6 @@ const schoolAdminItems = [
     ]
   },
   { 
-    name: 'Admissions', 
-    icon: UserPlus,
-    subItems: [
-      { name: 'Dashboard', path: '/school-admin/admissions/dashboard' },
-      { name: 'Admission Setup', path: '/school-admin/admissions/configure' },
-      { name: 'Intake', path: '/school-admin/admissions/intake' },
-      { name: 'Create Admission', path: '/school-admin/admissions/create' },
-      { name: 'Multiple Imports', path: '/school-admin/admissions/imports' }
-    ]
-  },
-  { 
     name: 'Assessment & Results', 
     icon: ClipboardCheck,
     subItems: [
@@ -301,117 +298,14 @@ const schoolAdminItems = [
     ]
   },
   { 
-    name: 'Student Management', 
-    icon: GraduationCap,
+    name: 'Admissions', 
+    icon: UserPlus,
     subItems: [
-      { name: 'All Students', path: '/school-admin/students/list' },
-      { name: 'Student Profile', path: '/school-admin/students/profile' }
-    ]
-  },
-  { 
-    name: 'Student Services', 
-    icon: Bus,
-    subItems: [
-      { name: 'Hostel', path: '/school-admin/student-services/hostel' },
-      { name: 'Transport', path: '/school-admin/student-services/transport' }
-    ]
-  },
-  { 
-    name: 'Finance', 
-    icon: DollarSign,
-    subItems: [
-      { name: 'Bank Accounts', path: '/school-admin/finance/accounts' },
-      {
-        name: 'Student Accounting',
-        subItems: [
-          { name: 'Dashboard', path: '/school-admin/finance/student-accounting/dashboard' },
-          { name: 'Fee Configuration', path: '/school-admin/finance/student-accounting/fee-structure' },
-          { name: 'Invoices', path: '/school-admin/finance/student-accounting/invoices' },
-          { name: 'Payments & Receipts', path: '/school-admin/finance/student-accounting/payments' },
-        ]
-      },
-      {
-        name: 'Administrative Accounting',
-        subItems: [
-          { name: 'General Ledger', path: '/school-admin/finance/administrative-accounting/ledger' },
-          { name: 'Payroll Disbursement', path: '/school-admin/finance/administrative-accounting/disbursement' }
-        ]
-      }
-    ]
-  },
-  { 
-    name: 'Library', 
-    icon: BookOpen,
-    subItems: [
-      { name: 'Dashboard', path: '/school-admin/library/dashboard' },
-      { name: 'Book Categories', path: '/school-admin/library/categories' },
-      { name: 'Book Catalogue', path: '/school-admin/library/catalog' },
-      { name: 'Circulations', path: '/school-admin/library/borrowing' },
-      { name: 'Reservations', path: '/school-admin/library/reservations' }
-    ]
-  },
-  { 
-    name: 'Events', 
-    icon: Calendar,
-    subItems: [
-      { name: 'Dashboard', path: '/school-admin/events/dashboard' },
-      { name: 'Event Categories', path: '/school-admin/events/categories' },
-      { name: 'Create Event', path: '/school-admin/events/create' },
-      { name: 'Upcoming Events', path: '/school-admin/events/upcoming' }
-    ]
-  },
-  { 
-    name: 'Communication Centre', 
-    icon: MessageSquare,
-    subItems: [
-      { name: 'Inbox', path: '/school-admin/communication-centre/inbox' },
-      { name: 'Announcements', path: '/school-admin/communication-centre/announcements' },
-      { name: 'Direct Messaging', path: '/school-admin/communication-centre/direct-messaging' }
-    ]
-  },
-  {
-    name: 'Alumni',
-    icon: GraduationCap,
-    subItems: [
-        { name: 'Dashboard', path: '/school-admin/alumni/dashboard' },
-        { name: 'Alumni List', path: '/school-admin/alumni/list' },
-        { name: 'Alumni Profile', path: '/school-admin/alumni/profile' },
-        { name: 'Employment Info', path: '/school-admin/alumni/employment' },
-        { name: 'Transcript Requests', path: '/school-admin/alumni/transcripts' },
-        { name: 'Communication', path: '/school-admin/alumni/communication' }
-    ]
-  },
-  {
-    name: 'Reception',
-    icon: Users,
-    subItems: [
-        { name: 'Visitors Log', path: '/school-admin/reception/visitors' },
-        { name: 'Appointments', path: '/school-admin/reception/appointments' },
-        { name: 'Enquiries Log', path: '/school-admin/reception/enquiries' },
-        { name: 'Mail Log', path: '/school-admin/reception/mail' }
-    ]
-  },
-  {
-    name: 'HelpDesk',
-    icon: MessageSquare,
-    subItems: [
-      { name: 'Dashboard', path: '/school-admin/helpdesk/dashboard' },
-      { name: 'Ticket Categories', path: '/school-admin/helpdesk/categories' },
-      { name: 'New Ticket', path: '/school-admin/helpdesk/create' },
-      { name: 'Tickets', path: '/school-admin/helpdesk/tickets' }
-    ]
-  },
-  { 
-    name: 'Reports',  
-    path: '/school-admin/reports', 
-    icon: FileText,
-    subItems: [
-      { name: 'Report Dashboard', path: '/school-admin/reports' },
-      { name: 'Admission Reports', path: '/school-admin/reports?tab=admissions' },
-      { name: 'Student Reports', path: '/school-admin/reports?tab=students' },
-      { name: 'Academic Performance', path: '/school-admin/reports?tab=academics' },
-      { name: 'Examination Reports', path: '/school-admin/reports?tab=exams' },
-      { name: 'Financial Reports', path: '/school-admin/reports?tab=finance' }
+      { name: 'Dashboard', path: '/school-admin/admissions/dashboard' },
+      { name: 'Admission Setup', path: '/school-admin/admissions/configure' },
+      { name: 'Intake', path: '/school-admin/admissions/intake' },
+      { name: 'Create Admission', path: '/school-admin/admissions/create' },
+      { name: 'Multiple Imports', path: '/school-admin/admissions/imports' }
     ]
   },
   { 
@@ -445,17 +339,29 @@ const schoolAdminItems = [
       }
     ]
   },
-  {
-    name: 'ID Cards',
-    icon: IdCard,
+  { 
+    name: 'Finance', 
+    icon: DollarSign,
     subItems: [
-      { name: 'Staff ID Cards', path: '/school-admin/id-cards/staff' },
-      { name: 'Staff Template', path: '/school-admin/id-cards/staff/template' },
-      { name: 'Student ID Cards', path: '/school-admin/id-cards/students' },
-      { name: 'Student Template', path: '/school-admin/id-cards/students/template' },
+      { name: 'Bank Accounts', path: '/school-admin/finance/accounts' },
+      {
+        name: 'Student Accounting',
+        subItems: [
+          { name: 'Dashboard', path: '/school-admin/finance/student-accounting/dashboard' },
+          { name: 'Fee Configuration', path: '/school-admin/finance/student-accounting/fee-structure' },
+          { name: 'Invoices', path: '/school-admin/finance/student-accounting/invoices' },
+          { name: 'Payments & Receipts', path: '/school-admin/finance/student-accounting/payments' },
+        ]
+      },
+      {
+        name: 'Administrative Accounting',
+        subItems: [
+          { name: 'General Ledger', path: '/school-admin/finance/administrative-accounting/ledger' },
+          { name: 'Payroll Disbursement', path: '/school-admin/finance/administrative-accounting/disbursement' }
+        ]
+      }
     ]
   },
-  { name: 'Health & Clinic', path: '/school-admin/health', icon: Stethoscope },
   {
     name: 'Procurement',
     icon: ShoppingBag,
@@ -467,14 +373,108 @@ const schoolAdminItems = [
       { name: 'Fixed Assets', path: '/school-admin/procurement/assets' }
     ]
   },
-  { name: 'Subscription', path: '/school-admin/subscription', icon: CreditCard },
+  { 
+    name: 'Communication Centre', 
+    icon: MessageSquare,
+    subItems: [
+      { name: 'Inbox', path: '/school-admin/communication-centre/inbox' },
+      { name: 'Announcements', path: '/school-admin/communication-centre/announcements' },
+      { name: 'Direct Messaging', path: '/school-admin/communication-centre/direct-messaging' }
+    ]
+  },
+  { 
+    name: 'Student Services', 
+    icon: Bus,
+    subItems: [
+      { name: 'Hostel', path: '/school-admin/student-services/hostel' },
+      { name: 'Transport', path: '/school-admin/student-services/transport' }
+    ]
+  },
+  { 
+    name: 'Library', 
+    icon: BookOpen,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/library/dashboard' },
+      { name: 'Book Categories', path: '/school-admin/library/categories' },
+      { name: 'Book Catalogue', path: '/school-admin/library/catalog' },
+      { name: 'Circulations', path: '/school-admin/library/borrowing' },
+      { name: 'Reservations', path: '/school-admin/library/reservations' }
+    ]
+  },
+  { 
+    name: 'Events', 
+    icon: Calendar,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/events/dashboard' },
+      { name: 'Event Categories', path: '/school-admin/events/categories' },
+      { name: 'Create Event', path: '/school-admin/events/create' },
+      { name: 'Upcoming Events', path: '/school-admin/events/upcoming' }
+    ]
+  },
+  {
+    name: 'HelpDesk',
+    icon: MessageSquare,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/helpdesk/dashboard' },
+      { name: 'Ticket Categories', path: '/school-admin/helpdesk/categories' },
+      { name: 'New Ticket', path: '/school-admin/helpdesk/create' },
+      { name: 'Tickets', path: '/school-admin/helpdesk/tickets' }
+    ]
+  },
+  {
+    name: 'Reception',
+    icon: Users,
+    subItems: [
+        { name: 'Visitors Log', path: '/school-admin/reception/visitors' },
+        { name: 'Appointments', path: '/school-admin/reception/appointments' },
+        { name: 'Enquiries Log', path: '/school-admin/reception/enquiries' },
+        { name: 'Mail Log', path: '/school-admin/reception/mail' }
+    ]
+  },
+  { name: 'Health & Clinic', path: '/school-admin/health', icon: Stethoscope },
+  {
+    name: 'Alumni',
+    icon: GraduationCap,
+    subItems: [
+        { name: 'Dashboard', path: '/school-admin/alumni/dashboard' },
+        { name: 'Alumni List', path: '/school-admin/alumni/list' },
+        { name: 'Alumni Profile', path: '/school-admin/alumni/profile' },
+        { name: 'Employment Info', path: '/school-admin/alumni/employment' },
+        { name: 'Transcript Requests', path: '/school-admin/alumni/transcripts' },
+        { name: 'Communication', path: '/school-admin/alumni/communication' }
+    ]
+  },
+  {
+    name: 'ID Cards',
+    icon: IdCard,
+    subItems: [
+      { name: 'Staff ID Cards', path: '/school-admin/id-cards/staff' },
+      { name: 'Staff Template', path: '/school-admin/id-cards/staff/template' },
+      { name: 'Student ID Cards', path: '/school-admin/id-cards/students' },
+      { name: 'Student Template', path: '/school-admin/id-cards/students/template' },
+    ]
+  },
+  { 
+    name: 'Reports',  
+    path: '/school-admin/reports', 
+    icon: FileText,
+    subItems: [
+      { name: 'Report Dashboard', path: '/school-admin/reports' },
+      { name: 'Admission Reports', path: '/school-admin/reports?tab=admissions' },
+      { name: 'Student Reports', path: '/school-admin/reports?tab=students' },
+      { name: 'Academic Performance', path: '/school-admin/reports?tab=academics' },
+      { name: 'Examination Reports', path: '/school-admin/reports?tab=exams' },
+      { name: 'Financial Reports', path: '/school-admin/reports?tab=finance' }
+    ]
+  },
   { 
     name: 'Settings', 
     icon: SettingsIcon,
     subItems: [
       { name: 'General Settings', path: '/school-admin/settings' }
     ]
-  }
+  },
+  { name: 'Subscription', path: '/school-admin/subscription', icon: CreditCard }
 ];
 
 const studentItems = [
