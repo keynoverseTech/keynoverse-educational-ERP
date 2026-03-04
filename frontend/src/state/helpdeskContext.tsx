@@ -20,6 +20,7 @@ export interface Ticket {
   hasAttachment: boolean;
   dateCreated: string;
   lastUpdated: string;
+  department?: string;
 }
 
 interface HelpDeskContextValue {
@@ -29,6 +30,7 @@ interface HelpDeskContextValue {
   deleteCategory: (id: string) => void;
   createTicket: (ticket: Omit<Ticket, 'id' | 'ticketId' | 'status' | 'dateCreated' | 'lastUpdated' | 'categoryName'>) => void;
   updateTicketStatus: (id: string, status: Ticket['status']) => void;
+  forwardTicket: (id: string, department: string) => void;
 }
 
 const HelpDeskContext = createContext<HelpDeskContextValue | undefined>(undefined);
@@ -53,7 +55,8 @@ const initialTickets: Ticket[] = [
     isAnonymous: false,
     hasAttachment: false,
     dateCreated: '2024-03-15',
-    lastUpdated: '2024-03-16'
+    lastUpdated: '2024-03-16',
+    department: 'Academic Affairs'
   }
 ];
 
@@ -82,7 +85,8 @@ export const HelpDeskProvider: React.FC<{ children: ReactNode }> = ({ children }
       categoryName: category ? category.name : 'Unknown',
       status: 'Open',
       dateCreated: new Date().toISOString().split('T')[0],
-      lastUpdated: new Date().toISOString().split('T')[0]
+      lastUpdated: new Date().toISOString().split('T')[0],
+      department: 'General Support' // Default department
     };
     setTickets([newTicket, ...tickets]);
   };
@@ -93,6 +97,12 @@ export const HelpDeskProvider: React.FC<{ children: ReactNode }> = ({ children }
     ));
   };
 
+  const forwardTicket = (id: string, department: string) => {
+    setTickets(tickets.map(t => 
+      t.id === id ? { ...t, department, lastUpdated: new Date().toISOString().split('T')[0] } : t
+    ));
+  };
+
   return (
     <HelpDeskContext.Provider value={{
       categories,
@@ -100,7 +110,8 @@ export const HelpDeskProvider: React.FC<{ children: ReactNode }> = ({ children }
       addCategory,
       deleteCategory,
       createTicket,
-      updateTicketStatus
+      updateTicketStatus,
+      forwardTicket
     }}>
       {children}
     </HelpDeskContext.Provider>

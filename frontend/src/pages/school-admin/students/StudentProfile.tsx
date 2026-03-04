@@ -13,9 +13,11 @@ import {
   CheckCircle, 
   XCircle,
   Edit,
+  FileText,
   Clock,
   Briefcase,
-  GraduationCap
+  GraduationCap,
+  Users
 } from 'lucide-react';
 
 // --- Interfaces ---
@@ -52,16 +54,33 @@ interface LoginSession {
   status: 'active' | 'completed' | 'timeout';
 }
 
+interface StudentDocument {
+  name: string;
+  type: string;
+  dateUploaded: string;
+  status: 'verified' | 'pending' | 'rejected';
+  url?: string;
+}
+
 interface Student {
   id: string;
   matricNumber: string;
   firstName: string;
   lastName: string;
+  middleName?: string;
+  gender: string;
   email: string;
   phone: string;
   dob: string;
   address: string;
+  nin?: string;
   
+  // Guardian Info
+  guardianName?: string;
+  guardianPhone?: string;
+  guardianAddress?: string;
+  guardianRelationship?: string;
+
   // Academic Info
   faculty: string;
   department: string;
@@ -70,6 +89,13 @@ interface Student {
   currentSession: string;
   currentSemester: number; // 1 or 2
   
+  // Admission Details
+  entryType?: string; // UTME, Direct Entry, Transfer
+  admissionDate?: string;
+  programDuration?: string;
+  jambNo?: string;
+  utmeScore?: number;
+
   status: 'active' | 'suspended' | 'graduated' | 'withdrawn';
   
   // Portal Access
@@ -87,6 +113,7 @@ interface Student {
     statusInfo: RegistrationStatus;
   };
   academicHistory: Course[]; // Past courses
+  documents: StudentDocument[];
 }
 
 // --- Mock Data ---
@@ -97,16 +124,28 @@ const MOCK_STUDENTS: Student[] = [
     matricNumber: 'SCI/2022/001',
     firstName: 'Alice',
     lastName: 'Johnson',
+    middleName: 'Marie',
+    gender: 'Female',
     email: 'alice.johnson@student.uni.edu',
     phone: '+234 801 111 2222',
     dob: '2004-05-15',
     address: '123 University Road, Campus Villa',
+    nin: '12345678901',
+    guardianName: 'Mr. Robert Johnson',
+    guardianPhone: '+234 802 222 3333',
+    guardianAddress: '45 Lekki Phase 1, Lagos',
+    guardianRelationship: 'Father',
     faculty: 'Science',
     department: 'Computer Science',
     programme: 'HND Computer Science',
     level: 300,
     currentSession: '2024/2025',
     currentSemester: 1,
+    entryType: 'UTME',
+    admissionDate: '2022-09-15',
+    programDuration: '4',
+    jambNo: '2022987654',
+    utmeScore: 285,
     status: 'active',
     portalAccess: {
       hasLogin: true,
@@ -143,6 +182,12 @@ const MOCK_STUDENTS: Student[] = [
       { id: 'h1', code: 'CSC 201', title: 'Data Structures', units: 3, grade: 'A', score: 75, session: '2023/2024', semester: 'First' },
       { id: 'h2', code: 'CSC 202', title: 'Algorithms', units: 3, grade: 'B', score: 65, session: '2023/2024', semester: 'Second' },
       { id: 'h3', code: 'MTH 201', title: 'Linear Algebra', units: 3, grade: 'A', score: 82, session: '2023/2024', semester: 'First' },
+    ],
+    documents: [
+      { name: 'O-Level Result', type: 'PDF', dateUploaded: '2022-08-20', status: 'verified' },
+      { name: 'Birth Certificate', type: 'PDF', dateUploaded: '2022-08-20', status: 'verified' },
+      { name: 'JAMB Result', type: 'PDF', dateUploaded: '2022-08-20', status: 'verified' },
+      { name: 'Admission Letter', type: 'PDF', dateUploaded: '2022-09-10', status: 'verified' },
     ]
   },
   {
@@ -150,16 +195,28 @@ const MOCK_STUDENTS: Student[] = [
     matricNumber: 'ENG/2023/045',
     firstName: 'Bob',
     lastName: 'Williams',
+    middleName: 'James',
+    gender: 'Male',
     email: 'bob.williams@student.uni.edu',
     phone: '+234 809 999 8888',
     dob: '2005-08-22',
     address: '45 Engineering Close, Off-Campus',
+    nin: '98765432109',
+    guardianName: 'Mrs. Sarah Williams',
+    guardianPhone: '+234 803 333 4444',
+    guardianAddress: '12 Abuja Crescent, FCT',
+    guardianRelationship: 'Mother',
     faculty: 'Engineering',
     department: 'Electrical Engineering',
     programme: 'PHD Electrical Engineering',
     level: 200,
     currentSession: '2024/2025',
     currentSemester: 1,
+    entryType: 'Direct Entry',
+    admissionDate: '2023-10-01',
+    programDuration: '3',
+    jambNo: 'DE20230045',
+    utmeScore: 0, 
     status: 'active',
     portalAccess: {
       hasLogin: false
@@ -174,6 +231,11 @@ const MOCK_STUDENTS: Student[] = [
     },
     academicHistory: [
       { id: 'h4', code: 'ENG 101', title: 'Intro to Engineering', units: 2, grade: 'B', score: 68, session: '2023/2024', semester: 'First' }
+    ],
+    documents: [
+      { name: 'B.Sc Certificate', type: 'PDF', dateUploaded: '2023-09-15', status: 'verified' },
+      { name: 'NYSC Certificate', type: 'PDF', dateUploaded: '2023-09-15', status: 'verified' },
+      { name: 'Passport Photo', type: 'JPG', dateUploaded: '2023-09-15', status: 'verified' },
     ]
   }
 ];
@@ -191,7 +253,7 @@ export default function StudentProfile() {
     return null;
   });
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'academics' | 'security'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'academics' | 'security' | 'documents'>('overview');
 
   const handleBack = () => {
     if (location.state?.fromList) {
@@ -384,11 +446,12 @@ export default function StudentProfile() {
           {[
             { id: 'overview', label: 'Overview', icon: User },
             { id: 'academics', label: 'Academics & Courses', icon: BookOpen },
+            { id: 'documents', label: 'Documents', icon: FileText },
             { id: 'security', label: 'Portal Access', icon: Key },
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as 'overview' | 'academics' | 'security')}
+              onClick={() => setActiveTab(tab.id as 'overview' | 'academics' | 'security' | 'documents')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                 activeTab === tab.id 
                   ? 'bg-blue-600 text-white shadow-md' 
@@ -407,14 +470,30 @@ export default function StudentProfile() {
           {activeTab === 'overview' && (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">Personal Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">First Name</label>
                   <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.firstName}</div>
                 </div>
                 <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Middle Name</label>
+                  <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.middleName || '-'}</div>
+                </div>
+                <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Last Name</label>
                   <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.lastName}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Gender</label>
+                  <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.gender}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Date of Birth</label>
+                  <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.dob}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">NIN</label>
+                  <div className="mt-1 text-gray-900 dark:text-white font-medium font-mono">{selectedStudent.nin || '-'}</div>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Email Address</label>
@@ -428,10 +507,36 @@ export default function StudentProfile() {
                     <Phone size={14} className="text-gray-400" /> {selectedStudent.phone}
                   </div>
                 </div>
-                <div className="md:col-span-2">
+                <div className="md:col-span-3">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Contact Address</label>
                   <div className="mt-1 text-gray-900 dark:text-white font-medium flex items-center gap-2">
                     <MapPin size={14} className="text-gray-400" /> {selectedStudent.address}
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-4 flex items-center gap-2">
+                <Users size={20} className="text-orange-500" /> Guardian Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Guardian Name</label>
+                  <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.guardianName || '-'}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Relationship</label>
+                  <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.guardianRelationship || '-'}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Guardian Phone</label>
+                  <div className="mt-1 text-gray-900 dark:text-white font-medium flex items-center gap-2">
+                    <Phone size={14} className="text-gray-400" /> {selectedStudent.guardianPhone || '-'}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Guardian Address</label>
+                  <div className="mt-1 text-gray-900 dark:text-white font-medium flex items-center gap-2">
+                    <MapPin size={14} className="text-gray-400" /> {selectedStudent.guardianAddress || '-'}
                   </div>
                 </div>
               </div>
@@ -465,6 +570,37 @@ export default function StudentProfile() {
           {/* Academics Tab */}
           {activeTab === 'academics' && (
             <div className="space-y-6">
+              {/* Admission Details Card */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                  <GraduationCap className="text-purple-600" size={20} /> Admission Details
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Entry Type</label>
+                    <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.entryType || '-'}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Admission Date</label>
+                    <div className="mt-1 text-gray-900 dark:text-white font-medium flex items-center gap-2">
+                      <Clock size={14} className="text-gray-400" /> {selectedStudent.admissionDate || '-'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Program Duration</label>
+                    <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.programDuration ? `${selectedStudent.programDuration} Years` : '-'}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">JAMB Reg No</label>
+                    <div className="mt-1 text-gray-900 dark:text-white font-medium font-mono">{selectedStudent.jambNo || '-'}</div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">UTME Score</label>
+                    <div className="mt-1 text-gray-900 dark:text-white font-medium">{selectedStudent.utmeScore || '-'}</div>
+                  </div>
+                </div>
+              </div>
+
               {/* Current Registration Card */}
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                 <div className="flex justify-between items-start mb-6">
@@ -571,6 +707,49 @@ export default function StudentProfile() {
                     <div className="text-center py-8 text-gray-500">No academic history found.</div>
                  )}
               </div>
+            </div>
+          )}
+
+          {/* Documents Tab */}
+          {activeTab === 'documents' && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <FileText className="text-blue-600" size={20} /> Student Documents
+              </h3>
+              
+              {selectedStudent.documents && selectedStudent.documents.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {selectedStudent.documents.map((doc, index) => (
+                    <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group cursor-pointer">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
+                          <FileText size={24} />
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                          doc.status === 'verified' ? 'bg-green-100 text-green-700' :
+                          doc.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {doc.status}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-1 truncate" title={doc.name}>{doc.name}</h4>
+                      <div className="flex justify-between items-end mt-2">
+                         <div className="text-xs text-gray-500">
+                           <span className="block font-mono">{doc.type}</span>
+                           <span className="block mt-0.5">{doc.dateUploaded}</span>
+                         </div>
+                         <button className="text-blue-600 hover:underline text-xs font-bold">View</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+                  <FileText size={32} className="mx-auto mb-2 opacity-50" />
+                  <p>No documents uploaded for this student.</p>
+                </div>
+              )}
             </div>
           )}
 

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Search, 
-  Plus, 
   Download, 
   Eye, 
   Edit, 
@@ -127,13 +126,6 @@ const Students: React.FC = () => {
           <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <Download size={18} />
             Export
-          </button>
-          <button 
-            onClick={() => { setCurrentStudent({}); setPortalAccess(false); setIsModalOpen(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
-          >
-            <Plus size={18} />
-            Add Student
           </button>
         </div>
       </div>

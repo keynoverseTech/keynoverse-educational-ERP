@@ -1,13 +1,30 @@
 import React, { useState } from 'react';
-import { Search, Filter, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Search, Filter, CheckCircle, Clock, AlertCircle, Share2, X } from 'lucide-react';
 import { useHelpDesk } from '../../../state/helpdeskContext';
 import type { Ticket } from '../../../state/helpdeskContext';
 
+const DEPARTMENTS = [
+  'General Support',
+  'Academic Affairs',
+  'IT Support',
+  'Bursary/Finance',
+  'Student Affairs',
+  'Examinations',
+  'Admissions',
+  'Human Resources'
+];
+
 const TicketWorkflow: React.FC = () => {
-  const { tickets, updateTicketStatus } = useHelpDesk();
+  const { tickets, updateTicketStatus, forwardTicket } = useHelpDesk();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [priorityFilter, setPriorityFilter] = useState('All');
+  
+  const [forwardModal, setForwardModal] = useState<{ isOpen: boolean; ticketId: string | null }>({
+    isOpen: false,
+    ticketId: null
+  });
+  const [selectedDepartment, setSelectedDepartment] = useState('');
 
   const filteredTickets = tickets.filter(t => {
     const matchesSearch = t.subject.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -34,6 +51,19 @@ const TicketWorkflow: React.FC = () => {
       case 'Medium': return <Clock size={16} className="text-orange-500" />;
       case 'Low': return <CheckCircle size={16} className="text-green-500" />;
       default: return null;
+    }
+  };
+
+  const handleForwardClick = (ticketId: string) => {
+    setForwardModal({ isOpen: true, ticketId });
+    setSelectedDepartment('');
+  };
+
+  const submitForward = () => {
+    if (forwardModal.ticketId && selectedDepartment) {
+      forwardTicket(forwardModal.ticketId, selectedDepartment);
+      setForwardModal({ isOpen: false, ticketId: null });
+      setSelectedDepartment('');
     }
   };
 
@@ -96,6 +126,7 @@ const TicketWorkflow: React.FC = () => {
               <tr>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Ticket Details</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Department</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Priority</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Last Updated</th>
@@ -120,6 +151,9 @@ const TicketWorkflow: React.FC = () => {
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {ticket.categoryName}
                   </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                    {ticket.department || 'General Support'}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       {getPriorityIcon(ticket.priority)}
@@ -135,7 +169,14 @@ const TicketWorkflow: React.FC = () => {
                     {ticket.lastUpdated}
                   </td>
                   <td className="px-6 py-4 text-right relative">
-                    <div className="group-hover:opacity-100 opacity-0 transition-opacity flex justify-end gap-2">
+                    <div className="group-hover:opacity-100 opacity-0 transition-opacity flex justify-end gap-2 items-center">
+                      <button 
+                        onClick={() => handleForwardClick(ticket.id)}
+                        className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        title="Forward to Department"
+                      >
+                        <Share2 size={16} />
+                      </button>
                       <select
                         className="text-xs border border-gray-200 rounded px-2 py-1 bg-white hover:border-blue-500 focus:outline-none cursor-pointer"
                         value={ticket.status}
@@ -153,7 +194,7 @@ const TicketWorkflow: React.FC = () => {
               ))}
               {filteredTickets.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                     No tickets found matching your criteria.
                   </td>
                 </tr>
@@ -162,6 +203,58 @@ const TicketWorkflow: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Forward Ticket Modal */}
+      {forwardModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Forward Ticket</h3>
+              <button 
+                onClick={() => setForwardModal({ isOpen: false, ticketId: null })}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Select the department you want to forward this ticket to. The ticket status will remain unchanged.
+              </p>
+              
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Select Department</label>
+                <select
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                >
+                  <option value="">Select Department...</option>
+                  {DEPARTMENTS.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-900/30">
+              <button
+                onClick={() => setForwardModal({ isOpen: false, ticketId: null })}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitForward}
+                disabled={!selectedDepartment}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <Share2 size={16} />
+                Forward Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

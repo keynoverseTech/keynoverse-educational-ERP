@@ -22,12 +22,12 @@ interface Student {
   cgpa: number;
   creditsPassed: number;
   creditsRegistered: number;
-  status: 'Eligible' | 'Probation' | 'Withdrawn' | 'Outstanding';
+  status: 'Eligible' | 'Probation' | 'Withdrawn' | 'Outstanding' | 'Graduated';
   remark?: string;
 }
 
 const LevelPromotion: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'Eligible' | 'Probation' | 'Withdrawn' | 'Outstanding'>('Eligible');
+  const [activeTab, setActiveTab] = useState<'Eligible' | 'Probation' | 'Withdrawn' | 'Outstanding' | 'Graduated'>('Eligible');
   const [selectedFaculty, setSelectedFaculty] = useState('All Faculties');
   const [selectedDept, setSelectedDept] = useState('All Departments');
   const [fromLevel, setFromLevel] = useState('100 Level');
@@ -64,7 +64,7 @@ const LevelPromotion: React.FC = () => {
 
   const faculties = ['All Faculties', 'Science', 'Engineering', 'Arts'];
   const departments = ['All Departments', 'Computer Science', 'Civil Engineering', 'History', 'Mathematics'];
-  const levels = ['100 Level', '200 Level', '300 Level', '400 Level', 'ND1', 'ND2'];
+  const levels = ['100 Level', '200 Level', '300 Level', '400 Level', 'ND1', 'ND2', 'Alumni'];
 
   // Filtering Logic
   const filteredStudents = students.filter(student => {
@@ -96,7 +96,12 @@ const LevelPromotion: React.FC = () => {
 
   const handleBulkPromote = () => {
     if (selectedStudents.length === 0) return;
-    if (window.confirm(`Are you sure you want to promote ${selectedStudents.length} students to ${toLevel}?`)) {
+    const isAlumniPromotion = toLevel === 'Alumni';
+    const message = isAlumniPromotion 
+      ? `Are you sure you want to graduate ${selectedStudents.length} students to Alumni status?`
+      : `Are you sure you want to promote ${selectedStudents.length} students to ${toLevel}?`;
+
+    if (window.confirm(message)) {
       setStudents(students.map(student => {
         if (selectedStudents.includes(student.id)) {
           return {
@@ -104,13 +109,16 @@ const LevelPromotion: React.FC = () => {
             currentLevel: toLevel,
             creditsPassed: 0,
             creditsRegistered: 0,
-            status: 'Eligible' // Reset status for new level
+            status: isAlumniPromotion ? 'Graduated' : 'Eligible' as any // Update status
           };
         }
         return student;
       }));
       setSelectedStudents([]);
-      alert(`Successfully promoted ${selectedStudents.length} students to ${toLevel}!`);
+      alert(isAlumniPromotion 
+        ? `Successfully graduated ${selectedStudents.length} students!` 
+        : `Successfully promoted ${selectedStudents.length} students to ${toLevel}!`
+      );
     }
   };
 
@@ -255,7 +263,7 @@ const LevelPromotion: React.FC = () => {
               className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ArrowRight size={18} />
-              Promote Selected ({selectedStudents.length})
+              {toLevel === 'Alumni' ? `Graduate Selected (${selectedStudents.length})` : `Promote Selected (${selectedStudents.length})`}
             </button>
           </div>
         </div>
@@ -342,6 +350,7 @@ const LevelPromotion: React.FC = () => {
                       student.status === 'Eligible' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-900' :
                       student.status === 'Probation' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-900' :
                       student.status === 'Withdrawn' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-900' :
+                      student.status === 'Graduated' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-900' :
                       'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-900'
                     }`}>
                       {student.status}

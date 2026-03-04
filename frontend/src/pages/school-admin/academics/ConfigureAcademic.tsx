@@ -63,8 +63,8 @@ export default function ConfigureAcademic() {
       color: 'bg-emerald-600'
     },
     { 
-      title: 'Courses', 
-      desc: 'Manage course catalog, codes, and credit units.', 
+      title: 'Course Catalogue', 
+      desc: 'Manage course catalogue, codes, and credit units.', 
       icon: BookOpen, 
       path: '/school-admin/academics/courses',
       color: 'bg-orange-600',
@@ -78,18 +78,11 @@ export default function ConfigureAcademic() {
       color: 'bg-blue-600'
     },
     { 
-      title: 'Registration Approvals', 
-      desc: 'Review and approve student course registrations.', 
+      title: 'Course Pre-requisites', 
+      desc: 'Map existing courses to their pre-requisites.', 
       icon: CheckCircle, 
-      path: '/school-admin/academics/registration-approvals',
+      path: '/school-admin/academics/prerequisites',
       color: 'bg-teal-600'
-    },
-    { 
-      title: 'Lectures Timetable', 
-      desc: 'Schedule and manage weekly lectures for students.', 
-      icon: Calendar, 
-      path: '/school-admin/academics/lectures-timetable',
-      color: 'bg-violet-600'
     }
   ];
 
@@ -98,10 +91,10 @@ export default function ConfigureAcademic() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Settings className="w-8 h-8 text-gray-700 dark:text-gray-300" />
-          Academics Configuration
+          Academic Setup
         </h1>
         <p className="text-lg text-gray-500 dark:text-gray-400 mt-2 max-w-3xl">
-          Manage your university's academic structure independently. Configure each module as needed without forced workflows.
+          Set up your academic structure: sessions, semesters, departments, levels, and more.
         </p>
       </div>
 
