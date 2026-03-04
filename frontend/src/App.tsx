@@ -484,6 +484,14 @@ const studentItems = [
   { name: 'Results', path: '/student/results', icon: ClipboardCheck },
   { name: 'Timetable', path: '/student/timetable', icon: Calendar },
   {
+    name: 'Communication',
+    icon: MessageSquare,
+    subItems: [
+      { name: 'Inbox', path: '/student/communication/inbox' },
+      { name: 'Announcements', path: '/student/communication/announcements' }
+    ]
+  },
+  {
     name: 'Fees',
     icon: DollarSign,
     subItems: [
@@ -492,6 +500,24 @@ const studentItems = [
       { name: 'Receipts', path: '/student/fees/receipts' },
     ],
   },
+  {
+    name: 'Library',
+    icon: BookOpen,
+    subItems: [
+      { name: 'Book Catalog', path: '/student/library/catalog' },
+      { name: 'My Borrows', path: '/student/library/borrows' }
+    ]
+  },
+  {
+    name: 'Student Services',
+    icon: Bus,
+    subItems: [
+      { name: 'Hostel', path: '/student/services/hostel' },
+      { name: 'Transport', path: '/student/services/transport' }
+    ]
+  },
+  { name: 'Events', path: '/student/events', icon: Calendar },
+  { name: 'HelpDesk', path: '/student/helpdesk', icon: MessageSquare },
   { name: 'Profile', path: '/student/profile', icon: Users },
 ];
 
@@ -738,6 +764,24 @@ function App() {
                         <Route path="/student/fees/receipts/:receiptId" element={<StudentReceiptDetails />} />
                         <Route path="/student/fees/history" element={<StudentPaymentHistory />} />
                         <Route path="/student/profile" element={<StudentPortalProfile />} />
+
+                        {/* Student Communication */}
+                        <Route path="/student/communication/inbox" element={<InboxPage />} />
+                        <Route path="/student/communication/announcements" element={<AnnouncementsPage />} />
+                        
+                        {/* Student Library */}
+                        <Route path="/student/library/catalog" element={<BookCatalogPage />} />
+                        <Route path="/student/library/borrows" element={<BorrowingSystemPage />} />
+
+                        {/* Student Services */}
+                        <Route path="/student/services/hostel" element={<HostelDashboard />} />
+                        <Route path="/student/services/transport" element={<TransportDashboard />} />
+
+                        {/* Student Events */}
+                        <Route path="/student/events" element={<UpcomingEventsPage />} />
+
+                        {/* Student HelpDesk */}
+                        <Route path="/student/helpdesk" element={<CreateTicket />} />
                       </Route>
 
                       {/* Staff Portal Routes */}
