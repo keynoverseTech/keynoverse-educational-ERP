@@ -79,8 +79,8 @@ const ERPModules: React.FC = () => {
           locked: false
         },
         {
-          id: 'examinations',
-          title: 'Examinations',
+          id: 'assesment-and-result',
+          title: 'Assesment and Result',
           description: 'Exam scheduling, hall management, and result processing.',
           icon: FileSignature,
           color: 'bg-purple-600',
