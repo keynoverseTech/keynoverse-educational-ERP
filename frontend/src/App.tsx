@@ -217,11 +217,15 @@ const StudentPaymentConfirmation = lazy(() => import('./pages/student-portal/fee
 const StudentReceipts = lazy(() => import('./pages/student-portal/fees/ReceiptsPage'));
 const StudentReceiptDetails = lazy(() => import('./pages/student-portal/fees/ReceiptDetailsPage'));
 const StudentPaymentHistory = lazy(() => import('./pages/student-portal/fees/PaymentHistoryPage'));
-const StudentCourses = lazy(() => import('./pages/student-portal/courses/CoursesPage'));
-const StudentCourseMaterials = lazy(() => import('./pages/student-portal/courses/StudentCourseMaterials'));
-const StudentResults = lazy(() => import('./pages/student-portal/results/ResultsPage'));
-const StudentTimetable = lazy(() => import('./pages/student-portal/timetable/TimetablePage'));
+const StudentAcademicsDashboard = lazy(() => import('./pages/student-portal/academics/AcademicsDashboard'));
+const StudentAcademicsCourses = lazy(() => import('./pages/student-portal/academics/EnrolledCourses'));
+const StudentAcademicsMaterials = lazy(() => import('./pages/student-portal/academics/CourseMaterials'));
+const StudentAcademicsResults = lazy(() => import('./pages/student-portal/academics/Results'));
+const StudentAcademicsTimetable = lazy(() => import('./pages/student-portal/academics/Timetable'));
+const StudentExamsTimetable = lazy(() => import('./pages/student-portal/timetable/ExamTimetablePage'));
 const StudentPortalProfile = lazy(() => import('./pages/student-portal/profile/ProfilePage'));
+const StudentSubmitTicket = lazy(() => import('./pages/student-portal/helpdesk/SubmitTicket'));
+const StudentTickets = lazy(() => import('./pages/student-portal/helpdesk/Tickets'));
 const StudentBookCatalog = lazy(() => import('./pages/student-portal/library/StudentBookCatalog'));
 const StudentBorrowingHistory = lazy(() => import('./pages/student-portal/library/StudentBorrowingHistory'));
 const StaffPortal = lazy(() => import('./pages/staff-portal/StaffPortal'));
@@ -488,20 +492,13 @@ const schoolAdminItems = [
 const studentItems = [
   { name: 'Dashboard', path: '/student/dashboard', icon: LayoutDashboard },
   { 
-    name: 'My Courses', 
+    name: 'Academics', 
     icon: BookOpen,
     subItems: [
-      { name: 'Enrolled Courses', path: '/student/courses' },
-      { name: 'Course Materials', path: '/student/courses/materials' }
-    ]
-  },
-  { name: 'Results', path: '/student/results', icon: ClipboardCheck },
-  { name: 'Timetable', path: '/student/timetable', icon: Calendar },
-  {
-    name: 'Communication',
-    icon: MessageSquare,
-    subItems: [
-      { name: 'Inbox', path: '/student/communication/inbox' }
+      { name: 'Enrolled Courses', path: '/student/academics/courses' },
+      { name: 'Course Materials', path: '/student/academics/materials' },
+      { name: 'Timetable', path: '/student/academics/timetable' },
+      { name: 'Results', path: '/student/academics/results' }
     ]
   },
   {
@@ -529,8 +526,22 @@ const studentItems = [
       { name: 'Transport', path: '/student/services/transport' }
     ]
   },
+  {
+    name: 'Communication',
+    icon: MessageSquare,
+    subItems: [
+      { name: 'Inbox', path: '/student/communication/inbox' }
+    ]
+  },
+  { 
+    name: 'Help Desk', 
+    icon: MessageSquare,
+    subItems: [
+      { name: 'Submit Ticket', path: '/student/helpdesk' },
+      { name: 'Tickets', path: '/student/helpdesk/tickets' }
+    ]
+  },
   { name: 'Events', path: '/student/events', icon: Calendar },
-  { name: 'HelpDesk', path: '/student/helpdesk', icon: MessageSquare },
   { name: 'Profile', path: '/student/profile', icon: Users },
 ];
 
@@ -791,10 +802,16 @@ function App() {
                       }>
                         <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
                         <Route path="/student/dashboard" element={<StudentPortalDashboard />} />
-                        <Route path="/student/courses" element={<StudentCourses />} />
-                        <Route path="/student/courses/materials" element={<StudentCourseMaterials />} />
-                        <Route path="/student/results" element={<StudentResults />} />
-                        <Route path="/student/timetable" element={<StudentTimetable />} />
+                        <Route path="/student/academics" element={<StudentAcademicsDashboard />} />
+                        <Route path="/student/academics/courses" element={<StudentAcademicsCourses />} />
+                        <Route path="/student/academics/materials" element={<StudentAcademicsMaterials />} />
+                        <Route path="/student/academics/results" element={<StudentAcademicsResults />} />
+                        <Route path="/student/academics/timetable" element={<StudentAcademicsTimetable />} />
+                        <Route path="/student/academics/timetable/exams" element={<StudentExamsTimetable />} />
+                        <Route path="/student/courses" element={<Navigate to="/student/academics/courses" replace />} />
+                        <Route path="/student/courses/materials" element={<Navigate to="/student/academics/materials" replace />} />
+                        <Route path="/student/results" element={<Navigate to="/student/academics/results" replace />} />
+                        <Route path="/student/timetable" element={<Navigate to="/student/academics/timetable" replace />} />
                         <Route path="/student/fees" element={<StudentFeesDashboard />} />
                         <Route path="/student/fees/invoices/:id" element={<StudentInvoiceDetails />} />
                         <Route path="/student/fees/pay/:invoiceId" element={<StudentPaymentCheckout />} />
@@ -818,8 +835,9 @@ function App() {
                         {/* Student Events */}
                         <Route path="/student/events" element={<UpcomingEventsPage />} />
 
-                        {/* Student HelpDesk */}
-                        <Route path="/student/helpdesk" element={<CreateTicket />} />
+                        {/* Student Help Desk */}
+                        <Route path="/student/helpdesk" element={<StudentSubmitTicket />} />
+                        <Route path="/student/helpdesk/tickets" element={<StudentTickets />} />
                       </Route>
 
                       {/* Staff Portal Routes */}

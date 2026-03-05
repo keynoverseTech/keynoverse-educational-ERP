@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BookOpen, Search, Clock, Users, AlertCircle, Plus, X, CheckCircle2 } from 'lucide-react';
+import { getEnrolledCourses, saveEnrolledCourses } from '../academics/enrollments';
 
 type StudentCourse = {
   code: string;
@@ -34,7 +35,10 @@ const AVAILABLE_COURSES: AvailableCourse[] = [
 ];
 
 const CoursesPage: React.FC = () => {
-  const [courses, setCourses] = useState<StudentCourse[]>(INITIAL_COURSES);
+  const [courses, setCourses] = useState<StudentCourse[]>(() => {
+    const persisted = getEnrolledCourses();
+    return persisted.length ? (persisted as StudentCourse[]) : INITIAL_COURSES;
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Registered' | 'Pending'>('All');
   
@@ -76,6 +80,11 @@ const CoursesPage: React.FC = () => {
     setSelectedCourses([]);
     setIsRegistering(false);
   };
+
+  // Persist courses whenever they change
+  useEffect(() => {
+    saveEnrolledCourses(courses);
+  }, [courses]);
 
   const selectedUnits = AVAILABLE_COURSES
     .filter(c => selectedCourses.includes(c.code))
