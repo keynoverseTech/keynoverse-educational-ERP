@@ -20,7 +20,8 @@ import {
   Layout,
   User,
   School,
-  ArrowRight
+  ArrowRight,
+  DollarSign
 } from 'lucide-react';
 
 interface ModuleStat {
@@ -58,8 +59,10 @@ const Overview: React.FC = () => {
       navigate('/super-admin/admissions-governance');
     } else if (module.id === 'academics') {
       navigate('/super-admin/academics-overview');
-    } else if (module.id === 'staff') {
-      navigate('/super-admin/hr-overview');
+    } else if (module.id === 'finance') {
+      navigate('/super-admin/finance-overview');
+    } else if (module.id === 'assesment-and-result') {
+      navigate('/super-admin/assesment-and-result');
     } else {
       setSelectedModule(module);
     }
@@ -138,8 +141,8 @@ const Overview: React.FC = () => {
       ]
     },
     {
-      id: 'examinations',
-      title: 'Examinations',
+      id: 'assesment-and-result',
+      title: 'Assesment & Result',
       description: 'Exam scheduling, hall management, and result processing.',
       icon: FileSignature,
       color: 'bg-purple-600',
@@ -219,6 +222,20 @@ const Overview: React.FC = () => {
         { label: 'Total Staff', value: '245' },
         { label: 'On Leave', value: '8' },
         { label: 'New Hires', value: '3', trend: 'This Month' }
+      ]
+    },
+    {
+      id: 'finance',
+      title: 'Finance',
+      description: 'Manage student fees, payroll, and general ledger.',
+      icon: DollarSign,
+      color: 'bg-green-600',
+      active: true,
+      lastSync: '1 hour ago',
+      stats: [
+        { label: 'Total Revenue', value: '₦45.2M' },
+        { label: 'Pending Invoices', value: '₦8.5M' },
+        { label: 'Total Expenses', value: '₦12.1M' }
       ]
     },
     {
