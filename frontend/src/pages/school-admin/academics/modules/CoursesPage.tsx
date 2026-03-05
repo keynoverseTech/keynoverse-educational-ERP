@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   BookOpen, 
   Plus, 
@@ -125,7 +125,13 @@ export const CoursesPage: React.FC = () => {
   const [selectedSemester, setSelectedSemester] = useState<string>('');
 
   // --- State for Data ---
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const [courses, setCourses] = useState<Course[]>(() => {
+    try {
+      const raw = localStorage.getItem('sa_course_catalogue');
+      if (raw) return JSON.parse(raw) as Course[];
+    } catch {}
+    return initialCourses;
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCourse, setCurrentCourse] = useState<Partial<Course>>({});
 
@@ -204,6 +210,11 @@ export const CoursesPage: React.FC = () => {
     setCurrentCourse({});
   };
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('sa_course_catalogue', JSON.stringify(courses));
+    } catch {}
+  }, [courses]);
 
 
   return (
