@@ -23,7 +23,7 @@ const StudentLogin: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        await login(email, password);
+        await login(email, password, '/auth/student/login');
     } catch (err) {
         console.error('Login failed', err);
     }

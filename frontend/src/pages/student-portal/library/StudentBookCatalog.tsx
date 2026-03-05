@@ -4,8 +4,7 @@ import {
   BookOpen, 
   User, 
   Layers,
-  ShoppingBag,
-  Info
+  ShoppingBag
 } from 'lucide-react';
 import { useLibrary } from '../../../state/libraryContext';
 import type { Book, BookCategory } from '../../../state/libraryTypes';
@@ -14,7 +13,6 @@ const StudentBookCatalog: React.FC = () => {
   const { books, categories, reserveBook } = useLibrary();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   // Mock student info (in a real app, this would come from auth context)
   const currentStudent = {

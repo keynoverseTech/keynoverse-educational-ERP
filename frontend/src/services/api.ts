@@ -1,10 +1,11 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://erp-api-production-024c.up.railway.app',
+  baseURL: 'https://erp-api-production-024c.up.railway.app/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 15000, // Increase timeout to 15 seconds
 });
 
 // Add a request interceptor to include the auth token in requests

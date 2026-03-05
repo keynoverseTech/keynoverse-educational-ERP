@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import type { AxiosError } from 'axios';
 import api from '../services/api';
 
 export interface User {
@@ -19,7 +20,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, endpointPath?: string) => Promise<void>;
   logout: () => void;
   error: string | null;
 }
@@ -53,20 +54,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, endpointPath: string = '/auth/login') => {
     setIsLoading(true);
     setError(null);
     try {
-      const { data: { access_token, user: loggedInUser } } = await api.post<LoginResponse>('/auth/login', { email, password });
+      const { data: { access_token, user: loggedInUser } } = await api.post<LoginResponse>(endpointPath, { email, password });
       
       localStorage.setItem('auth_token', access_token);
       localStorage.setItem('auth_user', JSON.stringify(loggedInUser));
       
       setUser(loggedInUser);
       setIsAuthenticated(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Login failed', err);
-      const errorMessage = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      const axiosErr = err as AxiosError<{ message?: string | string[] }>;
+      const message = axiosErr.response?.data?.message;
+      const errorMessage =
+        (Array.isArray(message) ? message[0] : message) || 'Login failed. Please check your credentials.';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

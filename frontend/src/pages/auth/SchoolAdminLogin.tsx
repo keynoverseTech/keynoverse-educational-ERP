@@ -23,7 +23,7 @@ const SchoolAdminLogin: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        await login(email, password);
+        await login(email, password, '/auth/admin/login');
     } catch (err) {
         console.error('Login failed', err);
     }
