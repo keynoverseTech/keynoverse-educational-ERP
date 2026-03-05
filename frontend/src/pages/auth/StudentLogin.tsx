@@ -1,25 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Lock, RefreshCw, Mail, Facebook, Twitter, Linkedin, Youtube, Check } from 'lucide-react';
-// import PixelBlast from '../../components/PixelBlast';
+import { Eye, EyeOff, Lock, RefreshCw, Mail, Facebook, Twitter, Linkedin, Youtube, Check, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../state/authContext';
 import nbteLogo from '../../assets/NBTE LOGO.png';
 import fullLogo from '../../assets/Full logo.jfif';
 
 const StudentLogin: React.FC = () => {
   const navigate = useNavigate();
+  const { login, isLoading: authLoading, error: authError, isAuthenticated } = useAuth();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/student/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate network delay for better UX
-    setTimeout(() => {
-        navigate('/student/dashboard');
-    }, 800);
+    try {
+        await login(email, password);
+    } catch (err) {
+        console.error('Login failed', err);
+    }
   };
 
   return (
@@ -115,6 +122,13 @@ const StudentLogin: React.FC = () => {
                         </div>
                     </div>
 
+                    {authError && (
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl flex items-center gap-3 text-red-200 text-sm animate-in fade-in slide-in-from-top-2">
+                            <AlertCircle size={18} className="text-red-500 shrink-0" />
+                            <p>{authError}</p>
+                        </div>
+                    )}
+
                     <form onSubmit={handleLogin} className="space-y-5">
                         <div className="space-y-2">
                             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">Student ID / Email</label>
@@ -177,10 +191,10 @@ const StudentLogin: React.FC = () => {
 
                         <button 
                             type="submit" 
-                            disabled={isLoading}
+                            disabled={authLoading}
                             className="w-full bg-white hover:bg-slate-200 disabled:bg-slate-600 disabled:opacity-70 text-black font-bold py-4 rounded-xl transition-all duration-200 shadow-lg shadow-white/10 hover:shadow-white/20 active:scale-[0.98] flex items-center justify-center gap-3 mt-4"
                         >
-                            {isLoading ? (
+                            {authLoading ? (
                                 <>
                                     <RefreshCw className="w-5 h-5 animate-spin" />
                                     Authenticating...
