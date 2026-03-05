@@ -238,7 +238,7 @@ const SchoolAdminDashboard: React.FC = () => {
           iconColor="text-indigo-600" 
           iconBg="bg-indigo-50"
           value="48" 
-          label="Total Teachers" 
+          label="Total Lecturers" 
           trend="+2" 
           trendUp={true} 
         />

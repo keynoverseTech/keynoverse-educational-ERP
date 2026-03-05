@@ -229,7 +229,31 @@ const StudentTickets = lazy(() => import('./pages/student-portal/helpdesk/Ticket
 const StudentBookCatalog = lazy(() => import('./pages/student-portal/library/StudentBookCatalog'));
 const StudentBorrowingHistory = lazy(() => import('./pages/student-portal/library/StudentBorrowingHistory'));
 const StaffPortal = lazy(() => import('./pages/staff-portal/StaffPortal'));
-const StaffGrading = lazy(() => import('./pages/staff-portal/StaffGrading'));
+// const StaffGrading = lazy(() => import('./pages/staff-portal/StaffGrading'));
+
+// Staff Portal - Academics
+const StaffMyCourses = lazy(() => import('./pages/staff-portal/academics/MyCourses'));
+const StaffCourseMaterials = lazy(() => import('./pages/staff-portal/academics/CourseMaterials'));
+const StaffTimetable = lazy(() => import('./pages/staff-portal/academics/Timetable'));
+const StaffAttendance = lazy(() => import('./pages/staff-portal/academics/attendance/AttendanceDashboard'));
+const StaffStudents = lazy(() => import('./pages/staff-portal/academics/Students'));
+
+// Staff Portal - Assessment
+const StaffMarksEntry = lazy(() => import('./pages/staff-portal/assessment/MarksEntry'));
+const StaffExamTimetable = lazy(() => import('./pages/staff-portal/assessment/ExamTimetable'));
+
+// Staff Portal - HR Self Service
+const StaffMySalary = lazy(() => import('./pages/staff-portal/hr/MySalary'));
+const StaffLeaveRequest = lazy(() => import('./pages/staff-portal/hr/LeaveRequest'));
+const StaffSalaryRequests = lazy(() => import('./pages/staff-portal/hr/SalaryRequests'));
+const StaffProfileView = lazy(() => import('./pages/staff-portal/hr/ProfileView'));
+
+// Staff Portal - Communication
+const StaffInbox = lazy(() => import('./pages/staff-portal/communication/StaffInbox'));
+const StaffDirectMessaging = lazy(() => import('./pages/staff-portal/communication/StaffDirectMessaging'));
+
+// Staff Portal - Events
+const StaffEvents = lazy(() => import('./pages/staff-portal/events/StaffEvents'));
 
 // Navigation Config
 const superAdminItems = [
@@ -547,11 +571,45 @@ const studentItems = [
 
 const staffItems = [
   { name: 'Dashboard', path: '/staff/dashboard', icon: LayoutDashboard },
-  { name: 'Course Materials', path: '/staff/materials', icon: FileText },
-  { name: 'Grading & Results', path: '/staff/grading', icon: ClipboardCheck },
-  { name: 'My Classes', path: '/staff/classes', icon: Users },
-  { name: 'Timetable', path: '/staff/timetable', icon: Calendar },
-  { name: 'Profile', path: '/staff/profile', icon: Briefcase },
+  { 
+    name: 'Academics', 
+    icon: BookOpen,
+    subItems: [
+      { name: 'My Courses', path: '/staff/academics/courses' },
+      { name: 'Course Materials', path: '/staff/academics/materials' },
+      { name: 'Timetable', path: '/staff/academics/timetable' },
+      { name: 'Attendance', path: '/staff/academics/attendance' },
+      { name: 'Students', path: '/staff/academics/students' },
+    ]
+  },
+  { 
+    name: 'Assessment & Results', 
+    icon: ClipboardCheck,
+    subItems: [
+      { name: 'Marks Entry', path: '/staff/assessment/marks' },
+      { name: 'Exam Timetable', path: '/staff/assessment/timetable' },
+    ]
+  },
+  { 
+    name: 'HR Self Service', 
+    icon: Briefcase,
+    subItems: [
+      { name: 'My Salary', path: '/staff/hr/salary' },
+      { name: 'Leave Request', path: '/staff/hr/leave' },
+      { name: 'Salary Requests', path: '/staff/hr/requests' },
+      { name: 'My Profile', path: '/staff/hr/profile' },
+    ]
+  },
+  {
+    name: 'Communication',
+    icon: MessageSquare,
+    subItems: [
+      { name: 'Inbox', path: '/staff/communication/inbox' },
+      { name: 'Direct Messaging', path: '/staff/communication/dm' },
+    ]
+  },
+  { name: 'Events', path: '/staff/events', icon: Calendar },
+  { name: 'Profile', path: '/staff/profile', icon: Users },
 ];
 
 function App() {
@@ -842,6 +900,7 @@ function App() {
 
                       {/* Staff Portal Routes */}
                       <Route
+                        path="/staff"
                         element={
                           <DashboardLayout
                             sidebarItems={staffItems}
@@ -857,8 +916,20 @@ function App() {
                       >
                         <Route index element={<Navigate to="dashboard" replace />} />
                         <Route path="dashboard" element={<StaffPortal />} />
-                        <Route path="materials" element={<StaffPortal />} />
-                        <Route path="grading" element={<StaffGrading />} />
+                        <Route path="academics/courses" element={<StaffMyCourses />} />
+                        <Route path="academics/materials" element={<StaffCourseMaterials />} />
+                        <Route path="academics/timetable" element={<StaffTimetable />} />
+                        <Route path="academics/attendance" element={<StaffAttendance />} />
+                        <Route path="academics/students" element={<StaffStudents />} />
+                        <Route path="assessment/marks" element={<StaffMarksEntry />} />
+                        <Route path="assessment/timetable" element={<StaffExamTimetable />} />
+                        <Route path="hr/salary" element={<StaffMySalary />} />
+                        <Route path="hr/leave" element={<StaffLeaveRequest />} />
+                        <Route path="hr/requests" element={<StaffSalaryRequests />} />
+                        <Route path="hr/profile" element={<StaffProfileView />} />
+                        <Route path="communication/inbox" element={<StaffInbox />} />
+                        <Route path="communication/dm" element={<StaffDirectMessaging />} />
+                        <Route path="events" element={<StaffEvents />} />
                       </Route>
                     </Routes>
                   </Suspense>

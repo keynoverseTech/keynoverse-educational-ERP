@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Calendar, Clock, MapPin, FileText } from 'lucide-react';
 import { getEnrolledCourses } from '../academics/enrollments';
 
