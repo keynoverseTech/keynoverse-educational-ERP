@@ -67,7 +67,10 @@ const SuperAdminRevenue = lazy(() => import('./pages/super-admin/finance/Revenue
 const SuperAdminSubscriptionPlans = lazy(() => import('./pages/super-admin/finance/SubscriptionPlans'));
 const SuperAdminAcademicsOverview = lazy(() => import('./pages/super-admin/institution-tabs/academics-overview/AcademicsOverviewDashboard'));
 const SuperAdminHROverview = lazy(() => import('./pages/super-admin/institution-tabs/hr-overview/HROverviewDashboard'));
+const SuperAdminAssesmentAndResult = lazy(() => import('./pages/super-admin/institution-tabs/assesment-and-result/AssesmentAndResultDashboard'));
 const SuperAdminStaffProfile = lazy(() => import('./pages/super-admin/institution-tabs/hr-overview/StaffProfile'));
+const SuperAdminExamDetails = lazy(() => import('./pages/super-admin/institution-tabs/assesment-and-result/ExamDetails'));
+const SuperAdminResultDetails = lazy(() => import('./pages/super-admin/institution-tabs/assesment-and-result/ResultDetails'));
 
 // School Admin - General
 const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard'));
@@ -246,6 +249,7 @@ const superAdminItems = [
       { name: 'Subscription Plans', path: '/super-admin/finance/plans' }
     ]
   },
+  { name: 'Assesment and Result', path: '/super-admin/assesment-and-result', icon: ClipboardCheck },
   { name: 'Reports', path: '/super-admin/reports', icon: FileText },
   { name: 'Configuration', path: '/super-admin/config', icon: SettingsIcon }
 ];
@@ -615,10 +619,34 @@ function App() {
                             } 
                           />
                           <Route 
+                            path="/super-admin/assesment-and-result" 
+                            element={
+                              <FullScreenLayout title="Assesment and Result Overview">
+                                <SuperAdminAssesmentAndResult />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
                             path="/super-admin/hr-overview/staff-profile" 
                             element={
                               <FullScreenLayout title="Staff Profile">
                                 <SuperAdminStaffProfile />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
+                            path="/super-admin/assesment-and-result/exam-details" 
+                            element={
+                              <FullScreenLayout title="Exam Details">
+                                <SuperAdminExamDetails />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
+                            path="/super-admin/assesment-and-result/result-details" 
+                            element={
+                              <FullScreenLayout title="Result Details">
+                                <SuperAdminResultDetails />
                               </FullScreenLayout>
                             } 
                           />

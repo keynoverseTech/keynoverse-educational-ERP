@@ -60,6 +60,8 @@ const Overview: React.FC = () => {
       navigate('/super-admin/academics-overview');
     } else if (module.id === 'staff') {
       navigate('/super-admin/hr-overview');
+    } else if (module.id === 'assesment-and-result') {
+      navigate('/super-admin/assesment-and-result');
     } else {
       setSelectedModule(module);
     }
@@ -138,8 +140,8 @@ const Overview: React.FC = () => {
       ]
     },
     {
-      id: 'examinations',
-      title: 'Examinations',
+      id: 'assesment-and-result',
+      title: 'Assesment & Result',
       description: 'Exam scheduling, hall management, and result processing.',
       icon: FileSignature,
       color: 'bg-purple-600',
