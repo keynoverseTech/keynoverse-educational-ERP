@@ -71,6 +71,7 @@ const SuperAdminAssesmentAndResult = lazy(() => import('./pages/super-admin/inst
 const SuperAdminStaffProfile = lazy(() => import('./pages/super-admin/institution-tabs/hr-overview/StaffProfile'));
 const SuperAdminExamDetails = lazy(() => import('./pages/super-admin/institution-tabs/assesment-and-result/ExamDetails'));
 const SuperAdminResultDetails = lazy(() => import('./pages/super-admin/institution-tabs/assesment-and-result/ResultDetails'));
+const SuperAdminFinanceOverview = lazy(() => import('./pages/super-admin/institution-tabs/finance-overview/FinanceOverviewDashboard'));
 
 // School Admin - General
 const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard'));
@@ -647,6 +648,14 @@ function App() {
                             element={
                               <FullScreenLayout title="Result Details">
                                 <SuperAdminResultDetails />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
+                            path="/super-admin/finance-overview" 
+                            element={
+                              <FullScreenLayout title="Finance Overview">
+                                <SuperAdminFinanceOverview />
                               </FullScreenLayout>
                             } 
                           />
