@@ -17,6 +17,11 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { mockProgrammes } from '../../../data/mockData';
+import {
+  loadAcademicFaculties,
+  loadAcademicDepartments,
+  loadAcademicLevels,
+} from '../../../state/academics/academicSetupStorage';
 
 const CreateAdmission: React.FC = () => {
   const navigate = useNavigate();
@@ -27,6 +32,20 @@ const CreateAdmission: React.FC = () => {
   const [onlineFormSettings, setOnlineFormSettings] = useState({
     allowSelfRegistration: true,
   });
+
+  // Load configuration data
+  const faculties = loadAcademicFaculties();
+  const departments = loadAcademicDepartments();
+  const levels = loadAcademicLevels();
+
+  const [bulkConfig, setBulkConfig] = useState({
+    facultyId: '',
+    departmentId: '',
+    levelId: ''
+  });
+
+  // Filter departments based on selected faculty
+  const filteredDepartments = departments.filter(d => d.facultyId === bulkConfig.facultyId);
 
   const [newApplicant, setNewApplicant] = useState({
     firstName: '',
@@ -563,6 +582,50 @@ const CreateAdmission: React.FC = () => {
                 <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-md mx-auto">
                   Upload a CSV or Excel file containing multiple applicant records to process them in bulk.
                 </p>
+              </div>
+
+              {/* Bulk Upload Configuration Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Faculty</label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none text-sm"
+                    value={bulkConfig.facultyId}
+                    onChange={(e) => setBulkConfig({ ...bulkConfig, facultyId: e.target.value, departmentId: '' })}
+                  >
+                    <option value="">Select Faculty</option>
+                    {faculties.map(f => (
+                      <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Department</label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none text-sm"
+                    value={bulkConfig.departmentId}
+                    onChange={(e) => setBulkConfig({ ...bulkConfig, departmentId: e.target.value })}
+                    disabled={!bulkConfig.facultyId}
+                  >
+                    <option value="">Select Department</option>
+                    {filteredDepartments.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Admitted Level</label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none text-sm"
+                    value={bulkConfig.levelId}
+                    onChange={(e) => setBulkConfig({ ...bulkConfig, levelId: e.target.value })}
+                  >
+                    <option value="">Select Level</option>
+                    {levels.map(l => (
+                      <option key={l.id} value={l.id}>{l.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl p-10 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-all cursor-pointer">

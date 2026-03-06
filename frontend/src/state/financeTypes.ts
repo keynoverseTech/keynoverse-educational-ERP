@@ -90,6 +90,15 @@ export interface LedgerTransaction {
   createdAt: string;
 }
 
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  isDefault: boolean;
+  type: 'Tuition' | 'Donation' | 'Other';
+}
+
 export interface FinanceContextValue {
   feeStructures: FeeStructure[];
   setFeeStructures: React.Dispatch<React.SetStateAction<FeeStructure[]>>;
@@ -97,6 +106,8 @@ export interface FinanceContextValue {
   setInvoices: React.Dispatch<React.SetStateAction<Invoice[]>>;
   payments: Payment[];
   setPayments: React.Dispatch<React.SetStateAction<Payment[]>>;
+  bankAccounts: BankAccount[];
+  setBankAccounts: React.Dispatch<React.SetStateAction<BankAccount[]>>;
   salaryStructures: SalaryStructure[];
   setSalaryStructures: React.Dispatch<React.SetStateAction<SalaryStructure[]>>;
   staffSalaryAssignments: StaffSalaryAssignment[];

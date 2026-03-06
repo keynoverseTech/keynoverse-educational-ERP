@@ -1,36 +1,11 @@
 import React, { useState } from 'react';
 import { Building2, Plus, Edit, Trash2, Save, X, Wallet } from 'lucide-react';
-
-interface BankAccount {
-  id: string;
-  bankName: string;
-  accountName: string;
-  accountNumber: string;
-  isDefault: boolean;
-  type: 'Tuition' | 'Donation' | 'Other';
-}
+import { useFinance } from '../../../state/financeContext';
+import type { BankAccount } from '../../../state/financeTypes';
 
 const AccountsPage: React.FC = () => {
-  // Mock data - in a real app this would come from an API/Context
-  const [accounts, setAccounts] = useState<BankAccount[]>([
-    {
-      id: '1',
-      bankName: 'First Bank of Nigeria',
-      accountName: 'Keynoverse University Tuition',
-      accountNumber: '2034567890',
-      isDefault: true,
-      type: 'Tuition'
-    },
-    {
-      id: '2',
-      bankName: 'Zenith Bank',
-      accountName: 'Keynoverse University Projects',
-      accountNumber: '1012345678',
-      isDefault: false,
-      type: 'Other'
-    }
-  ]);
-
+  const { bankAccounts, setBankAccounts } = useFinance();
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAccount, setCurrentAccount] = useState<Partial<BankAccount>>({});
 
@@ -46,7 +21,7 @@ const AccountsPage: React.FC = () => {
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this account detail?')) {
-      setAccounts(prev => prev.filter(a => a.id !== id));
+      setBankAccounts(prev => prev.filter(a => a.id !== id));
     }
   };
 
@@ -55,7 +30,7 @@ const AccountsPage: React.FC = () => {
     if (!currentAccount.bankName || !currentAccount.accountNumber) return;
 
     if (currentAccount.id) {
-      setAccounts(prev => prev.map(a => 
+      setBankAccounts(prev => prev.map(a => 
         a.id === currentAccount.id ? { ...a, ...currentAccount } as BankAccount : a
       ));
     } else {
@@ -70,10 +45,10 @@ const AccountsPage: React.FC = () => {
       
       // If setting as default, unset others
       if (newAccount.isDefault) {
-        setAccounts(prev => prev.map(a => ({ ...a, isDefault: false })));
+        setBankAccounts(prev => prev.map(a => ({ ...a, isDefault: false })));
       }
       
-      setAccounts(prev => [...prev, newAccount]);
+      setBankAccounts(prev => [...prev, newAccount]);
     }
     setIsModalOpen(false);
   };
@@ -110,7 +85,7 @@ const AccountsPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {accounts.map(account => (
+        {bankAccounts.map(account => (
           <div key={account.id} className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
             <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 opacity-5 rounded-full ${
               account.isDefault ? 'bg-green-500' : 'bg-blue-500'

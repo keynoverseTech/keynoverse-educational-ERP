@@ -7,7 +7,8 @@ import type {
   SalaryStructure, 
   StaffSalaryAssignment, 
   PayrollRun, 
-  LedgerTransaction 
+  LedgerTransaction,
+  BankAccount
 } from './financeTypes';
 
 const initialFeeStructures: FeeStructure[] = [
@@ -86,6 +87,25 @@ const initialLedgerTransactions: LedgerTransaction[] = [
   }
 ];
 
+const initialBankAccounts: BankAccount[] = [
+  {
+    id: '1',
+    bankName: 'First Bank of Nigeria',
+    accountName: 'Keynoverse University Tuition',
+    accountNumber: '2034567890',
+    isDefault: true,
+    type: 'Tuition'
+  },
+  {
+    id: '2',
+    bankName: 'Zenith Bank',
+    accountName: 'Keynoverse University Projects',
+    accountNumber: '1012345678',
+    isDefault: false,
+    type: 'Other'
+  }
+];
+
 export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [feeStructures, setFeeStructures] = useState<FeeStructure[]>(initialFeeStructures);
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
@@ -94,6 +114,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [staffSalaryAssignments, setStaffSalaryAssignments] = useState<StaffSalaryAssignment[]>([]);
   const [payrollRuns, setPayrollRuns] = useState<PayrollRun[]>([]);
   const [ledgerTransactions, setLedgerTransactions] = useState<LedgerTransaction[]>(initialLedgerTransactions);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>(initialBankAccounts);
 
   return (
     <FinanceContext.Provider
@@ -104,6 +125,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setInvoices,
         payments,
         setPayments,
+        bankAccounts,
+        setBankAccounts,
         salaryStructures,
         setSalaryStructures,
         staffSalaryAssignments,

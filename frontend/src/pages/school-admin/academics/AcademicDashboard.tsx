@@ -83,21 +83,34 @@ export const AcademicDashboard: React.FC = () => {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <LayoutDashboard className="text-blue-600" />
-            Academic Dashboard
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400">Overview of university academic activities and configuration.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-medium flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            System Active
-          </span>
-          <div className="text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-2xl px-6 py-5 shadow-lg shadow-blue-600/20 border border-blue-500/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-blue-50 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Academic Overview
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <LayoutDashboard className="w-7 h-7" />
+              Academic Dashboard
+            </h1>
+            <p className="text-blue-50/80 mt-2 text-sm md:text-base max-w-xl">
+              Overview of university academic activities, session progress, and configuration.
+            </p>
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-3 text-blue-50/90">
+            <div className="text-right">
+              <p className="text-xs uppercase tracking-wide">Current Session</p>
+              <p className="text-xl font-bold">{currentSession.name}</p>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="px-3 py-1 rounded-full bg-white/10">
+                Semester: <span className="font-semibold">{currentSession.semester}</span>
+              </span>
+              <span className="px-3 py-1 rounded-full bg-white/10">
+                Status: <span className="font-semibold">{currentSession.status}</span>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -105,13 +118,16 @@ export const AcademicDashboard: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className={`w-12 h-12 rounded-lg ${stat.bg} flex items-center justify-center ${stat.color}`}>
-              <stat.icon size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</h3>
+          <div key={index} className={`relative overflow-hidden bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 hover:shadow-lg transition-all duration-300 hover:shadow-${stat.color.split('-')[1]}-500/10`}>
+            <div className={`absolute inset-x-0 top-0 h-1 bg-${stat.bg.replace('bg-', '').replace('100', '500').replace(' dark:bg-blue-900/20', '').replace(' dark:bg-purple-900/20', '').replace(' dark:bg-green-900/20', '').replace(' dark:bg-orange-900/20', '')}`} />
+            <div className="flex items-center justify-between relative">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
+              </div>
+              <div className={`p-2 rounded-xl ${stat.bg}`}>
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              </div>
             </div>
           </div>
         ))}

@@ -36,27 +36,53 @@ const ProcurementDashboard: React.FC = () => {
     });
   }, []);
 
-  const StatCard = ({ title, value, icon: Icon, color, bg }: any) => (
-    <div className="bg-white dark:bg-[#151e32] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex items-center justify-between transition-transform hover:-translate-y-1">
-      <div>
-        <p className="text-sm font-bold text-gray-500 uppercase mb-1">{title}</p>
-        <h3 className="text-3xl font-black text-gray-900 dark:text-white">{value}</h3>
+  const StatCard = ({ title, value, icon: Icon, color, bg }: any) => {
+    let gradient = 'bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500';
+    if (title.includes('Pending')) gradient = 'bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500';
+    else if (title.includes('Active')) gradient = 'bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500';
+    else if (title.includes('Low')) gradient = 'bg-gradient-to-r from-red-500 via-rose-500 to-pink-500';
+    else if (title.includes('Asset')) gradient = 'bg-gradient-to-r from-emerald-500 via-green-500 to-lime-500';
+
+    return (
+      <div className={`relative overflow-hidden bg-white dark:bg-[#151e32] p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300 hover:shadow-${color.split('-')[1]}-500/10`}>
+        <div className={`absolute inset-x-0 top-0 h-1 ${gradient}`} />
+        <div className="flex items-center justify-between relative">
+          <div>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">{title}</p>
+            <h3 className="text-3xl font-black text-gray-900 dark:text-white">{value}</h3>
+          </div>
+          <div className={`p-4 rounded-xl ${bg} ${color}`}>
+            <Icon size={24} />
+          </div>
+        </div>
       </div>
-      <div className={`p-4 rounded-xl ${bg} ${color}`}>
-        <Icon size={24} />
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <ShoppingBag className="text-blue-600" />
-            Procurement & Inventory
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage purchasing, stock levels, and fixed assets.</p>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-2xl px-6 py-5 shadow-lg shadow-blue-600/20 border border-blue-500/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-blue-50 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Procurement & Inventory
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <ShoppingBag className="w-7 h-7" />
+              Procurement Dashboard
+            </h1>
+            <p className="text-blue-50/80 mt-2 text-sm md:text-base max-w-xl">
+              Manage purchasing, stock levels, and fixed assets across the institution.
+            </p>
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-3 text-blue-50/90">
+             <div className="text-right">
+              <p className="text-xs uppercase tracking-wide">Total Asset Value</p>
+              <p className="text-2xl font-bold">${stats.totalAssetValue.toLocaleString()}</p>
+            </div>
+          </div>
         </div>
       </div>
 
