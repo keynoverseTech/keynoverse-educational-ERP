@@ -274,7 +274,6 @@ const superAdminItems = [
       { name: 'Subscription Plans', path: '/super-admin/finance/plans' }
     ]
   },
-  { name: 'Assesment and Result', path: '/super-admin/assesment-and-result', icon: ClipboardCheck },
   { name: 'Reports', path: '/super-admin/reports', icon: FileText },
   { name: 'Configuration', path: '/super-admin/config', icon: SettingsIcon }
 ];

@@ -24,7 +24,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   sidebarLogo
 }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   // Initialize sidebar as open on desktop (default)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -69,8 +69,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   const handleLogout = () => {
+    // Capture the role before logging out
+    const role = user?.role;
     logout();
-    navigate('/auth/select');
+    
+    // Redirect based on the captured role
+     if (role === 'super_admin') {
+       navigate('/auth/super-admin');
+     } else if (role === 'admin' || role === 'staff') {
+       navigate('/auth/school-admin');
+     } else if (role === 'student') {
+       navigate('/auth/student');
+     } else {
+       navigate('/auth'); // Fallback to auth selection if role is unknown
+     }
   };
 
   return (

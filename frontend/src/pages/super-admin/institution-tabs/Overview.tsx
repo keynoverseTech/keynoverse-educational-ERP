@@ -63,6 +63,8 @@ const Overview: React.FC = () => {
       navigate('/super-admin/finance-overview');
     } else if (module.id === 'assesment-and-result') {
       navigate('/super-admin/assesment-and-result');
+    } else if (module.id === 'staff') {
+      navigate('/super-admin/hr-overview');
     } else {
       setSelectedModule(module);
     }
