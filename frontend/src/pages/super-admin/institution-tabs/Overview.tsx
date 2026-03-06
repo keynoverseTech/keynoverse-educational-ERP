@@ -17,8 +17,6 @@ import {
   Activity,
   BarChart3,
   FileSignature,
-  Layout,
-  User,
   School,
   ArrowRight,
   DollarSign
@@ -158,62 +156,7 @@ const Overview: React.FC = () => {
         { label: 'Pending Approval', value: '5' }
       ]
     },
-    {
-      id: 'reports',
-      title: 'Reports & Analytics',
-      description: 'Comprehensive reporting dashboard and data visualization.',
-      icon: BarChart3,
-      color: 'bg-orange-600',
-      active: true,
-      lastSync: 'Just now',
-      stats: [
-        { label: 'Daily Reports', value: '15' },
-        { label: 'Generated', value: '1,205' },
-        { label: 'Downloads', value: '450' }
-      ]
-    },
-    {
-      id: 'staff_portal',
-      title: 'Staff Portal',
-      description: 'Self-service portal for faculty and administrative staff.',
-      icon: Layout,
-      color: 'bg-teal-600',
-      active: true,
-      lastSync: '2 mins ago',
-      stats: [
-        { label: 'Active Users', value: '210', trend: '85%' },
-        { label: 'Logins Today', value: '185' },
-        { label: 'Requests', value: '12' }
-      ]
-    },
-    {
-      id: 'student_portal',
-      title: 'Student Portal',
-      description: 'Access to grades, courses, and fees for students.',
-      icon: User,
-      color: 'bg-indigo-600',
-      active: true,
-      lastSync: '1 min ago',
-      stats: [
-        { label: 'Active Users', value: '3,200', trend: '92%' },
-        { label: 'Logins Today', value: '2,850' },
-        { label: 'Course Reg.', value: 'Complete' }
-      ]
-    },
-    {
-      id: 'settings',
-      title: 'Settings',
-      description: 'Global system configuration and preferences.',
-      icon: Settings,
-      color: 'bg-gray-600',
-      active: true,
-      lastSync: '3 days ago',
-      stats: [
-        { label: 'Configs Changed', value: '5' },
-        { label: 'System Version', value: 'v2.4.0' },
-        { label: 'Backups', value: 'Daily' }
-      ]
-    },
+
     {
       id: 'staff',
       title: 'Human Resources',

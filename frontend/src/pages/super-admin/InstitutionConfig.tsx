@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { 
+import SubAdminList from '../../pages/sub-admins/SubAdminList';
+import {  
   GraduationCap, 
   UserPlus, 
   FileSignature, 
@@ -581,6 +582,7 @@ const InstitutionConfig: React.FC = () => {
 
   const tabs = [
     { id: 'modules', label: 'Global Modules', icon: Layout },
+    { id: 'sub_admins', label: 'Sub-Admins', icon: Users },
     { id: 'maintenance', label: 'Maintenance Mode', icon: Construction },
     { id: 'general', label: 'General Settings', icon: Sliders },
   ];
@@ -614,6 +616,7 @@ const InstitutionConfig: React.FC = () => {
 
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
         {activeTab === 'modules' && <GlobalModules />}
+        {activeTab === 'sub_admins' && <SubAdminList />}
         {activeTab === 'maintenance' && <MaintenanceMode />}
         {activeTab === 'general' && (
           <div className="bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center">

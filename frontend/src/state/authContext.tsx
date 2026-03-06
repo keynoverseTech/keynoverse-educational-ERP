@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import type { AxiosError } from 'axios';
 import api from '../services/api';
 
+import type { PermissionSet } from '../utils/permissionCheck';
+
 export interface User {
   id: string;
   email: string;
@@ -9,6 +11,7 @@ export interface User {
   role: string;
   avatar?: string;
   passwordUpdated?: boolean;
+  permissions?: PermissionSet;
 }
 
 export interface LoginResponse {

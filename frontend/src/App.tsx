@@ -2,7 +2,6 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Building2,
   BookOpen,
   UserPlus,
   ClipboardCheck,
@@ -43,6 +42,8 @@ import LoadingFallback from './components/LoadingFallback';
 import DashboardLayout from './layouts/DashboardLayout';
 import FullScreenLayout from './layouts/FullScreenLayout';
 
+import SuperAdminLayout from './layouts/SuperAdminLayout';
+
 // Lazy Load Pages
 // Auth
 const AuthSelection = lazy(() => import('./pages/auth/AuthSelection'));
@@ -58,7 +59,9 @@ const Applications = lazy(() => import('./pages/super-admin/Applications'));
 const ApplicationDetails = lazy(() => import('./pages/super-admin/ApplicationDetails'));
 const InstitutionDetails = lazy(() => import('./pages/super-admin/InstitutionDetails'));
 const InstitutionConfig = lazy(() => import('./pages/super-admin/InstitutionConfig'));
-const SubAdmins = lazy(() => import('./pages/super-admin/SubAdmins'));
+const SubAdminList = lazy(() => import('./pages/sub-admins/SubAdminList'));
+const CreateSubAdmin = lazy(() => import('./pages/sub-admins/CreateSubAdmin'));
+const EditSubAdmin = lazy(() => import('./pages/sub-admins/EditSubAdmin'));
 const SystemLogs = lazy(() => import('./pages/super-admin/SystemLogs'));
 const ProgramGovernance = lazy(() => import('./pages/super-admin/ProgramGovernance'));
 const ReportsLayout = lazy(() => import('./pages/super-admin/reports/ReportsLayout'));
@@ -263,23 +266,7 @@ const StaffDirectMessaging = lazy(() => import('./pages/staff-portal/communicati
 const StaffEvents = lazy(() => import('./pages/staff-portal/events/StaffEvents'));
 
 // Navigation Config
-const superAdminItems = [
-  { name: 'Overview', path: '/super-admin/dashboard', icon: LayoutDashboard },
-  { name: 'Registrations', path: '/super-admin/applications', icon: ClipboardCheck },
-  { name: 'All Institutes', path: '/super-admin/institutions', icon: Building2 },
-  { name: 'Program Governance', path: '/super-admin/academic-catalog', icon: BookOpen },
-  { 
-    name: 'Finance', 
-    icon: DollarSign, 
-    subItems: [
-      { name: 'Dashboard', path: '/super-admin/finance/dashboard' },
-      { name: 'Revenue', path: '/super-admin/finance/revenue' },
-      { name: 'Subscription Plans', path: '/super-admin/finance/plans' }
-    ]
-  },
-  { name: 'Reports', path: '/super-admin/reports', icon: FileText },
-  { name: 'Configuration', path: '/super-admin/config', icon: SettingsIcon }
-];
+// Super Admin items are now managed in SuperAdminLayout.tsx
 
 const schoolAdminItems = [
   { name: 'Overview', path: '/school-admin/dashboard', icon: LayoutDashboard },
@@ -643,16 +630,17 @@ function App() {
                           <Route path="/auth/student" element={<StudentLogin />} />
 
                           {/* Super Admin Routes */}
-                          <Route element={
-                            <DashboardLayout sidebarItems={superAdminItems}>
-                              <Outlet />
-                            </DashboardLayout>
-                          }>
+                          <Route element={<SuperAdminLayout />}>
                             <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
                             <Route path="/super-admin/institutions" element={<Institutions />} />
                             <Route path="/super-admin/new-registration" element={<NewRegistration />} />
                             <Route path="/super-admin/applications" element={<Applications />} />
-                            <Route path="/super-admin/sub-admins" element={<SubAdmins />} />
+                            
+                            {/* Sub-Admin Management */}
+                            <Route path="/super-admin/sub-admins" element={<SubAdminList />} />
+                            <Route path="/super-admin/sub-admins/create" element={<CreateSubAdmin />} />
+                            <Route path="/super-admin/sub-admins/edit/:id" element={<EditSubAdmin />} />
+
                             <Route path="/super-admin/academic-catalog" element={<ProgramGovernance />} />
                             <Route path="/super-admin/system-logs" element={<SystemLogs />} />
                             <Route path="/super-admin/config" element={<InstitutionConfig />} />
