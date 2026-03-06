@@ -19,6 +19,7 @@ type AvailableCourse = {
   lecturer: string;
   schedule: string;
   venue: string;
+  semester?: string;
 };
 
 // Default initial courses if none are persisted
@@ -26,10 +27,10 @@ const INITIAL_COURSES: StudentCourse[] = [];
 
 // Fallback available courses if nothing is in local storage (Legacy Mock Data)
 const LEGACY_AVAILABLE_COURSES: AvailableCourse[] = [
-  { code: 'CSC 403', title: 'Computer Graphics', units: 3, lecturer: 'Dr. T. Balogun', schedule: 'Tue 10:00 - 12:00', venue: 'Lab 1' },
-  { code: 'CSC 412', title: 'Artificial Intelligence', units: 3, lecturer: 'Prof. K. Adeyemi', schedule: 'Thu 14:00 - 16:00', venue: 'LH B' },
-  { code: 'GNS 301', title: 'Entrepreneurship Studies', units: 2, lecturer: 'Dr. Mrs. P. Cole', schedule: 'Fri 08:00 - 10:00', venue: 'Auditorium' },
-  { code: 'MTH 401', title: 'Numerical Analysis II', units: 3, lecturer: 'Dr. S. Ibrahim', schedule: 'Mon 14:00 - 16:00', venue: 'LH C' },
+  { code: 'CSC 403', title: 'Computer Graphics', units: 3, lecturer: 'Dr. T. Balogun', schedule: 'Tue 10:00 - 12:00', venue: 'Lab 1', semester: '1st' },
+  { code: 'CSC 412', title: 'Artificial Intelligence', units: 3, lecturer: 'Prof. K. Adeyemi', schedule: 'Thu 14:00 - 16:00', venue: 'LH B', semester: '1st' },
+  { code: 'GNS 301', title: 'Entrepreneurship Studies', units: 2, lecturer: 'Dr. Mrs. P. Cole', schedule: 'Fri 08:00 - 10:00', venue: 'Auditorium', semester: '2nd' },
+  { code: 'MTH 401', title: 'Numerical Analysis II', units: 3, lecturer: 'Dr. S. Ibrahim', schedule: 'Mon 14:00 - 16:00', venue: 'LH C', semester: '2nd' },
 ];
 
 const CoursesPage: React.FC = () => {
@@ -49,29 +50,34 @@ const CoursesPage: React.FC = () => {
         if (savedAllocations) {
           const allocations = JSON.parse(savedAllocations);
           
-          // MOCK CONTEXT: In a real app, we would use the logged-in student's Dept, Level, and Current Semester
-          // For this demo, we will try to find courses for 'csc' (Computer Science) at '100' Level, Semester '1'
-          // If not found, we fallback to any available allocation key to show *something*
+          // MOCK CONTEXT: In a real app, we would use the logged-in student's Dept, Level.
+          // For this demo, we assume the student is in 'csc' (Computer Science) at '100' Level.
+          // We fetch courses for BOTH Semester 1 and Semester 2.
           
-          let targetKey = 'csc_100_1'; 
+          const dept = 'csc';
+          const level = '100';
           
-          // If no courses for csc_100_1, try to find the first available key to display data for demo purposes
-          if (!allocations[targetKey] || allocations[targetKey].length === 0) {
-            const firstKey = Object.keys(allocations)[0];
-            if (firstKey) targetKey = firstKey;
-          }
+          const sem1Key = `${dept}_${level}_1`;
+          const sem2Key = `${dept}_${level}_2`;
 
-          const adminCourses = allocations[targetKey] || [];
+          const coursesSem1 = allocations[sem1Key] || [];
+          const coursesSem2 = allocations[sem2Key] || [];
           
           // Map Admin Course format to Student AvailableCourse format
-          const mappedCourses: AvailableCourse[] = adminCourses.map((c: any) => ({
+          const mapCourse = (c: any, semester: string): AvailableCourse => ({
             code: c.code,
             title: c.title,
             units: c.units,
             lecturer: 'TBA', // Admin hasn't assigned lecturer in this flow yet
             schedule: 'TBA', // Admin hasn't assigned schedule yet
-            venue: 'TBA'     // Admin hasn't assigned venue yet
-          }));
+            venue: 'TBA',     // Admin hasn't assigned venue yet
+            semester: semester
+          });
+
+          const mappedCourses: AvailableCourse[] = [
+            ...coursesSem1.map((c: any) => mapCourse(c, '1st')),
+            ...coursesSem2.map((c: any) => mapCourse(c, '2nd'))
+          ];
 
           if (mappedCourses.length > 0) {
              setAvailableCourses(mappedCourses);
