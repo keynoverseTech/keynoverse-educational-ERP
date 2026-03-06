@@ -15,30 +15,38 @@ interface StatCardProps {
   trendValue?: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, subtext, icon: Icon, trend, trendValue }) => (
-  <div className="bg-white dark:bg-[#151e32] p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
-    <div className="flex justify-between items-start">
-      <div>
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-        <h3 className="text-2xl font-bold mt-2 text-gray-900 dark:text-white">{value}</h3>
+const StatCard: React.FC<StatCardProps> = ({ title, value, subtext, icon: Icon, trend, trendValue }) => {
+  let gradient = 'bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500';
+  if (title.includes('New')) gradient = 'bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500';
+  else if (title.includes('Withdrawn')) gradient = 'bg-gradient-to-r from-red-500 via-rose-500 to-pink-500';
+  else if (title.includes('Graduating')) gradient = 'bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500';
+
+  return (
+    <div className={`relative overflow-hidden bg-white dark:bg-[#151e32] p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300 hover:shadow-blue-500/10`}>
+      <div className={`absolute inset-x-0 top-0 h-1 ${gradient}`} />
+      <div className="flex justify-between items-start relative">
+        <div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
+          <h3 className="text-2xl font-bold mt-2 text-gray-900 dark:text-white">{value}</h3>
+        </div>
+        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+          <Icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        </div>
       </div>
-      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <Icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+      <div className="mt-4 flex items-center gap-2 relative">
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${
+          trend === 'up' 
+            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+        }`}>
+          {trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+          {trendValue}
+        </span>
+        <span className="text-xs text-gray-500">{subtext}</span>
       </div>
     </div>
-    <div className="mt-4 flex items-center gap-2">
-      <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${
-        trend === 'up' 
-          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-      }`}>
-        {trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-        {trendValue}
-      </span>
-      <span className="text-xs text-gray-500">{subtext}</span>
-    </div>
-  </div>
-);
+  );
+};
 
 const ReportsDashboard: React.FC = () => {
   // Mock Data
@@ -80,18 +88,32 @@ const ReportsDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Overview</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">University-wide performance metrics</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">
-            <Printer size={16} /> Print
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-blue-500/20">
-            <Download size={16} /> Export
-          </button>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-2xl px-6 py-5 shadow-lg shadow-blue-600/20 border border-blue-500/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-blue-50 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Analytics & Insights
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <BarChart className="w-7 h-7" />
+              Reports Dashboard
+            </h1>
+            <p className="text-blue-50/80 mt-2 text-sm md:text-base max-w-xl">
+              Comprehensive analytics and reporting on university performance.
+            </p>
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-3 text-blue-50/90">
+             <div className="flex items-center gap-3">
+              <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-sm font-bold text-white transition-colors shadow-sm backdrop-blur-sm">
+                <Printer size={16} /> Print
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg text-sm font-bold transition-colors shadow-lg">
+                <Download size={16} /> Export
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

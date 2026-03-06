@@ -43,17 +43,27 @@ const EventsDashboard: React.FC = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-            <div className="p-2.5 bg-purple-600 rounded-xl shadow-lg shadow-purple-500/20">
-              <LayoutDashboard className="w-6 h-6 text-white" />
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-2xl px-6 py-5 shadow-lg shadow-blue-600/20 border border-blue-500/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-blue-50 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Events & Activities
             </div>
-            Events Dashboard
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Overview of upcoming school events and activities.
-          </p>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <LayoutDashboard className="w-7 h-7" />
+              Events Dashboard
+            </h1>
+            <p className="text-blue-50/80 mt-2 text-sm md:text-base max-w-xl">
+              Overview of upcoming school events, academic calendars, and extracurricular activities.
+            </p>
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-3 text-blue-50/90">
+             <Link to="/school-admin/events/create" className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm font-medium backdrop-blur-sm border border-white/20">
+               + Create Event
+             </Link>
+          </div>
         </div>
       </div>
 

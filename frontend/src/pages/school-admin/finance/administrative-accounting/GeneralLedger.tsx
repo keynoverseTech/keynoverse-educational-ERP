@@ -31,7 +31,7 @@ interface LedgerFormData {
 }
 
 const GeneralLedger: React.FC = () => {
-  const { ledgerTransactions, setLedgerTransactions } = useFinance();
+  const { ledgerTransactions, setLedgerTransactions, bankAccounts } = useFinance();
   
   const [activeView, setActiveView] = useState<'list' | 'add'>('list');
   const [filterType, setFilterType] = useState<'All' | 'Income' | 'Expense'>('All');
@@ -334,17 +334,22 @@ const GeneralLedger: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Account Name</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Bank Account</label>
                 <div className="relative">
                   <Building2 className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="text"
-                    placeholder="e.g. Zenith Bank - Main"
-                    className="w-full pl-14 pr-6 py-4 rounded-2xl border-2 border-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-indigo-500 outline-none transition-all font-bold"
+                  <select
+                    className="w-full pl-14 pr-6 py-4 rounded-2xl border-2 border-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-indigo-500 outline-none transition-all font-bold appearance-none"
                     value={formData.accountName}
                     onChange={e => setFormData(prev => ({ ...prev, accountName: e.target.value }))}
                     required
-                  />
+                  >
+                    <option value="">Select Bank Account</option>
+                    {bankAccounts.map(account => (
+                      <option key={account.id} value={`${account.bankName} - ${account.accountName}`}>
+                        {account.bankName} - {account.accountName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 

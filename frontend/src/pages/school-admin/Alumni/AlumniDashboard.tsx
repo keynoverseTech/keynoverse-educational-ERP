@@ -19,30 +19,51 @@ const AlumniDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alumni Overview</h1>
-          <p className="text-gray-500 dark:text-gray-400">Welcome to the Alumni Management Dashboard</p>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-2xl px-6 py-5 shadow-lg shadow-blue-600/20 border border-blue-500/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-blue-50 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Alumni Management
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <GraduationCap className="w-7 h-7" />
+              Alumni Dashboard
+            </h1>
+            <p className="text-blue-50/80 mt-2 text-sm md:text-base max-w-xl">
+              Track alumni careers, manage transcripts, and foster community engagement.
+            </p>
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-3 text-blue-50/90">
+             <div className="text-right">
+              <p className="text-xs uppercase tracking-wide">Total Alumni</p>
+              <p className="text-2xl font-bold">{totalAlumni.toLocaleString()}</p>
+            </div>
+             <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm font-medium backdrop-blur-sm border border-white/20">
+              Download Report
+            </button>
+          </div>
         </div>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Download Report
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-xl ${stat.color} bg-opacity-10`}>
+          <div key={index} className={`relative overflow-hidden bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:shadow-${stat.color.replace('bg-', '')}/10`}>
+            <div className={`absolute inset-x-0 top-0 h-1 ${stat.color.replace('bg-', 'bg-')}`} />
+            <div className="flex items-center justify-between relative mb-2">
+               <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
+                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</h3>
+              </div>
+              <div className={`p-2 rounded-xl ${stat.color} bg-opacity-10`}>
                 <stat.icon size={24} className={stat.color.replace('bg-', 'text-')} />
               </div>
-              <span className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-full">
+            </div>
+            <span className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-full w-fit">
                 <TrendingUp size={12} className="mr-1" />
                 {stat.trend}
-              </span>
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{stat.value}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+            </span>
           </div>
         ))}
       </div>

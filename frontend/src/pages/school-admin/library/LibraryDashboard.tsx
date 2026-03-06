@@ -108,23 +108,31 @@ const LibraryDashboard: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-start justify-between">
-              <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
-                <stat.icon className="w-6 h-6" />
-              </div>
-              <div className={`flex items-center gap-1 text-sm font-medium ${stat.trendUp ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {stat.trendUp ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                {stat.trend}
+        {stats.map((stat, index) => {
+          let gradient = 'bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500';
+          if (stat.label.includes('Active')) gradient = 'bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500';
+          else if (stat.label.includes('Overdue')) gradient = 'bg-gradient-to-r from-rose-500 via-red-500 to-orange-500';
+          else if (stat.label.includes('Reservations')) gradient = 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500';
+
+          return (
+            <div key={index} className={`relative overflow-hidden bg-white dark:bg-gray-900 p-5 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 hover:shadow-lg transition-all duration-300 hover:shadow-${stat.color.split('-')[1]}-500/10`}>
+              <div className={`absolute inset-x-0 top-0 h-1 ${gradient}`} />
+              <div className="flex items-center justify-between relative">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
+                  <div className={`flex items-center gap-1 text-xs font-medium mt-2 ${stat.trendUp ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    {stat.trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    {stat.trend}
+                  </div>
+                </div>
+                <div className={`p-2 rounded-xl ${stat.bg}`}>
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                </div>
               </div>
             </div>
-            <div className="mt-4">
-              <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">{stat.label}</h3>
-              <p className="text-2xl font-black text-gray-900 dark:text-white mt-1">{stat.value}</p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
