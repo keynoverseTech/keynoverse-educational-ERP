@@ -21,13 +21,11 @@ type AvailableCourse = {
   venue: string;
 };
 
-const INITIAL_COURSES: StudentCourse[] = [
-  { code: 'CSC 401', title: 'Advanced Software Engineering', units: 3, lecturer: 'Dr. A. Bello', schedule: 'Mon 10:00 - 12:00', venue: 'Lab 2', status: 'Registered' },
-  { code: 'CSC 415', title: 'Distributed Systems', units: 3, lecturer: 'Prof. C. Okoye', schedule: 'Wed 14:00 - 16:00', venue: 'LH A', status: 'Registered' },
-  { code: 'CSC 499', title: 'Final Year Project', units: 6, lecturer: 'Project Supervisor', schedule: 'Flexible', venue: 'Department', status: 'Pending' },
-];
+// Default initial courses if none are persisted
+const INITIAL_COURSES: StudentCourse[] = [];
 
-const AVAILABLE_COURSES: AvailableCourse[] = [
+// Fallback available courses if nothing is in local storage (Legacy Mock Data)
+const LEGACY_AVAILABLE_COURSES: AvailableCourse[] = [
   { code: 'CSC 403', title: 'Computer Graphics', units: 3, lecturer: 'Dr. T. Balogun', schedule: 'Tue 10:00 - 12:00', venue: 'Lab 1' },
   { code: 'CSC 412', title: 'Artificial Intelligence', units: 3, lecturer: 'Prof. K. Adeyemi', schedule: 'Thu 14:00 - 16:00', venue: 'LH B' },
   { code: 'GNS 301', title: 'Entrepreneurship Studies', units: 2, lecturer: 'Dr. Mrs. P. Cole', schedule: 'Fri 08:00 - 10:00', venue: 'Auditorium' },
@@ -39,6 +37,62 @@ const CoursesPage: React.FC = () => {
     const persisted = getEnrolledCourses();
     return persisted.length ? (persisted as StudentCourse[]) : INITIAL_COURSES;
   });
+  
+  // State for available courses (fetched from School Admin allocation)
+  const [availableCourses, setAvailableCourses] = useState<AvailableCourse[]>([]);
+
+  // Load available courses from Local Storage (Simulating Backend)
+  useEffect(() => {
+    const loadAllocatedCourses = () => {
+      try {
+        const savedAllocations = localStorage.getItem('course_allocations');
+        if (savedAllocations) {
+          const allocations = JSON.parse(savedAllocations);
+          
+          // MOCK CONTEXT: In a real app, we would use the logged-in student's Dept, Level, and Current Semester
+          // For this demo, we will try to find courses for 'csc' (Computer Science) at '100' Level, Semester '1'
+          // If not found, we fallback to any available allocation key to show *something*
+          
+          let targetKey = 'csc_100_1'; 
+          
+          // If no courses for csc_100_1, try to find the first available key to display data for demo purposes
+          if (!allocations[targetKey] || allocations[targetKey].length === 0) {
+            const firstKey = Object.keys(allocations)[0];
+            if (firstKey) targetKey = firstKey;
+          }
+
+          const adminCourses = allocations[targetKey] || [];
+          
+          // Map Admin Course format to Student AvailableCourse format
+          const mappedCourses: AvailableCourse[] = adminCourses.map((c: any) => ({
+            code: c.code,
+            title: c.title,
+            units: c.units,
+            lecturer: 'TBA', // Admin hasn't assigned lecturer in this flow yet
+            schedule: 'TBA', // Admin hasn't assigned schedule yet
+            venue: 'TBA'     // Admin hasn't assigned venue yet
+          }));
+
+          if (mappedCourses.length > 0) {
+             setAvailableCourses(mappedCourses);
+             return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load course allocations", err);
+      }
+      
+      // Fallback if no admin allocations found
+      setAvailableCourses(LEGACY_AVAILABLE_COURSES);
+    };
+
+    loadAllocatedCourses();
+    
+    // Listen for storage events in case admin updates in another tab
+    window.addEventListener('storage', loadAllocatedCourses);
+    return () => window.removeEventListener('storage', loadAllocatedCourses);
+  }, []);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Registered' | 'Pending'>('All');
   
@@ -68,7 +122,7 @@ const CoursesPage: React.FC = () => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const newCourses: StudentCourse[] = AVAILABLE_COURSES
+    const newCourses: StudentCourse[] = availableCourses
       .filter(ac => selectedCourses.includes(ac.code))
       .map(ac => ({
         ...ac,
@@ -86,7 +140,7 @@ const CoursesPage: React.FC = () => {
     saveEnrolledCourses(courses);
   }, [courses]);
 
-  const selectedUnits = AVAILABLE_COURSES
+  const selectedUnits = availableCourses
     .filter(c => selectedCourses.includes(c.code))
     .reduce((sum, c) => sum + c.units, 0);
 
@@ -243,7 +297,7 @@ const CoursesPage: React.FC = () => {
             </div>
             
             <div className="p-8 max-h-[60vh] overflow-y-auto space-y-4">
-              {AVAILABLE_COURSES.filter(ac => !courses.some(c => c.code === ac.code)).map((course) => (
+              {availableCourses.filter(ac => !courses.some(c => c.code === ac.code)).map((course) => (
                 <div 
                   key={course.code}
                   onClick={() => handleToggleCourse(course.code)}
@@ -273,7 +327,7 @@ const CoursesPage: React.FC = () => {
                 </div>
               ))}
               
-              {AVAILABLE_COURSES.every(ac => courses.some(c => c.code === ac.code)) && (
+              {availableCourses.every(ac => courses.some(c => c.code === ac.code)) && (
                 <div className="text-center py-12 text-gray-500">
                   <CheckCircle2 size={48} className="mx-auto mb-4 text-green-500 opacity-50" />
                   <p>You have registered for all available courses.</p>
@@ -306,4 +360,3 @@ const CoursesPage: React.FC = () => {
 };
 
 export default CoursesPage;
-

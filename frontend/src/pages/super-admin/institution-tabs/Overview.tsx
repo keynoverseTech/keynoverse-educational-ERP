@@ -12,7 +12,6 @@ import {
   LayoutGrid,
   History,
   Calendar,
-  Briefcase,
   X,
   Activity,
   BarChart3,
@@ -288,11 +287,11 @@ const Overview: React.FC = () => {
           progress={85}
         />
         <StatusCard 
-          title="Total Teachers"
-          value="245"
-          subtext="98% Attendance"
+          title="Total Attendance"
+          value="98%"
+          subtext="Students & Staff"
           subtextTrend="up"
-          icon={Briefcase}
+          icon={CheckCircle2}
           color="emerald"
           progress={92}
         />

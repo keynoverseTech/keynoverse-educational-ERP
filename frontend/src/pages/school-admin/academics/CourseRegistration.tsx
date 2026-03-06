@@ -43,14 +43,6 @@ const mockRegistrations: StudentRegistration[] = [
   { id: '6', studentName: 'Emily Chen', matricNumber: 'SCI/2024/055', programme: 'Computer Science', level: 300, totalUnits: 21, status: 'pending', submissionDate: '2024-09-17' },
 ];
 
-const availableCourses = [
-  { code: 'CSC 101', title: 'Introduction to Computer Science', units: 3, compulsory: true },
-  { code: 'MTH 101', title: 'General Mathematics I', units: 3, compulsory: true },
-  { code: 'PHY 101', title: 'General Physics I', units: 3, compulsory: true },
-  { code: 'GST 101', title: 'Use of English', units: 2, compulsory: true },
-  { code: 'CHM 101', title: 'General Chemistry I', units: 3, compulsory: false },
-];
-
 export default function CourseRegistration() {
   const navigate = useNavigate();
   const [selectedSession, setSelectedSession] = useState('2024/2025');
@@ -60,7 +52,6 @@ export default function CourseRegistration() {
   const [selectedLevel, setSelectedLevel] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [showCourseModal, setShowCourseModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Derived Statistics
@@ -123,7 +114,7 @@ export default function CourseRegistration() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <BookOpen className="text-blue-600" />
-            Course Registration
+            Course Registration Management
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             Manage and oversee student course enrollments for the {selectedSession} session.
@@ -158,14 +149,15 @@ export default function CourseRegistration() {
             <Settings size={16} /> 
             Config
           </button>
-
+          
           <button 
-            onClick={() => setShowCourseModal(true)}
+            onClick={() => navigate('/school-admin/academics/departmental-allocation')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 text-sm font-medium"
           >
-            <FileText size={16} /> 
-            Set Courses
+            <BookOpen size={16} /> 
+            Course Allocation
           </button>
+
           <button className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm flex items-center gap-2 text-sm font-medium">
             <Download size={16} /> 
             Export
@@ -313,90 +305,64 @@ export default function CourseRegistration() {
           </div>
         )}
 
-        {/* Data Table */}
+        {/* Student List Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 dark:bg-gray-900/50">
+            <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-xs uppercase font-medium">
               <tr>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Student Details</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Programme</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Level & Units</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                <th className="px-6 py-4">Student</th>
+                <th className="px-6 py-4">Programme</th>
+                <th className="px-6 py-4 text-center">Level</th>
+                <th className="px-6 py-4 text-center">Units</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Submitted</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredData.length > 0 ? (
-                filteredData.map(reg => (
-                  <tr key={reg.id} className="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-sm">
-                          {reg.studentName.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">{reg.studentName}</div>
-                          <div className="text-xs text-gray-500 font-mono">{reg.matricNumber}</div>
-                        </div>
+              {filteredData.map((student) => (
+                <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-sm">
+                        {student.studentName.charAt(0)}
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">{reg.programme}</div>
-                      <div className="text-xs text-gray-500">Faculty of Science</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{reg.level} Level</span>
-                        <span className="text-xs text-gray-500">{reg.totalUnits} Units Registered</span>
+                      <div>
+                        <p className="font-bold text-sm text-gray-900 dark:text-white">{student.studentName}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{student.matricNumber}</p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(reg.status)}
-                    </td>
-                    <td className="px-6 py-4">
-                      {reg.submissionDate ? (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <Calendar size={14} />
-                          {reg.submissionDate}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="View Details">
-                          <Eye size={18} />
-                        </button>
-                        <button className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                          <MoreVertical size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                    {student.programme}
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm font-medium text-gray-700 dark:text-gray-200">
+                    {student.level}
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm font-medium text-gray-700 dark:text-gray-200">
+                    {student.totalUnits}
+                  </td>
+                  <td className="px-6 py-4">
+                    {getStatusBadge(student.status)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                    {student.submissionDate || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                      <MoreVertical size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filteredData.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-12 text-center">
-                    <div className="flex flex-col items-center justify-center text-gray-400">
-                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                        <Search size={32} className="opacity-50" />
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-3">
+                        <Search size={20} className="text-gray-400" />
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">No registrations found</h3>
-                      <p className="text-sm mt-1 max-w-xs mx-auto">
-                        Try adjusting your filters or search terms to find what you're looking for.
-                      </p>
-                      <button 
-                        onClick={() => {
-                          setSearchTerm('');
-                          setStatusFilter('all');
-                          setSelectedLevel('');
-                        }}
-                        className="mt-4 text-blue-600 hover:underline text-sm font-medium"
-                      >
-                        Clear all filters
-                      </button>
+                      <p>No registration records found matching your filters.</p>
                     </div>
                   </td>
                 </tr>
@@ -406,120 +372,15 @@ export default function CourseRegistration() {
         </div>
         
         {/* Pagination (Mock) */}
-        {filteredData.length > 0 && (
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 flex justify-between items-center">
-            <div className="text-sm text-gray-500">
-              Showing <span className="font-medium">{filteredData.length}</span> of <span className="font-medium">{stats.total}</span> results
-            </div>
-            <div className="flex gap-2">
-              <button disabled className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-400 cursor-not-allowed">Previous</button>
-              <button className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Next</button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Course Setup Modal */}
-      {showCourseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-3xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-start">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Configure Available Courses</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Select courses that students can register for in the current session.</p>
-              </div>
-              <button 
-                onClick={() => setShowCourseModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors bg-gray-100 dark:bg-gray-700 p-1 rounded-full"
-              >
-                <XCircle size={24} />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-6">
-              {/* Context Selectors */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700/50">
-                 <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1.5 block">Faculty</label>
-                    <div className="relative">
-                      <select className="w-full p-2.5 pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white text-sm appearance-none focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option>Faculty of Science</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
-                 </div>
-                 <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1.5 block">Department</label>
-                    <div className="relative">
-                      <select className="w-full p-2.5 pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white text-sm appearance-none focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option>Computer Science</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
-                 </div>
-                 <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1.5 block">Level</label>
-                    <div className="relative">
-                      <select className="w-full p-2.5 pl-3 pr-8 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white text-sm appearance-none focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option>100 Level</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
-                 </div>
-              </div>
-
-              {/* Course List */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Available Courses (5)</h4>
-                  <div className="text-sm text-blue-600 hover:underline cursor-pointer">Select All</div>
-                </div>
-                {availableCourses.map((course, idx) => (
-                  <label key={idx} className="flex items-center justify-between p-4 bg-white dark:bg-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all group">
-                    <div className="flex items-start gap-4">
-                      <div className="mt-1 relative flex items-center">
-                        <input type="checkbox" defaultChecked className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 transition-all" />
-                      </div>
-                      <div>
-                        <div className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">{course.code}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{course.title}</div>
-                      </div>
-                    </div>
-                    <div className="text-right flex flex-col items-end gap-1">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-                        {course.units} Units
-                      </span>
-                      <span className={`text-xs font-medium ${course.compulsory ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
-                        {course.compulsory ? 'Compulsory' : 'Elective'}
-                      </span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/30 rounded-b-2xl">
-              <div className="text-sm text-gray-500">
-                <span className="font-medium text-gray-900 dark:text-white">14</span> Units selected
-              </div>
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => setShowCourseModal(false)}
-                  className="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={() => setShowCourseModal(false)}
-                  className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-lg shadow-blue-600/20 transition-all transform active:scale-95"
-                >
-                  Save Configuration
-                </button>
-              </div>
-            </div>
-          </div>
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+           <p className="text-sm text-gray-500 dark:text-gray-400">Showing 1 to {filteredData.length} of {filteredData.length} entries</p>
+           <div className="flex gap-2">
+             <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded-md disabled:opacity-50" disabled>Previous</button>
+             <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md">1</button>
+             <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded-md">Next</button>
+           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
