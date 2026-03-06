@@ -8,7 +8,6 @@ import {
   Search, 
   Filter,
   Eye,
-  Upload,
   Plus,
   Calendar
 } from 'lucide-react';
@@ -105,13 +104,6 @@ const AdmissionsDashboard: React.FC = () => {
         >
           <Calendar size={18} className="mr-2" />
           Manage Intake
-        </button>
-        <button 
-          onClick={() => navigate('/school-admin/admissions/imports')}
-          className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
-        >
-          <Upload size={18} className="mr-2" />
-          Batch Import
         </button>
         <button 
           onClick={() => navigate('/school-admin/admissions/create')}

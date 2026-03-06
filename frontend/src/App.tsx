@@ -72,6 +72,10 @@ const SuperAdminStaffProfile = lazy(() => import('./pages/super-admin/institutio
 const SuperAdminExamDetails = lazy(() => import('./pages/super-admin/institution-tabs/assesment-and-result/ExamDetails'));
 const SuperAdminResultDetails = lazy(() => import('./pages/super-admin/institution-tabs/assesment-and-result/ResultDetails'));
 const SuperAdminFinanceOverview = lazy(() => import('./pages/super-admin/institution-tabs/finance-overview/FinanceOverviewDashboard'));
+const SuperAdminAdmissionsOverview = lazy(() => import('./pages/super-admin/institution-tabs/admissions-overview/AdmissionsOverviewDashboard.tsx'));
+const SuperAdminAdmissionsApplicantDetails = lazy(() => import('./pages/super-admin/institution-tabs/admissions-overview/ApplicantDetails.tsx'));
+const SuperAdminStudentsOverview = lazy(() => import('./pages/super-admin/institution-tabs/students-overview/StudentsOverviewDashboard.tsx'));
+const SuperAdminStudentDetails = lazy(() => import('./pages/super-admin/institution-tabs/students-overview/StudentDetails.tsx'));
 
 // School Admin - General
 const SchoolAdminDashboard = lazy(() => import('./pages/school-admin/Dashboard'));
@@ -84,8 +88,7 @@ const HealthDashboard = lazy(() => import('./pages/school-admin/health-clinic/He
 const AdmissionsDashboard = lazy(() => import('./pages/school-admin/admissions/AdmissionsDashboard'));
 const ApplicantProfile = lazy(() => import('./pages/school-admin/admissions/ApplicantProfile'));
 const ConfigureAdmissions = lazy(() => import('./pages/school-admin/admissions/ConfigureAdmissions'));
-const CreateAdmission = lazy(() => import('./pages/school-admin/admissions/CreateAdmission'));
-const MultipleImports = lazy(() => import('./pages/school-admin/admissions/MultipleImports'));
+const CreateAdmission = lazy(() => import('./pages/school-admin/admissions/CreateAdmission.tsx'));
 const AdmissionIntake = lazy(() => import('./pages/school-admin/admissions/AdmissionIntake'));
 
 // School Admin - Academics
@@ -344,8 +347,7 @@ const schoolAdminItems = [
       { name: 'Dashboard', path: '/school-admin/admissions/dashboard' },
       { name: 'Admission Setup', path: '/school-admin/admissions/configure' },
       { name: 'Intake', path: '/school-admin/admissions/intake' },
-      { name: 'Create Admission', path: '/school-admin/admissions/create' },
-      { name: 'Multiple Imports', path: '/school-admin/admissions/imports' }
+      { name: 'Create Admission', path: '/school-admin/admissions/create' }
     ]
   },
   { 
@@ -716,6 +718,38 @@ function App() {
                               </FullScreenLayout>
                             } 
                           />
+                          <Route 
+                            path="/super-admin/students-overview" 
+                            element={
+                              <FullScreenLayout title="Students Overview">
+                                <SuperAdminStudentsOverview />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
+                            path="/super-admin/students-overview/student-details" 
+                            element={
+                              <FullScreenLayout title="Student Details">
+                                <SuperAdminStudentDetails />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
+                            path="/super-admin/admissions-overview" 
+                            element={
+                              <FullScreenLayout title="Admissions Overview">
+                                <SuperAdminAdmissionsOverview />
+                              </FullScreenLayout>
+                            } 
+                          />
+                          <Route 
+                            path="/super-admin/admissions-overview/applicant-details" 
+                            element={
+                              <FullScreenLayout title="Applicant Details">
+                                <SuperAdminAdmissionsApplicantDetails />
+                              </FullScreenLayout>
+                            } 
+                          />
 
                           <Route path="/super-admin/applications/:id" element={<ApplicationDetails />} />
                           <Route path="/super-admin/institutions/:id" element={<InstitutionDetails />} />
@@ -739,11 +773,11 @@ function App() {
 
                         {/* Admissions */}
                         <Route path="/school-admin/admissions/dashboard" element={<AdmissionsDashboard />} />
+                        <Route path="/school-admin/admissions/applicants" element={<AdmissionsDashboard />} />
                         <Route path="/school-admin/admissions/intake" element={<AdmissionIntake />} />
                         <Route path="/school-admin/admissions/profile/:id" element={<ApplicantProfile />} />
                         <Route path="/school-admin/admissions/configure" element={<ConfigureAdmissions />} />
                         <Route path="/school-admin/admissions/create" element={<CreateAdmission />} />
-                        <Route path="/school-admin/admissions/imports" element={<MultipleImports />} />
 
                         {/* Academics */}
                         <Route path="/school-admin/academics/dashboard" element={<AcademicDashboard />} />

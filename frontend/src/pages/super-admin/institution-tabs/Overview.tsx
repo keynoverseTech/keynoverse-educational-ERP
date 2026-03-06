@@ -56,7 +56,7 @@ const Overview: React.FC = () => {
 
   const handleViewModule = (module: ModuleData) => {
     if (module.id === 'admissions') {
-      navigate('/super-admin/admissions-governance');
+      navigate('/super-admin/admissions-overview');
     } else if (module.id === 'academics') {
       navigate('/super-admin/academics-overview');
     } else if (module.id === 'finance') {
@@ -65,6 +65,8 @@ const Overview: React.FC = () => {
       navigate('/super-admin/assesment-and-result');
     } else if (module.id === 'staff') {
       navigate('/super-admin/hr-overview');
+    } else if (module.id === 'student') {
+      navigate('/super-admin/students-overview');
     } else {
       setSelectedModule(module);
     }
