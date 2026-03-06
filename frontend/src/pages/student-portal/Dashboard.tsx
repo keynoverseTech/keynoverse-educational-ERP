@@ -90,33 +90,33 @@ const StudentDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               <div className="space-y-1">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Faculty</p>
-                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <BookOpen size={14} className="text-indigo-500" />
-                  {academicProfile.faculty}
+                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2 truncate" title={academicProfile.faculty}>
+                  <BookOpen size={14} className="text-indigo-500 flex-shrink-0" />
+                  <span className="truncate">{academicProfile.faculty}</span>
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Department</p>
-                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <GraduationCap size={14} className="text-indigo-500" />
-                  {academicProfile.department}
+                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2 truncate" title={academicProfile.department}>
+                  <GraduationCap size={14} className="text-indigo-500 flex-shrink-0" />
+                  <span className="truncate">{academicProfile.department}</span>
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Email</p>
-                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Mail size={14} className="text-indigo-500" />
-                  {academicProfile.email}
+                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2 truncate" title={academicProfile.email}>
+                  <Mail size={14} className="text-indigo-500 flex-shrink-0" />
+                  <span className="truncate">{academicProfile.email}</span>
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Advisor</p>
-                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <User size={14} className="text-indigo-500" />
-                  {academicProfile.advisor}
+                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-2 truncate" title={academicProfile.advisor}>
+                  <User size={14} className="text-indigo-500 flex-shrink-0" />
+                  <span className="truncate">{academicProfile.advisor}</span>
                 </p>
               </div>
             </div>

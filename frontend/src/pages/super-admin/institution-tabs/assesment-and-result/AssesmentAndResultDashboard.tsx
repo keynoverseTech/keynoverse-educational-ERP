@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
-  Briefcase, 
   Activity, 
-  DollarSign, 
   Calendar, 
   ArrowUpRight,
   PieChart,
@@ -109,7 +107,7 @@ const AssesmentAndResultDashboard: React.FC = () => {
 
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {data.stats.map((stat: { label: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; value: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; trendUp: any; trend: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }, idx: React.Key | null | undefined) => (
+        {data.stats.map((stat, idx) => (
           <div key={idx} className="bg-white dark:bg-[#151e32] p-5 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div className="flex justify-between items-start">
               <div>
@@ -132,14 +130,14 @@ const AssesmentAndResultDashboard: React.FC = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-200 dark:border-gray-800 pb-1 overflow-x-auto">
-        {[
+        {([
           { id: 'overview', label: 'Overview', icon: Layout },
           { id: 'timetable', label: 'Exam Timetable', icon: Calendar },
           { id: 'results', label: 'Result Publication', icon: Users },
-        ].map((tab: { id: React.SetStateAction<"overview" | "timetable" | "results">; icon: any; label: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) => (
+        ] as const).map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === tab.id
                 ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'

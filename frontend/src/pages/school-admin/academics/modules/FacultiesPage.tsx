@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, Building2 } from 'lucide-react';
+import { loadAcademicFaculties, saveAcademicFaculties } from '../../../../state/academics/academicSetupStorage';
 
 interface Faculty {
   id: string;
@@ -10,13 +11,27 @@ interface Faculty {
 }
 
 export const FacultiesPage: React.FC = () => {
-  const [faculties, setFaculties] = useState<Faculty[]>([
-    { id: '1', name: 'Faculty of Engineering', code: 'ENG', status: 'Active', deanName: 'Dr. Alan Grant' },
-    { id: '2', name: 'Faculty of Sciences', code: 'SCI', status: 'Active', deanName: 'Prof. Ellie Sattler' },
-  ]);
+  const [faculties, setFaculties] = useState<Faculty[]>(() => {
+    const stored = loadAcademicFaculties();
+    if (stored.length > 0) return stored as Faculty[];
+    return [
+      { id: '1', name: 'Faculty of Engineering', code: 'ENG', status: 'Active', deanName: 'Dr. Alan Grant' },
+      { id: '2', name: 'Faculty of Sciences', code: 'SCI', status: 'Active', deanName: 'Prof. Ellie Sattler' },
+    ];
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentFaculty, setCurrentFaculty] = useState<Partial<Faculty>>({});
+
+  useEffect(() => {
+    saveAcademicFaculties(faculties);
+  }, [faculties]);
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Delete this faculty?')) {
+      setFaculties(prev => prev.filter(f => f.id !== id));
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +100,10 @@ export const FacultiesPage: React.FC = () => {
                     >
                       <Edit2 size={16} />
                     </button>
-                    <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <button
+                      onClick={() => handleDelete(faculty.id)}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>

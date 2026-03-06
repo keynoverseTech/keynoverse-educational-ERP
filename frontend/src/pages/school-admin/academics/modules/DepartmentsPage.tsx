@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { loadAcademicDepartments, loadAcademicFaculties, saveAcademicDepartments } from '../../../../state/academics/academicSetupStorage';
 
 interface Department {
   id: string;
@@ -10,21 +11,38 @@ interface Department {
 }
 
 export const DepartmentsPage: React.FC = () => {
-  const [departments, setDepartments] = useState<Department[]>([
-    { id: '1', name: 'Computer Science', code: 'CSC', facultyId: '3', headOfDepartment: 'Dr. Sarah Connor' },
-    { id: '2', name: 'Computer Engineering', code: 'CPE', facultyId: '1', headOfDepartment: 'Dr. Wu' },
-    { id: '3', name: 'Electrical Engineering', code: 'EEE', facultyId: '1' },
-    { id: '4', name: 'Biochemistry', code: 'BCH', facultyId: '2' },
-  ]);
+  const [departments, setDepartments] = useState<Department[]>(() => {
+    const stored = loadAcademicDepartments();
+    if (stored.length > 0) return stored as Department[];
+    return [
+      { id: '1', name: 'Computer Science', code: 'CSC', facultyId: '2', headOfDepartment: 'Dr. Sarah Connor' },
+      { id: '2', name: 'Computer Engineering', code: 'CPE', facultyId: '1', headOfDepartment: 'Dr. Wu' },
+      { id: '3', name: 'Electrical Engineering', code: 'EEE', facultyId: '1' },
+      { id: '4', name: 'Biochemistry', code: 'BCH', facultyId: '2' },
+    ];
+  });
 
-  const faculties = [
-    { id: '1', name: 'Faculty of Engineering' },
-    { id: '2', name: 'Faculty of Sciences' },
-    { id: '3', name: 'Faculty of Computing' },
-  ];
+  const faculties = useMemo(() => {
+    const stored = loadAcademicFaculties();
+    if (stored.length > 0) return stored.map(f => ({ id: f.id, name: f.name }));
+    return [
+      { id: '1', name: 'Faculty of Engineering' },
+      { id: '2', name: 'Faculty of Sciences' },
+    ];
+  }, []);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentDept, setCurrentDept] = useState<Partial<Department>>({});
+
+  useEffect(() => {
+    saveAcademicDepartments(departments);
+  }, [departments]);
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Delete this department?')) {
+      setDepartments(prev => prev.filter(d => d.id !== id));
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +98,10 @@ export const DepartmentsPage: React.FC = () => {
                     >
                       <Edit2 size={16} />
                     </button>
-                    <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <button
+                      onClick={() => handleDelete(dept.id)}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>

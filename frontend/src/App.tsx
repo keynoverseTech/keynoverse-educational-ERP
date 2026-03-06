@@ -113,11 +113,11 @@ const MarkAttendance = lazy(() => import('./pages/school-admin/academics/attenda
 const AttendanceReport = lazy(() => import('./pages/school-admin/academics/attendance/AttendanceReport'));
 const CGPAMonitoring = lazy(() => import('./pages/school-admin/academics/CGPAMonitoring'));
 
-// School Admin - HelpDesk
-const HelpDeskDashboard = lazy(() => import('./pages/school-admin/HelpDesk/HelpDeskDashboard'));
-const TicketCategories = lazy(() => import('./pages/school-admin/HelpDesk/TicketCategories'));
-const CreateTicket = lazy(() => import('./pages/school-admin/HelpDesk/CreateTicket'));
-const TicketWorkflow = lazy(() => import('./pages/school-admin/HelpDesk/TicketWorkflow'));
+// School Admin - Help Desk
+const HelpDeskDashboard = lazy(() => import('./pages/school-admin/Help Desk/HelpDeskDashboard'));
+const TicketCategories = lazy(() => import('./pages/school-admin/Help Desk/TicketCategories'));
+const CreateTicket = lazy(() => import('./pages/school-admin/Help Desk/CreateTicket'));
+const TicketWorkflow = lazy(() => import('./pages/school-admin/Help Desk/TicketWorkflow'));
 
 // School Admin - Examinations
 const AssessmentConfiguration = lazy(() => import('./pages/school-admin/examinations/AssessmentConfiguration'));
@@ -453,7 +453,7 @@ const schoolAdminItems = [
     ]
   },
   {
-    name: 'HelpDesk',
+    name: 'Help Desk',
     icon: MessageSquare,
     subItems: [
       { name: 'Dashboard', path: '/school-admin/helpdesk/dashboard' },
