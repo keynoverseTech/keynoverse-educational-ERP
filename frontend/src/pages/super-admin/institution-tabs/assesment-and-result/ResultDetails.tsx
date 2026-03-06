@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
   Shield,
   CheckCircle,
   Briefcase,
   Calendar,
   Landmark,
-  Building2,
-  Clock,
-  IdCard,
   ArrowLeft
 } from 'lucide-react';
 

@@ -35,7 +35,7 @@ const HelpDeskDashboard: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <LayoutDashboard className="text-blue-600" />
-            HelpDesk Overview
+            Help Desk Overview
           </h1>
           <p className="text-gray-500 dark:text-gray-400">Track and manage support requests efficiently</p>
         </div>

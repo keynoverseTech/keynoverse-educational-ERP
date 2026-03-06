@@ -130,7 +130,7 @@ const AssesmentAndResultDashboard: React.FC = () => {
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-200 dark:border-gray-800 pb-1 overflow-x-auto">
-        {( [
+        {([
           { id: 'overview', label: 'Overview', icon: Layout },
           { id: 'timetable', label: 'Exam Timetable', icon: Calendar },
           { id: 'results', label: 'Result Publication', icon: Users },

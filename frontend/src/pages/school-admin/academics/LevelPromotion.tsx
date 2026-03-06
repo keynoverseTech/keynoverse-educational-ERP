@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   CheckCircle, 
   AlertCircle, 
@@ -8,9 +8,10 @@ import {
   FileText, 
   ShieldAlert,
   Download,
-  Settings,
   TrendingUp
 } from 'lucide-react';
+import { useAlumni } from '../../../state/alumniState';
+import { loadAcademicDepartments, loadAcademicFaculties, loadAcademicLevels, loadAcademicSessions } from '../../../state/academics/academicSetupStorage';
 
 interface Student {
   id: string;
@@ -27,44 +28,109 @@ interface Student {
 }
 
 const LevelPromotion: React.FC = () => {
+  const { alumni, setAlumni } = useAlumni();
   const [activeTab, setActiveTab] = useState<'Eligible' | 'Probation' | 'Withdrawn' | 'Outstanding' | 'Graduated'>('Eligible');
   const [selectedFaculty, setSelectedFaculty] = useState('All Faculties');
   const [selectedDept, setSelectedDept] = useState('All Departments');
-  const [fromLevel, setFromLevel] = useState('100 Level');
-  const [toLevel, setToLevel] = useState('200 Level');
+  const storedLevels = useMemo(() => {
+    const stored = loadAcademicLevels();
+    if (stored.length > 0) return stored;
+    return [
+      { id: '1', name: '100 Level', description: 'Freshman Year' },
+      { id: '2', name: '200 Level', description: 'Sophomore Year' },
+      { id: '3', name: '300 Level', description: 'Junior Year' },
+      { id: '4', name: '400 Level', description: 'Senior Year' },
+      { id: '5', name: '500 Level', description: 'Final Year (Engineering)' },
+    ];
+  }, []);
+  const levelNames = useMemo(() => {
+    const names = storedLevels.map(l => l.name).filter(Boolean);
+    const uniq = Array.from(new Set(names));
+    return uniq;
+  }, [storedLevels]);
+  const [fromLevel, setFromLevel] = useState(levelNames[0] || '100 Level');
+  const [toLevel, setToLevel] = useState(levelNames[1] || levelNames[0] || '200 Level');
   const [minCredits, setMinCredits] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
-  const [currentSession, setCurrentSession] = useState('2023/2024');
-  const [targetSession, setTargetSession] = useState('2024/2025');
+  const storedSessions = useMemo(() => {
+    const stored = loadAcademicSessions();
+    if (stored.length > 0) return stored;
+    return [
+      { id: '1', name: '2024/2025', startDate: '2024-09-01', endDate: '2025-07-30', status: 'Active' },
+      { id: '2', name: '2023/2024', startDate: '2023-09-01', endDate: '2024-07-30', status: 'Closed' },
+    ];
+  }, []);
+  const sessionNames = useMemo(() => storedSessions.map(s => s.name), [storedSessions]);
+  const [currentSession, setCurrentSession] = useState(sessionNames[1] || sessionNames[0] || '2023/2024');
+  const [targetSession, setTargetSession] = useState(sessionNames[0] || '2024/2025');
 
   // Mock Data
   const [students, setStudents] = useState<Student[]>([
     {
-      id: '1', name: 'John Doe', matricNo: 'SCI/23/001', faculty: 'Science', department: 'Computer Science',
+      id: '1', name: 'John Doe', matricNo: 'SCI/23/001', faculty: 'Faculty of Sciences', department: 'Computer Science',
       currentLevel: '100 Level', cgpa: 3.5, creditsPassed: 24, creditsRegistered: 24, status: 'Eligible'
     },
     {
-      id: '2', name: 'Jane Smith', matricNo: 'SCI/23/002', faculty: 'Science', department: 'Computer Science',
+      id: '2', name: 'Jane Smith', matricNo: 'SCI/23/002', faculty: 'Faculty of Sciences', department: 'Computer Science',
       currentLevel: '100 Level', cgpa: 1.2, creditsPassed: 10, creditsRegistered: 24, status: 'Probation', remark: 'Low CGPA'
     },
     {
-      id: '3', name: 'Alice Johnson', matricNo: 'ENG/23/005', faculty: 'Engineering', department: 'Civil Engineering',
+      id: '3', name: 'Alice Johnson', matricNo: 'ENG/23/005', faculty: 'Faculty of Engineering', department: 'Electrical Engineering',
       currentLevel: '100 Level', cgpa: 4.0, creditsPassed: 24, creditsRegistered: 24, status: 'Eligible'
     },
     {
-      id: '4', name: 'Bob Brown', matricNo: 'ART/23/010', faculty: 'Arts', department: 'History',
+      id: '4', name: 'Bob Brown', matricNo: 'ART/23/010', faculty: 'Faculty of Sciences', department: 'Biochemistry',
       currentLevel: '200 Level', cgpa: 2.8, creditsPassed: 20, creditsRegistered: 24, status: 'Outstanding', remark: 'Missing core course'
     },
     {
-      id: '5', name: 'Charlie Davis', matricNo: 'SCI/23/006', faculty: 'Science', department: 'Mathematics',
+      id: '5', name: 'Charlie Davis', matricNo: 'SCI/23/006', faculty: 'Faculty of Sciences', department: 'Biochemistry',
       currentLevel: '100 Level', cgpa: 0.8, creditsPassed: 5, creditsRegistered: 24, status: 'Withdrawn', remark: 'Poor Academic Performance'
     },
   ]);
 
-  const faculties = ['All Faculties', 'Science', 'Engineering', 'Arts'];
-  const departments = ['All Departments', 'Computer Science', 'Civil Engineering', 'History', 'Mathematics'];
-  const levels = ['100 Level', '200 Level', '300 Level', '400 Level', 'ND1', 'ND2', 'Alumni'];
+  const storedFaculties = useMemo(() => {
+    const stored = loadAcademicFaculties();
+    if (stored.length > 0) return stored;
+    return [
+      { id: '1', name: 'Faculty of Engineering', code: 'ENG', status: 'Active' as const },
+      { id: '2', name: 'Faculty of Sciences', code: 'SCI', status: 'Active' as const },
+    ];
+  }, []);
+  const storedDepartments = useMemo(() => {
+    const stored = loadAcademicDepartments();
+    if (stored.length > 0) return stored;
+    return [
+      { id: '1', name: 'Computer Science', code: 'CSC', facultyId: '2', headOfDepartment: 'Dr. Sarah Connor' },
+      { id: '2', name: 'Electrical Engineering', code: 'EEE', facultyId: '1' },
+      { id: '3', name: 'Biochemistry', code: 'BCH', facultyId: '2' },
+    ];
+  }, []);
+  const faculties = useMemo(() => ['All Faculties', ...storedFaculties.map(f => f.name)], [storedFaculties]);
+  const selectedFacultyEntity = useMemo(() => storedFaculties.find(f => f.name === selectedFaculty), [selectedFaculty, storedFaculties]);
+  const departments = useMemo(() => {
+    const base = selectedFacultyEntity
+      ? storedDepartments.filter(d => d.facultyId === selectedFacultyEntity.id)
+      : storedDepartments;
+    return ['All Departments', ...base.map(d => d.name)];
+  }, [selectedFacultyEntity, storedDepartments]);
+  const fromLevels = useMemo(() => levelNames, [levelNames]);
+  const toLevels = useMemo(() => (levelNames.includes('Alumni') ? levelNames : [...levelNames, 'Alumni']), [levelNames]);
+
+  const getGraduationYear = (sessionName: string) => {
+    const parts = sessionName.split('/');
+    const last = parts[parts.length - 1];
+    const parsed = Number.parseInt(last, 10);
+    return Number.isFinite(parsed) ? parsed : new Date().getFullYear();
+  };
+
+  const getClassOfDegree = (cgpa: number) => {
+    if (cgpa >= 4.5) return 'First Class';
+    if (cgpa >= 3.5) return 'Second Class Upper';
+    if (cgpa >= 2.4) return 'Second Class Lower';
+    if (cgpa >= 1.5) return 'Third Class';
+    return 'Pass';
+  };
 
   // Filtering Logic
   const filteredStudents = students.filter(student => {
@@ -72,10 +138,11 @@ const LevelPromotion: React.FC = () => {
     const matchesFaculty = selectedFaculty === 'All Faculties' || student.faculty === selectedFaculty;
     const matchesDept = selectedDept === 'All Departments' || student.department === selectedDept;
     const matchesLevel = student.currentLevel === fromLevel;
+    const matchesCredits = student.creditsPassed >= minCredits;
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           student.matricNo.toLowerCase().includes(searchTerm.toLowerCase());
     
-    return matchesTab && matchesFaculty && matchesDept && matchesLevel && matchesSearch;
+    return matchesTab && matchesFaculty && matchesDept && matchesLevel && matchesCredits && matchesSearch;
   });
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +169,39 @@ const LevelPromotion: React.FC = () => {
       : `Are you sure you want to promote ${selectedStudents.length} students to ${toLevel}?`;
 
     if (window.confirm(message)) {
+      if (isAlumniPromotion) {
+        const graduationYear = getGraduationYear(targetSession);
+        const toAdd = students
+          .filter(s => selectedStudents.includes(s.id))
+          .filter(s => !alumni.some(a => a.studentId === s.matricNo))
+          .map(s => {
+            const parts = s.name.trim().split(/\s+/);
+            const firstName = parts[0] || s.name;
+            const lastName = parts.slice(1).join(' ') || 'Alumni';
+            const emailSafe = s.matricNo.toLowerCase().replace(/[^a-z0-9]+/g, '.');
+            return {
+              id: `alu-${Date.now()}-${s.id}`,
+              studentId: s.matricNo,
+              firstName,
+              lastName,
+              email: `${emailSafe}@alumni.nbte.edu`,
+              phone: '',
+              gender: 'Other' as const,
+              dateOfBirth: '2000-01-01',
+              program: s.department,
+              department: s.department,
+              faculty: s.faculty,
+              graduationYear,
+              cgpa: s.cgpa,
+              classOfDegree: getClassOfDegree(s.cgpa),
+              employmentStatus: 'Unemployed' as const,
+            };
+          });
+        if (toAdd.length > 0) {
+          setAlumni(prev => [...toAdd, ...prev]);
+        }
+      }
+
       setStudents(students.map(student => {
         if (selectedStudents.includes(student.id)) {
           return {
@@ -143,10 +243,6 @@ const LevelPromotion: React.FC = () => {
           <p className="text-gray-500 dark:text-gray-400">Promote students based on session completion and academic performance.</p>
         </div>
         <div className="flex gap-2">
-           <button className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 shadow-sm">
-            <Settings size={18} />
-            Configure Criteria
-          </button>
           <button className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 shadow-sm">
             <Download size={18} />
             Export List
@@ -169,8 +265,7 @@ const LevelPromotion: React.FC = () => {
               onChange={(e) => setCurrentSession(e.target.value)}
               className="w-full p-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             >
-              <option>2023/2024</option>
-              <option>2022/2023</option>
+              {sessionNames.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
            <div>
@@ -180,8 +275,7 @@ const LevelPromotion: React.FC = () => {
               onChange={(e) => setTargetSession(e.target.value)}
               className="w-full p-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             >
-              <option>2024/2025</option>
-              <option>2023/2024</option>
+              {sessionNames.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
@@ -191,7 +285,7 @@ const LevelPromotion: React.FC = () => {
               onChange={(e) => setFromLevel(e.target.value)}
               className="w-full p-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             >
-              {levels.map(l => <option key={l} value={l}>{l}</option>)}
+              {fromLevels.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
           <div>
@@ -201,7 +295,7 @@ const LevelPromotion: React.FC = () => {
               onChange={(e) => setToLevel(e.target.value)}
               className="w-full p-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             >
-              {levels.map(l => <option key={l} value={l}>{l}</option>)}
+              {toLevels.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
           </div>
         </div>

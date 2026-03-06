@@ -72,26 +72,46 @@ const LibraryDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+    <div className="p-6 space-y-6 animate-in fade-in duration-500">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/20">
-            <BookOpen className="w-6 h-6 text-white" />
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-2xl px-6 py-5 shadow-lg shadow-blue-600/20 border border-blue-500/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-blue-50 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Library Overview
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <BookOpen className="w-7 h-7" />
+              Library Dashboard
+            </h1>
+            <p className="text-blue-50/80 mt-2 text-sm md:text-base max-w-xl">
+              Monitor book circulation, inventory health, and reservation queues across the library system.
+            </p>
           </div>
-          Library Overview
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">
-          Monitor book circulation, inventory health, and reservation queues.
-        </p>
+          <div className="flex flex-col items-start md:items-end gap-3 text-blue-50/90">
+            <div className="text-right">
+              <p className="text-xs uppercase tracking-wide">Total Books</p>
+              <p className="text-2xl font-bold">{totalBooks.toLocaleString()}</p>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="px-3 py-1 rounded-full bg-white/10">
+                Active Loans: <span className="font-semibold">{activeBorrowings}</span>
+              </span>
+              <span className="px-3 py-1 rounded-full bg-white/10">
+                Overdue: <span className="font-semibold">{overdueBooks}</span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+          <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-start justify-between">
-              <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
+              <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
                 <stat.icon className="w-6 h-6" />
               </div>
               <div className={`flex items-center gap-1 text-sm font-medium ${stat.trendUp ? 'text-emerald-600' : 'text-rose-600'}`}>
@@ -109,7 +129,7 @@ const LibraryDashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Most Popular Books */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-8 shadow-sm">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -125,8 +145,8 @@ const LibraryDashboard: React.FC = () => {
 
           <div className="space-y-6">
             {popularityData.map((book: any, idx: number) => (
-              <div key={idx} className="flex items-center gap-6 p-4 rounded-3xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
-                <div className="relative w-16 h-20 rounded-xl overflow-hidden shadow-md flex-shrink-0">
+              <div key={idx} className="flex items-center gap-6 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
+                <div className="relative w-16 h-20 rounded-lg overflow-hidden shadow-md flex-shrink-0">
                   <img src={book.photoUrl} alt={book.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
                     #{idx + 1}
@@ -160,20 +180,20 @@ const LibraryDashboard: React.FC = () => {
 
         {/* Quick Actions & Recent Activity */}
         <div className="space-y-8">
-          <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
+          <div className="bg-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
             <div className="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
               <BookOpen className="w-48 h-48" />
             </div>
             <h2 className="text-xl font-bold mb-2">Quick Actions</h2>
             <p className="text-indigo-100 text-sm mb-6">Common library management tasks.</p>
             <div className="grid grid-cols-2 gap-4">
-              <button className="p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-colors text-left">
+              <button className="p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left">
                 <div className="p-2 bg-white/20 rounded-lg w-fit mb-3">
                   <BookMarked className="w-5 h-5" />
                 </div>
                 <span className="text-sm font-bold">Issue Book</span>
               </button>
-              <button className="p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-colors text-left">
+              <button className="p-4 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-left">
                 <div className="p-2 bg-white/20 rounded-lg w-fit mb-3">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
@@ -182,7 +202,7 @@ const LibraryDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-8 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8 shadow-sm">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Upcoming Returns</h2>
             <div className="space-y-4">
               {borrowings.filter((b: any) => b.status === 'Issued').slice(0, 3).map((loan: any, idx: number) => (

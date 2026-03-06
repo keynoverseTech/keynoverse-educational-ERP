@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { loadAcademicLevels, saveAcademicLevels } from '../../../../state/academics/academicSetupStorage';
 
 interface Level {
   id: string;
@@ -9,16 +10,30 @@ interface Level {
 }
 
 export const LevelsPage: React.FC = () => {
-  const [levels, setLevels] = useState<Level[]>([
-    { id: '1', name: '100 Level', description: 'Freshman Year' },
-    { id: '2', name: '200 Level', description: 'Sophomore Year' },
-    { id: '3', name: '300 Level', description: 'Junior Year' },
-    { id: '4', name: '400 Level', description: 'Senior Year' },
-    { id: '5', name: '500 Level', description: 'Final Year (Engineering)' },
-  ]);
+  const [levels, setLevels] = useState<Level[]>(() => {
+    const stored = loadAcademicLevels();
+    if (stored.length > 0) return stored as Level[];
+    return [
+      { id: '1', name: '100 Level', description: 'Freshman Year' },
+      { id: '2', name: '200 Level', description: 'Sophomore Year' },
+      { id: '3', name: '300 Level', description: 'Junior Year' },
+      { id: '4', name: '400 Level', description: 'Senior Year' },
+      { id: '5', name: '500 Level', description: 'Final Year (Engineering)' },
+    ];
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentLevel, setCurrentLevel] = useState<Partial<Level>>({});
+
+  useEffect(() => {
+    saveAcademicLevels(levels);
+  }, [levels]);
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Delete this level?')) {
+      setLevels(prev => prev.filter(l => l.id !== id));
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +83,10 @@ export const LevelsPage: React.FC = () => {
                     >
                       <Edit2 size={16} />
                     </button>
-                    <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <button
+                      onClick={() => handleDelete(lvl.id)}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>

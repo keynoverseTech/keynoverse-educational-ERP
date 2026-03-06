@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Search, MessageSquare, User, Users } from 'lucide-react';
+import { Send, Search, MessageSquare, Users } from 'lucide-react';
 import { getAssignedCourses } from '../academics/assignedCourses';
 
 interface Recipient {

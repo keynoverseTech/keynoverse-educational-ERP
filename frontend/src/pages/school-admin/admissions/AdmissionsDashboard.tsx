@@ -65,86 +65,113 @@ const AdmissionsDashboard: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admissions Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400">Monitor and process incoming applications</p>
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 rounded-2xl px-6 py-5 shadow-lg shadow-blue-600/20 border border-blue-500/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-blue-50 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Admissions Overview
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <Users className="w-7 h-7" />
+              Admissions Dashboard
+            </h1>
+            <p className="text-blue-50/80 mt-2 text-sm md:text-base max-w-xl">
+              Monitor and process incoming applications for the current academic session.
+            </p>
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-3 text-blue-50/90">
+            <div className="text-right">
+              <p className="text-xs uppercase tracking-wide">Total Applications</p>
+              <p className="text-2xl font-bold">{stats.total}</p>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="px-3 py-1 rounded-full bg-white/10">
+                Eligible: <span className="font-semibold">{stats.eligible}</span>
+              </span>
+              <span className="px-3 py-1 rounded-full bg-white/10">
+                Admitted: <span className="font-semibold">{stats.admitted}</span>
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="flex space-x-3">
-          <button 
-            onClick={() => navigate('/school-admin/admissions/intake')}
-            className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
-          >
-            <Calendar size={18} className="mr-2" />
-            Manage Intake
-          </button>
-          <button 
-            onClick={() => navigate('/school-admin/admissions/imports')}
-            className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
-          >
-            <Upload size={18} className="mr-2" />
-            Batch Import
-          </button>
-          <button 
-            onClick={() => navigate('/school-admin/admissions/create')}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <Plus size={18} className="mr-2" />
-            New Application
-          </button>
-        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-wrap gap-3 justify-end">
+        <button 
+          onClick={() => navigate('/school-admin/admissions/intake')}
+          className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+        >
+          <Calendar size={18} className="mr-2" />
+          Manage Intake
+        </button>
+        <button 
+          onClick={() => navigate('/school-admin/admissions/imports')}
+          className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+        >
+          <Upload size={18} className="mr-2" />
+          Batch Import
+        </button>
+        <button 
+          onClick={() => navigate('/school-admin/admissions/create')}
+          className="flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+        >
+          <Plus size={18} className="mr-2" />
+          New Application
+        </button>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div onClick={() => setFilterStatus('All')} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow">
+        <div onClick={() => setFilterStatus('All')} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-all duration-300">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Applications</p>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{stats.total}</h3>
             </div>
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <Users className="text-blue-600 dark:text-blue-400" size={20} />
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+              <Users className="text-blue-600 dark:text-blue-400" size={24} />
             </div>
           </div>
         </div>
-        <div onClick={() => setFilterStatus('Eligible')} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow">
+        <div onClick={() => setFilterStatus('Eligible')} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-all duration-300">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Eligible</p>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{stats.eligible}</h3>
             </div>
-            <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <CheckCircle className="text-green-600 dark:text-green-400" size={20} />
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+              <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
             </div>
           </div>
         </div>
-        <div onClick={() => setFilterStatus('Pending')} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow">
+        <div onClick={() => setFilterStatus('Pending')} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-all duration-300">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Review</p>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{stats.pending}</h3>
             </div>
-            <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-              <Clock className="text-yellow-600 dark:text-yellow-400" size={20} />
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+              <Clock className="text-yellow-600 dark:text-yellow-400" size={24} />
             </div>
           </div>
         </div>
-        <div onClick={() => setFilterStatus('Admitted')} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-md transition-shadow">
+        <div onClick={() => setFilterStatus('Admitted')} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-all duration-300">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Admitted</p>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{stats.admitted}</h3>
             </div>
-            <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-              <UserCheck className="text-purple-600 dark:text-purple-400" size={20} />
+            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+              <UserCheck className="text-purple-600 dark:text-purple-400" size={24} />
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <select className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             <option>2024/2025 Session</option>
@@ -181,7 +208,7 @@ const AdmissionsDashboard: React.FC = () => {
       </div>
 
       {/* Applications Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 dark:bg-gray-900/50">
             <tr>

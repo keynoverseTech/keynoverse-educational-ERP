@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, MapPin, Clock, Search, Filter } from 'lucide-react';
+import { Calendar, MapPin, Search, Filter } from 'lucide-react';
 
 interface Event {
   id: string;

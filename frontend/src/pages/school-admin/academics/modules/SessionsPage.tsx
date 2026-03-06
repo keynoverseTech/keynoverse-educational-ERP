@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, Calendar } from 'lucide-react';
+import { loadAcademicSessions, saveAcademicSessions } from '../../../../state/academics/academicSetupStorage';
 
 interface Session {
   id: string;
@@ -10,13 +11,27 @@ interface Session {
 }
 
 export const SessionsPage: React.FC = () => {
-  const [sessions, setSessions] = useState<Session[]>([
-    { id: '1', name: '2024/2025', startDate: '2024-09-01', endDate: '2025-07-30', status: 'Active' },
-    { id: '2', name: '2023/2024', startDate: '2023-09-01', endDate: '2024-07-30', status: 'Closed' },
-  ]);
+  const [sessions, setSessions] = useState<Session[]>(() => {
+    const stored = loadAcademicSessions();
+    if (stored.length > 0) return stored as Session[];
+    return [
+      { id: '1', name: '2024/2025', startDate: '2024-09-01', endDate: '2025-07-30', status: 'Active' },
+      { id: '2', name: '2023/2024', startDate: '2023-09-01', endDate: '2024-07-30', status: 'Closed' },
+    ];
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSession, setCurrentSession] = useState<Partial<Session>>({});
+
+  useEffect(() => {
+    saveAcademicSessions(sessions);
+  }, [sessions]);
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Delete this session?')) {
+      setSessions(prev => prev.filter(s => s.id !== id));
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +101,10 @@ export const SessionsPage: React.FC = () => {
                     >
                       <Edit2 size={16} />
                     </button>
-                    <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <button
+                      onClick={() => handleDelete(session.id)}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>

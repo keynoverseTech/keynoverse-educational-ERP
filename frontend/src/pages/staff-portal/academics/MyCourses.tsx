@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, FileText, Users, ClipboardCheck, Calendar } from 'lucide-react';
+import { FileText, Users, ClipboardCheck, Calendar } from 'lucide-react';
 import { getAssignedCourses } from './assignedCourses';
 
 const semesterLabel = (semesterId: string) => {
@@ -125,4 +125,3 @@ const MyCourses: React.FC = () => {
 };
 
 export default MyCourses;
-
