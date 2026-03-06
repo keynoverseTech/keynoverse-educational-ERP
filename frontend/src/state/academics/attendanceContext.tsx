@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 export interface AttendanceRecord {
@@ -32,6 +32,7 @@ interface AttendanceContextValue {
   setSessions: React.Dispatch<React.SetStateAction<AttendanceSession[]>>;
   createSession: (session: Omit<AttendanceSession, 'id' | 'records' | 'isActive' | 'isSubmitted'>) => void;
   markAttendance: (sessionId: string, studentId: string, status: 'Present' | 'Absent') => void;
+  markAll: (sessionId: string, status: 'Present' | 'Absent') => void;
   closeSession: (sessionId: string) => void;
   submitAttendance: (sessionId: string) => void;
 }
@@ -62,7 +63,25 @@ const MOCK_SESSIONS: AttendanceSession[] = [
 ];
 
 export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [sessions, setSessions] = useState<AttendanceSession[]>(MOCK_SESSIONS);
+  // Initialize from localStorage if available, otherwise use MOCK_SESSIONS
+  const [sessions, setSessions] = useState<AttendanceSession[]>(() => {
+    try {
+      const saved = localStorage.getItem('attendance_sessions');
+      return saved ? JSON.parse(saved) : MOCK_SESSIONS;
+    } catch (error) {
+      console.error('Error reading attendance sessions from localStorage:', error);
+      return MOCK_SESSIONS;
+    }
+  });
+
+  // Persist to localStorage whenever sessions change
+  useEffect(() => {
+    try {
+      localStorage.setItem('attendance_sessions', JSON.stringify(sessions));
+    } catch (error) {
+      console.error('Error saving attendance sessions to localStorage:', error);
+    }
+  }, [sessions]);
 
   const createSession = (sessionData: Omit<AttendanceSession, 'id' | 'records' | 'isActive' | 'isSubmitted'>) => {
     const newSession: AttendanceSession = {
@@ -75,9 +94,11 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
         { id: `r-${Date.now()}-1`, studentId: 's3', studentName: 'Michael Johnson', studentMatric: 'CSC/20/003', status: 'Absent', timestamp: '' },
         { id: `r-${Date.now()}-2`, studentId: 's4', studentName: 'Emily Davis', studentMatric: 'CSC/20/004', status: 'Absent', timestamp: '' },
         { id: `r-${Date.now()}-3`, studentId: 's5', studentName: 'David Wilson', studentMatric: 'CSC/20/005', status: 'Absent', timestamp: '' },
+        { id: `r-${Date.now()}-4`, studentId: 's6', studentName: 'Sarah Brown', studentMatric: 'CSC/20/006', status: 'Absent', timestamp: '' },
+        { id: `r-${Date.now()}-5`, studentId: 's7', studentName: 'James Wilson', studentMatric: 'CSC/20/007', status: 'Absent', timestamp: '' },
       ], 
       qrCode: `qr-${Date.now()}`,
-      link: `https://school.edu/attendance/${Date.now()}`
+      link: `${window.location.origin}/student/attendance/${Date.now()}` // Use current origin for more realistic link
     };
     setSessions([newSession, ...sessions]);
   };
@@ -100,6 +121,20 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
     }));
   };
 
+  const markAll = (sessionId: string, status: 'Present' | 'Absent') => {
+    setSessions(prev => prev.map(s => {
+      if (s.id !== sessionId || s.isSubmitted) return s;
+      
+      const updatedRecords = s.records.map(r => ({
+        ...r,
+        status,
+        timestamp: status === 'Present' ? new Date().toLocaleTimeString() : ''
+      }));
+      
+      return { ...s, records: updatedRecords };
+    }));
+  };
+
   const closeSession = (sessionId: string) => {
     setSessions(prev => prev.map(s => 
       s.id === sessionId ? { ...s, isActive: false } : s
@@ -118,6 +153,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
       setSessions,
       createSession,
       markAttendance,
+      markAll,
       closeSession,
       submitAttendance
     }}>

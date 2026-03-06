@@ -246,6 +246,7 @@ const StaffMyCourses = lazy(() => import('./pages/staff-portal/academics/MyCours
 const StaffCourseMaterials = lazy(() => import('./pages/staff-portal/academics/CourseMaterials'));
 const StaffTimetable = lazy(() => import('./pages/staff-portal/academics/Timetable'));
 const StaffAttendance = lazy(() => import('./pages/staff-portal/academics/attendance/AttendanceDashboard'));
+const StaffMarkAttendance = lazy(() => import('./pages/staff-portal/academics/attendance/MarkAttendance'));
 const StaffStudents = lazy(() => import('./pages/staff-portal/academics/Students'));
 
 // Staff Portal - Assessment
@@ -978,6 +979,7 @@ function App() {
                         <Route path="academics/materials" element={<StaffCourseMaterials />} />
                         <Route path="academics/timetable" element={<StaffTimetable />} />
                         <Route path="academics/attendance" element={<StaffAttendance />} />
+                        <Route path="academics/attendance/mark/:id" element={<StaffMarkAttendance />} />
                         <Route path="academics/students" element={<StaffStudents />} />
                         <Route path="assessment/marks" element={<StaffMarksEntry />} />
                         <Route path="assessment/timetable" element={<StaffExamTimetable />} />
