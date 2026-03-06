@@ -185,7 +185,6 @@ const EnquiriesLog = lazy(() => import('./pages/school-admin/Reception/Enquiries
 const MailLog = lazy(() => import('./pages/school-admin/Reception/MailLog'));
 
 // School Admin - Finance
-const FinanceOverviewPage = lazy(() => import('./pages/school-admin/finance/FinanceOverview'));
 const GeneralLedgerPage = lazy(() => import('./pages/school-admin/finance/administrative-accounting/GeneralLedger'));
 const PayrollDisbursementPage = lazy(() => import('./pages/school-admin/finance/administrative-accounting/PayrollDisbursement'));
 const AccountsPage = lazy(() => import('./pages/school-admin/finance/AccountsPage'));
@@ -373,7 +372,6 @@ const schoolAdminItems = [
     name: 'Finance', 
     icon: DollarSign,
     subItems: [
-      { name: 'Dashboard', path: '/school-admin/finance/dashboard' },
       { name: 'Bank Accounts', path: '/school-admin/finance/accounts' },
       {
         name: 'Student Accounting',
@@ -886,7 +884,6 @@ function App() {
                         <Route path="/school-admin/events/upcoming" element={<UpcomingEventsPage />} />
 
                         {/* Finance - Student Accounting */}
-                        <Route path="/school-admin/finance/dashboard" element={<FinanceOverviewPage />} />
                         <Route path="/school-admin/finance/student-accounting/dashboard" element={<StudentFinanceDashboard />} />
                         <Route path="/school-admin/finance/student-accounting/fee-structure" element={<StudentFeeConfigurationPage />} />
                         <Route path="/school-admin/finance/student-accounting/invoices" element={<StudentInvoicesPage />} />

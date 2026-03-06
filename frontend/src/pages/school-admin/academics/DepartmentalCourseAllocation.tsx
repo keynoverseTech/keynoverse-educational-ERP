@@ -5,9 +5,6 @@ import {
   Trash2, 
   Save, 
   Search, 
-  Filter,
-  CheckCircle,
-  AlertCircle,
   ChevronDown,
   Info
 } from 'lucide-react';
@@ -48,7 +45,7 @@ const globalCourseBank: Course[] = [
   { id: '11', code: 'CSC 202', title: 'Operating Systems', units: 3, type: 'compulsory' },
 ];
 
-export default function DepartmentalCourseAllocation() {
+export default function CourseAllocation() {
   // Selection State
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedLevel, setSelectedLevel] = useState<string>('');
