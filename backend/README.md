@@ -159,7 +159,7 @@ npm run seed:reset
 After `npm run seed:reset`, the following default users are created:
 
 - **Super Admin**
-  - Email: `superadmin@planetstech.com`
+  - Email: ``
   - Password: `super@password`
 
 - **Admin**

@@ -17,72 +17,9 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 import { Skeleton } from '../../components/ui/Skeleton';
+import superAdminService from '../../services/superAdminApi';
 
-// Mock Data
-const institutionsData = [
-  {
-    id: 'INST-2023-001',
-    name: 'Global Heights Academy',
-    logo: 'GH',
-    logoColor: 'bg-indigo-600',
-    adminName: 'Sarah Jenkins',
-    adminEmail: 's.jenkins@gha.edu',
-    location: 'New York, USA',
-    joinedDate: 'Oct 12, 2023',
-    subscription: 'Enterprise',
-    status: 'Approved',
-  },
-  {
-    id: 'INST-2023-042',
-    name: "St. Mary's Institute",
-    logo: 'SM',
-    logoColor: 'bg-emerald-600',
-    adminName: 'Michael Chen',
-    adminEmail: 'm.chen@stmarys.ac.uk',
-    location: 'London, UK',
-    joinedDate: 'Nov 05, 2023',
-    subscription: 'Pro',
-    status: 'Pending',
-  },
-  {
-    id: 'INST-2023-015',
-    name: 'Oakwood High',
-    logo: 'OH',
-    logoColor: 'bg-orange-600',
-    adminName: 'Elena Rodriguez',
-    adminEmail: 'e.rodriguez@oakwood.es',
-    location: 'Madrid, Spain',
-    joinedDate: 'Sep 20, 2023',
-    subscription: 'Basic',
-    status: 'Suspended',
-  },
-  {
-    id: 'INST-2023-088',
-    name: 'Tech Innovate School',
-    logo: 'TI',
-    logoColor: 'bg-blue-600',
-    adminName: 'David Smith',
-    adminEmail: 'd.smith@techinnovate.com',
-    location: 'San Francisco, USA',
-    joinedDate: 'Dec 01, 2023',
-    subscription: 'Enterprise',
-    status: 'Approved',
-  },
-  {
-    id: 'INST-2023-112',
-    name: 'Future Leaders Prep',
-    logo: 'FL',
-    logoColor: 'bg-rose-600',
-    adminName: 'Amara Okafor',
-    adminEmail: 'amara.o@flprep.edu.ng',
-    location: 'Lagos, Nigeria',
-    joinedDate: 'Oct 28, 2023',
-    subscription: 'Pro',
-    status: 'Approved',
-  },
-];
-
-// Mock Data for Sparklines
+// Mock Data for Sparklines (Static for now)
 const sparklineData = {
   total: [ { value: 40 }, { value: 30 }, { value: 45 }, { value: 50 }, { value: 65 }, { value: 60 }, { value: 75 } ],
   active: [ { value: 20 }, { value: 45 }, { value: 30 }, { value: 50 }, { value: 45 }, { value: 60 }, { value: 55 } ],
@@ -94,14 +31,39 @@ const Institutions: React.FC = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [loading, setLoading] = useState(true);
+  const [institutions, setInstitutions] = useState<any[]>([]);
 
   useEffect(() => {
-    // Simulate initial data loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
+    const fetchInstitutions = async () => {
+      try {
+        const response = await superAdminService.getInstitutions();
+        // Handle response format (array or { data: [] })
+        const data = Array.isArray(response) ? response : response.data || [];
+        
+        // Map API data to UI format
+        const mappedData = data.map((inst: any) => ({
+          id: inst.id,
+          name: inst.name,
+          logo: inst.name.substring(0, 2).toUpperCase(),
+          logoColor: 'bg-blue-600', // Default color
+          adminName: inst.rector || 'N/A',
+          adminEmail: inst.contact_email || inst.rector_email || 'N/A',
+          location: inst.address || 'N/A',
+          joinedDate: new Date(inst.created_at || Date.now()).toLocaleDateString(),
+          subscription: 'Basic', // Placeholder
+          status: inst.status || 'Pending',
+        }));
+        
+        setInstitutions(mappedData);
+      } catch (err) {
+        console.error('Failed to fetch institutions', err);
+        // setError('Failed to load institutions');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchInstitutions();
   }, []);
 
   return (
@@ -281,7 +243,7 @@ const Institutions: React.FC = () => {
                     </tr>
                   ))
                 ) : (
-                  institutionsData.map((inst) => (
+                  institutions.map((inst) => (
                     <tr 
                       key={inst.id} 
                       onClick={() => navigate(`/super-admin/institutions/${inst.id}`)}
@@ -357,7 +319,7 @@ const Institutions: React.FC = () => {
                 </div>
               ))
             ) : (
-              institutionsData.map((inst) => (
+              institutions.map((inst) => (
                 <div 
                   key={inst.id} 
                   onClick={() => navigate(`/super-admin/institutions/${inst.id}`)}
@@ -429,7 +391,7 @@ const Institutions: React.FC = () => {
         {/* Pagination */}
         <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-[#1a2438]/50">
           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            Showing <span className="font-bold text-gray-900 dark:text-white">1 to 5</span> of <span className="font-bold text-gray-900 dark:text-white">1,284</span> results
+            Showing <span className="font-bold text-gray-900 dark:text-white">1 to {institutions.length}</span> of <span className="font-bold text-gray-900 dark:text-white">{institutions.length}</span> results
           </p>
           <div className="flex items-center gap-2">
             <button className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">

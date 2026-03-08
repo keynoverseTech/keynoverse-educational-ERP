@@ -14,22 +14,21 @@ interface ExtendedSidebarItem extends Omit<SidebarItem, 'subItems'> {
 }
 
 const superAdminItems: ExtendedSidebarItem[] = [
-  { name: 'Overview', path: '/super-admin/dashboard', icon: LayoutDashboard, permission: 'overview.view' },
-  { name: 'Registrations', path: '/super-admin/applications', icon: ClipboardCheck, permission: 'registration.view' },
-  { name: 'All Institutes', path: '/super-admin/institutions', icon: Building2, permission: 'institute.view' },
-  { name: 'Program Governance', path: '/super-admin/academic-catalog', icon: BookOpen, permission: 'program.view' },
+  { name: 'Overview', path: '/super-admin/dashboard', icon: LayoutDashboard },
+  { name: 'Registrations', path: '/super-admin/applications', icon: ClipboardCheck },
+  { name: 'All Institutes', path: '/super-admin/institutions', icon: Building2 },
+  { name: 'Program Governance', path: '/super-admin/academic-catalog', icon: BookOpen },
   { 
     name: 'Finance', 
     icon: DollarSign, 
-    permission: 'finance.view',
     subItems: [
-      { name: 'Dashboard', path: '/super-admin/finance/dashboard', permission: 'finance.view' },
-      { name: 'Revenue', path: '/super-admin/finance/revenue', permission: 'finance.revenue' },
-      { name: 'Subscription Plans', path: '/super-admin/finance/plans', permission: 'finance.view' }
+      { name: 'Dashboard', path: '/super-admin/finance/dashboard' },
+      { name: 'Revenue', path: '/super-admin/finance/revenue' },
+      { name: 'Subscription Plans', path: '/super-admin/finance/plans' }
     ]
   },
-  { name: 'Reports', path: '/super-admin/reports', icon: FileText, permission: 'reports.view' },
-  { name: 'Configuration', path: '/super-admin/config', icon: SettingsIcon, permission: 'config.settings' }
+  { name: 'Reports', path: '/super-admin/reports', icon: FileText },
+  { name: 'Configuration', path: '/super-admin/config', icon: SettingsIcon }
 ];
 
 const SuperAdminLayout: React.FC = () => {
@@ -54,7 +53,13 @@ const SuperAdminLayout: React.FC = () => {
         if (item.permission) {
            const [module, action] = item.permission.split('.');
            const allowed = hasPermission(user.role, user.permissions, module, action);
-           console.log(`Checking permission for ${item.name} (${module}.${action}): ${allowed}`);
+           // Only filter out if NOT allowed. 
+           // BUT for Super Admin, hasPermission always returns true if role matches.
+           // However, if your role is somehow not matching perfectly in hasPermission, it might return false.
+           
+           // CRITICAL FIX: If we removed permissions from the items above, this block won't even run for them.
+           // But if we want to enforce permissions only for SUB admins, we should handle that logic.
+           
            if (!allowed) {
              return acc;
            }

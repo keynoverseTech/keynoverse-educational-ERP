@@ -22,10 +22,15 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '../../components/ui/Skeleton';
 
+import superAdminService from '../../services/superAdminApi';
+import { useParams } from 'react-router-dom';
+
 const ApplicationDetails: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [reviewNote, setReviewNote] = useState('');
   const [loading, setLoading] = useState(true);
+  const [application, setApplication] = useState<any>(null);
   
   // Action States
   const [appStatus, setAppStatus] = useState<'PENDING APPROVAL' | 'APPROVED' | 'REJECTED' | 'NEEDS CLARIFICATION'>('PENDING APPROVAL');
@@ -42,12 +47,62 @@ const ApplicationDetails: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
 
-    // Simulate data loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchApplicationDetails = async () => {
+      if (!id) return;
+      try {
+        // Fetch specific institution details
+        // Note: superAdminService.getInstitution(id) must be implemented or use getInstitutions().find()
+        // Using getInstitution(id) as we added it to the service
+        const data = await superAdminService.getInstitution(id);
+        
+        // Map API data to UI structure
+        setApplication({
+            id: data.id,
+            institution: data.name,
+            legalName: data.name, // Assuming same for now
+            type: data.institution_type_id ? 'Institution' : 'Unknown',
+            website: data.website || 'N/A',
+            regId: data.id,
+            address: data.address || 'N/A',
+            status: (data.status || 'pending').toUpperCase().replace('_', ' '),
+            statusColor: 'text-amber-500', // Dynamic based on status?
+            statusBg: 'bg-amber-500/10 border-amber-500/20',
+            logo: data.logo || 'GH',
+            logoColor: 'bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400',
+            contact: {
+              name: data.rector || 'N/A',
+              role: 'Rector', // Default role
+              email: data.rector_email || 'N/A',
+              phone: data.rector_phone_number || 'N/A',
+              avatar: '' // No avatar yet
+            },
+            documents: [
+              // Mock documents for now as API doesn't seem to return them in this object
+              { name: 'Accreditation_Letter.pdf', size: '2.4 MB', date: 'Uploaded recently', type: 'PDF' }
+            ],
+            timeline: [
+              { id: 1, event: 'Application Submitted', user: data.rector || 'User', date: new Date(data.created_at || Date.now()).toLocaleDateString(), icon: 'send', active: true }
+            ],
+            notes: []
+        });
+        
+        // Set initial status state
+        const statusMap: any = {
+            'approved': 'APPROVED',
+            'pending': 'PENDING APPROVAL',
+            'rejected': 'REJECTED'
+        };
+        setAppStatus(statusMap[data.status] || 'PENDING APPROVAL');
+
+      } catch (err) {
+        console.error('Failed to fetch application details', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplicationDetails();
+  }, [id]);
 
   const getStatusStyles = (status: string) => {
     switch (status) {
@@ -75,55 +130,26 @@ const ApplicationDetails: React.FC = () => {
       setActionReason('');
     }, 1000);
   };
-
-  const application = {
-    id: 'REG-2024-8842',
-    institution: 'Future Leaders Preparatory Academy',
-    legalName: 'Future Leaders Preparatory Academy',
-    type: 'K-12 Private School',
-    website: 'www.flprep.edu.ng',
-    regId: 'REG-2024-8842',
-    address: '14 Victoria Island Avenue, Lagos, Nigeria, 101241',
-    status: 'PENDING APPROVAL',
-    statusColor: 'text-amber-500',
-    statusBg: 'bg-amber-500/10 border-amber-500/20',
-    logo: 'FL',
-    logoColor: 'bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400', // Adaptive background for logo box
-    contact: {
-      name: 'Amara Okafor',
-      role: 'Head of Administration',
-      email: 'amara.o@flprep.edu.ng',
-      phone: '+234 803 123 4567',
-      avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=200&h=200'
-    },
-    documents: [
-      { name: 'Registration_Certificate.pdf', size: '2.4 MB', date: 'Uploaded 2 days ago', type: 'PDF' },
-      { name: 'Tax_ID_Document.jpg', size: '1.1 MB', date: 'Uploaded 2 days ago', type: 'IMG' },
-      { name: 'Accreditation_Proof.pdf', size: '5.8 MB', date: 'Uploaded 2 days ago', type: 'PDF' }
-    ],
-    timeline: [
-      { id: 1, event: 'Registration viewed by Admin', user: 'Alex Morgan', date: 'Today, 10:42 AM', icon: 'view', active: true },
-      { id: 2, event: 'Email Address Verified', user: 'System', date: 'Yesterday, 4:30 PM', icon: 'check', active: true },
-      { id: 3, event: 'Phone Number Verified', user: 'System', date: 'Yesterday, 4:28 PM', icon: 'check', active: true },
-      { id: 4, event: 'Application Submitted', user: 'Amara Okafor', date: 'Yesterday, 4:15 PM', icon: 'send', active: true }
-    ],
-    notes: [
-      {
-        id: 1,
-        author: 'Alex Morgan',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100',
-        text: 'Documents look authentic. Need to verify if they want the Transport module added later as their website mentions bus services.',
-        date: '2h ago'
-      }
-    ]
-  };
+  
+  // Render nothing or skeleton if application is not loaded
+  if (!application && !loading) return <div className="p-8">Application not found</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-[#0B1120]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          <p className="text-gray-500 font-medium">Loading Application Details...</p>
+        </div>
+      </div>
+    );
+  }
 
   const currentStyles = getStatusStyles(appStatus);
 
-  // Mock Credentials
+  // Mock Credentials (updated to use real data)
   const credentials = {
     adminEmail: application.contact.email,
-    password: 'Password123!',
+    password: 'Password123!', // Placeholder as we don't get password from API
     loginUrl: `https://${application.institution.toLowerCase().replace(/\s+/g, '-')}.portal.edu.ng`
   };
 
@@ -503,8 +529,12 @@ const ApplicationDetails: React.FC = () => {
               
               <div className="flex flex-col md:flex-row gap-6">
                 {/* Logo Box */}
-                <div className={`w-24 h-24 rounded-xl ${application.logoColor} flex items-center justify-center text-3xl font-bold shrink-0 border border-gray-100 dark:border-white/5`}>
-                  {application.logo}
+                <div className={`w-24 h-24 rounded-xl ${application.logoColor} flex items-center justify-center text-3xl font-bold shrink-0 border border-gray-100 dark:border-white/5 overflow-hidden`}>
+                  {application.logo && application.logo.length > 3 ? (
+                     <img src={application.logo} alt={application.institution} className="w-full h-full object-cover" />
+                  ) : (
+                     application.logo
+                  )}
                 </div>
                 
                 {/* Details Grid */}
@@ -630,7 +660,7 @@ const ApplicationDetails: React.FC = () => {
               </div>
               
               <div className="p-2 space-y-1">
-                {application.documents.map((doc, index) => (
+                {application.documents.map((doc: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors group">
                     <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center border border-gray-100 dark:border-white/5 ${
@@ -676,7 +706,7 @@ const ApplicationDetails: React.FC = () => {
               </div>
               
               <div className="p-6 space-y-6">
-                {application.notes.map((note) => (
+                {application.notes.map((note: any) => (
                   <div key={note.id} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700/50">
                     <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-4">"{note.text}"</p>
                     <div className="flex items-center gap-3">
@@ -714,7 +744,7 @@ const ApplicationDetails: React.FC = () => {
               </h2>
               
               <div className="relative pl-2 space-y-8 before:absolute before:left-[9px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-200 dark:before:bg-gray-800">
-                {application.timeline.map((item) => (
+                {application.timeline.map((item: any) => (
                   <div key={item.id} className="relative pl-8">
                     {/* Timeline Dot/Icon */}
                     <div className={`absolute left-0 top-1 w-5 h-5 rounded-full border-2 border-white dark:border-[#151e32] flex items-center justify-center z-10 ${

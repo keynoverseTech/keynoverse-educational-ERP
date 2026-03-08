@@ -13,5 +13,12 @@ export default defineConfig({
   },
   server: {
     allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: 'https://erp-api-production-024c.up.railway.app',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 })

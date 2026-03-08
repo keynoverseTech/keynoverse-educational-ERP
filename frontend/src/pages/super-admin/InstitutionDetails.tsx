@@ -15,7 +15,8 @@ import {
   BookOpen,
   Key
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import superAdminService from '../../services/superAdminApi';
 
 // Tabs
 import Overview from './institution-tabs/Overview';
@@ -27,21 +28,55 @@ import AcademicCatalog from './institution-tabs/AcademicCatalog';
 
 const InstitutionDetails: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>(); // Get institution ID from URL
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [showCredentials, setShowCredentials] = useState(false);
+  const [institution, setInstitution] = useState<any>(null); // State for fetched data
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000); // Shorter load time for shell
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchDetails = async () => {
+      if (!id) return;
+      setLoading(true);
+      try {
+        // Fetch real institution details by fetching list and filtering (until dedicated endpoint is available)
+        const response = await superAdminService.getInstitutions();
+        const institutions = Array.isArray(response) ? response : (response as any).data || [];
+        const found = institutions.find((inst: any) => inst.id === id);
+        
+        if (found) {
+          // Map API data to UI structure
+          setInstitution({
+            id: found.id,
+            name: found.name,
+            logo: found.logo || 'GH',
+            logoColor: 'bg-indigo-600', // Randomize or map if available
+            type: found.institution_type_id ? 'Polytechnic' : 'Institution', // Map type ID to name if possible
+            status: found.status || 'Active',
+            joinedDate: new Date(found.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            email: found.contact_email,
+            phone: found.rector_phone_number || 'N/A',
+            address: found.address || 'N/A',
+            subscription: 'Enterprise Plan' // Placeholder until subscription data is linked
+          });
+        } else {
+           // If not found in list (e.g. pagination), fallback to mock or error
+           console.error('Institution not found in list');
+        }
+      } catch (err) {
+        console.error('Failed to fetch institution details', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Mock Institution Data
-  const institution = {
-    id: 'INST-2023-001',
-    name: 'Global Heights Academy',
+    fetchDetails();
+  }, [id]);
+
+  // Fallback if fetch fails or while loading (initial render handled by loading state)
+  const displayInstitution = institution || {
+    id: id || 'INST-2023-001',
+    name: 'Loading...',
     logo: 'GH',
     logoColor: 'bg-indigo-600',
     type: 'K-12 Education',
@@ -69,7 +104,7 @@ const InstitutionDetails: React.FC = () => {
       case 'modules':
         return <ERPModules />;
       case 'academic':
-        return <AcademicCatalog />;
+        return <AcademicCatalog institutionId={id} />;
       case 'users':
         return <UsersTab />;
       case 'subscription':
@@ -134,34 +169,38 @@ const InstitutionDetails: React.FC = () => {
                 <ChevronRight size={12} className="text-gray-300 dark:text-gray-600" />
                 <span className="cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors" onClick={() => navigate('/super-admin/institutions')}>Institutions</span>
                 <ChevronRight size={12} className="text-gray-300 dark:text-gray-600" />
-                <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-md">{institution.name}</span>
+                <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-md">{displayInstitution.name}</span>
               </div>
               
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                 <div className="flex items-start gap-5">
-                  <div className={`w-20 h-20 rounded-2xl ${institution.logoColor} flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-indigo-500/20 ring-4 ring-white dark:ring-[#151e32]`}>
-                    {institution.logo}
+                  <div className={`w-20 h-20 rounded-2xl ${displayInstitution.logoColor} flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-indigo-500/20 ring-4 ring-white dark:ring-[#151e32] overflow-hidden`}>
+                    {displayInstitution.logo.startsWith('http') ? (
+                        <img src={displayInstitution.logo} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                        displayInstitution.logo
+                    )}
                   </div>
                   <div className="pt-1">
                     <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3 mb-2">
-                      {institution.name}
+                      {displayInstitution.name}
                       <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold border border-emerald-200 dark:border-emerald-500/20 uppercase tracking-wide flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        {institution.status}
+                        {displayInstitution.status}
                       </span>
                     </h1>
                     <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                         <Building2 size={14} className="text-gray-400" />
-                        {institution.id}
+                        {displayInstitution.id}
                       </span>
                       <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                         <MapPin size={14} className="text-gray-400" />
-                        New York, USA
+                        {displayInstitution.address}
                       </span>
                       <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                         <Calendar size={14} className="text-gray-400" />
-                        Joined {institution.joinedDate}
+                        Joined {displayInstitution.joinedDate}
                       </span>
                     </div>
                   </div>
@@ -194,7 +233,7 @@ const InstitutionDetails: React.FC = () => {
                     <div className="space-y-1">
                       <label className="text-xs text-gray-500">Admin Email</label>
                       <div className="font-mono text-sm text-gray-900 dark:text-white select-all bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg border border-gray-100 dark:border-gray-700">
-                        {institution.email}
+                        {displayInstitution.email}
                       </div>
                     </div>
                     <div className="space-y-1">
@@ -206,7 +245,7 @@ const InstitutionDetails: React.FC = () => {
                     <div className="space-y-1">
                       <label className="text-xs text-gray-500">Login URL</label>
                       <div className="font-mono text-sm text-blue-600 dark:text-blue-400 select-all bg-blue-50/50 dark:bg-blue-900/10 px-3 py-2 rounded-lg border border-blue-100 dark:border-blue-900/20 truncate">
-                        https://gha.portal.edu.ng
+                        https://{displayInstitution.name.toLowerCase().replace(/\s+/g, '-')}.portal.edu.ng
                       </div>
                     </div>
                   </div>

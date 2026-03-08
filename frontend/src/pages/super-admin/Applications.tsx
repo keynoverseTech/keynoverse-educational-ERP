@@ -10,13 +10,14 @@ import {
   CheckCircle2, 
   ClipboardList,
   History,
-  TrendingUp,
-  MoreHorizontal
+  TrendingUp
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 
-// Mock Data
+import superAdminService from '../../services/superAdminApi';
+
+// Mock Data for Charts (until real stats endpoint is available)
 const chartData = [
   { name: 'Mon', value: 4 },
   { name: 'Tue', value: 7 },
@@ -33,161 +34,67 @@ const sparklineData = {
   approved: [ { value: 10 }, { value: 12 }, { value: 15 }, { value: 14 }, { value: 16 }, { value: 20 }, { value: 18 } ]
 };
 
-const applicationsData = [
-  {
-    id: 'REG-042',
-    institution: 'Apex Technical Institute',
-    location: 'Austin, TX',
-    logo: 'AT',
-    logoColor: 'bg-blue-600',
-    dateSubmitted: '2 hours ago',
-    type: 'Vocational',
-    contactName: 'Sarah Jenkins',
-    contactAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'New',
-    statusColor: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',
-    priority: 'High'
-  },
-  {
-    id: 'REG-041',
-    institution: 'River Valley High',
-    location: 'Seattle, WA',
-    logo: 'RV',
-    logoColor: 'bg-purple-600',
-    dateSubmitted: '5 hours ago',
-    type: 'K-12',
-    contactName: 'Michael Ross',
-    contactAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'New',
-    statusColor: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',
-    priority: 'Normal'
-  },
-  {
-    id: 'REG-039',
-    institution: 'Global Health Academy',
-    location: 'Boston, MA',
-    logo: 'GH',
-    logoColor: 'bg-rose-600',
-    dateSubmitted: '1 day ago',
-    type: 'University',
-    contactName: 'Emily Chen',
-    contactAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'Pending',
-    statusColor: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
-    priority: 'Urgent'
-  },
-  {
-    id: 'REG-038',
-    institution: 'Summit Tech',
-    location: 'Denver, CO',
-    logo: 'ST',
-    logoColor: 'bg-emerald-600',
-    dateSubmitted: '2 days ago',
-    type: 'Vocational',
-    contactName: 'David Wright',
-    contactAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'Pending',
-    statusColor: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
-    priority: 'Normal'
-  },
-  {
-    id: 'REG-035',
-    institution: 'North Oak Elementary',
-    location: 'Portland, OR',
-    logo: 'NO',
-    logoColor: 'bg-orange-600',
-    dateSubmitted: '3 days ago',
-    type: 'K-12',
-    contactName: 'Amanda Bell',
-    contactAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'Pending',
-    statusColor: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
-    priority: 'Normal'
-  },
-  {
-    id: 'REG-034',
-    institution: 'Westfield Academy',
-    location: 'Chicago, IL',
-    logo: 'WA',
-    logoColor: 'bg-indigo-600',
-    dateSubmitted: '4 days ago',
-    type: 'K-12',
-    contactName: 'Robert Fox',
-    contactAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'Rejected',
-    statusColor: 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400',
-    priority: 'Low'
-  },
-  {
-    id: 'REG-032',
-    institution: 'Modern Arts College',
-    location: 'San Francisco, CA',
-    logo: 'MA',
-    logoColor: 'bg-pink-600',
-    dateSubmitted: '5 days ago',
-    type: 'University',
-    contactName: 'Eleanor Pena',
-    contactAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'Approved',
-    statusColor: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400',
-    priority: 'Normal'
-  },
-  {
-    id: 'REG-030',
-    institution: 'Tech Innovation High',
-    location: 'San Jose, CA',
-    logo: 'TI',
-    logoColor: 'bg-cyan-600',
-    dateSubmitted: '1 week ago',
-    type: 'K-12',
-    contactName: 'James Wilson',
-    contactAvatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'Pending',
-    statusColor: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
-    priority: 'Normal'
-  },
-  {
-    id: 'REG-028',
-    institution: 'Creative Arts School',
-    location: 'New York, NY',
-    logo: 'CA',
-    logoColor: 'bg-fuchsia-600',
-    dateSubmitted: '1 week ago',
-    type: 'Vocational',
-    contactName: 'Lisa Anderson',
-    contactAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'New',
-    statusColor: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',
-    priority: 'High'
-  },
-  {
-    id: 'REG-025',
-    institution: 'Future Science Academy',
-    location: 'Boston, MA',
-    logo: 'FS',
-    logoColor: 'bg-teal-600',
-    dateSubmitted: '2 weeks ago',
-    type: 'K-12',
-    contactName: 'Mark Thompson',
-    contactAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    status: 'Rejected',
-    statusColor: 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400',
-    priority: 'Low'
-  }
-];
-
 const Applications: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState<any[]>([]);
 
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
+    const fetchApplications = async () => {
+      try {
+        const response = await superAdminService.getInstitutions();
+        const data = Array.isArray(response) ? response : (response as any).data || [];
+        
+        // Map API data to UI structure
+        const mapped = data.map((inst: any) => ({
+            id: inst.id,
+            institution: inst.name,
+            location: inst.address || 'N/A',
+            logo: inst.logo && inst.logo.includes('http') ? inst.logo : (inst.name.charAt(0) + (inst.name.split(' ')[1] || '').charAt(0)).toUpperCase(), 
+            logoColor: 'bg-blue-600', // Randomize or map if available
+            dateSubmitted: new Date(inst.created_at || Date.now()).toLocaleDateString(),
+            type: inst.institution_type_id ? 'Institution' : 'Unknown', // Map type ID if needed
+            contactName: inst.rector || 'N/A',
+            contactAvatar: '', // No avatar in API yet
+            status: (inst.status || 'pending').charAt(0).toUpperCase() + (inst.status || 'pending').slice(1),
+            statusColor: inst.status === 'approved' 
+                ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' 
+                : 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
+            priority: 'Normal'
+        }));
+        setApplications(mapped);
+      } catch (err) {
+        console.error('Failed to fetch applications', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchApplications();
   }, []);
+
+  // --- Filtering & Pagination ---
+  const [filterStatus] = useState('All'); // TODO: Add setFilterStatus when UI supports it
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredApplications = applications.filter(app => {
+    const matchesStatus = filterStatus === 'All' || app.status === filterStatus;
+    const matchesSearch = 
+      app.institution.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.location.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          <p className="text-gray-500 font-medium">Loading Applications...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -213,129 +120,85 @@ const Applications: React.FC = () => {
 
       {/* Status Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {loading ? (
-          <>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-4">
-              <Skeleton className="h-12 w-12 rounded-lg" />
-              <div>
-                <Skeleton className="h-3 w-24 mb-2" />
-                <div className="flex items-baseline gap-2">
-                  <Skeleton className="h-8 w-12" />
-                  <Skeleton className="h-4 w-10" />
-                </div>
-              </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+          <div className="flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+              <ClipboardList size={24} />
             </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-4">
-              <Skeleton className="h-12 w-12 rounded-lg" />
-              <div>
-                <Skeleton className="h-3 w-24 mb-2" />
-                <div className="flex items-baseline gap-2">
-                  <Skeleton className="h-8 w-12" />
-                  <Skeleton className="h-4 w-10" />
-                </div>
-              </div>
+            <div className="h-10 w-24">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sparklineData.newApps}>
+                  <Bar dataKey="value" fill="#3b82f6" radius={[2, 2, 2, 2]} barSize={4} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-4">
-              <Skeleton className="h-12 w-12 rounded-lg" />
-              <div>
-                <Skeleton className="h-3 w-24 mb-2" />
-                <div className="flex items-baseline gap-2">
-                  <Skeleton className="h-8 w-12" />
-                  <Skeleton className="h-4 w-10" />
-                </div>
-              </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Applications</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-gray-900 dark:text-white">12</span>
+              <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">+4</span>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-center">
-              <div className="flex items-center justify-between mb-2">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-3 w-3" />
-              </div>
-              <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+          <div className="flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+              <History size={24} />
             </div>
-          </>
-        ) : (
-          <>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
-              <div className="flex items-center justify-between">
-                <div className="p-3 rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                  <ClipboardList size={24} />
-                </div>
-                <div className="h-10 w-24">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={sparklineData.newApps}>
-                      <Bar dataKey="value" fill="#3b82f6" radius={[2, 2, 2, 2]} barSize={4} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">New Applications</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold text-gray-900 dark:text-white">12</span>
-                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">+4</span>
-                </div>
-              </div>
+            <div className="h-10 w-24">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sparklineData.pending}>
+                  <Bar dataKey="value" fill="#d97706" radius={[2, 2, 2, 2]} barSize={4} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
-              <div className="flex items-center justify-between">
-                <div className="p-3 rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
-                  <History size={24} />
-                </div>
-                <div className="h-10 w-24">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={sparklineData.pending}>
-                      <Bar dataKey="value" fill="#d97706" radius={[2, 2, 2, 2]} barSize={4} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Pending</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold text-gray-900 dark:text-white">42</span>
-                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Requires action</span>
-                </div>
-              </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total Pending</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-gray-900 dark:text-white">42</span>
+              <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Requires action</span>
             </div>
+          </div>
+        </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
-              <div className="flex items-center justify-between">
-                <div className="p-3 rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
-                  <CheckCircle2 size={24} />
-                </div>
-                <div className="h-10 w-24">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={sparklineData.approved}>
-                      <Bar dataKey="value" fill="#10b981" radius={[2, 2, 2, 2]} barSize={4} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Approved Today</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold text-gray-900 dark:text-white">18</span>
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">+12%</span>
-                </div>
-              </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+          <div className="flex items-center justify-between">
+            <div className="p-3 rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+              <CheckCircle2 size={24} />
             </div>
+            <div className="h-10 w-24">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sparklineData.approved}>
+                  <Bar dataKey="value" fill="#10b981" radius={[2, 2, 2, 2]} barSize={4} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Approved Today</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-gray-900 dark:text-white">18</span>
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">+12%</span>
+            </div>
+          </div>
+        </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
-               <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Activity Trend</p>
-                  <TrendingUp size={14} className="text-gray-400" />
-               </div>
-               <div className="h-20 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
-                      <Bar dataKey="value" fill="#3b82f6" radius={[2, 2, 2, 2]} barSize={6} />
-                    </BarChart>
-                  </ResponsiveContainer>
-               </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-40 transition-transform hover:scale-[1.02] duration-200">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Activity Trend</p>
+              <TrendingUp size={14} className="text-gray-400" />
             </div>
-          </>
-        )}
+            <div className="h-20 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <Bar dataKey="value" fill="#3b82f6" radius={[2, 2, 2, 2]} barSize={6} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+        </div>
       </div>
 
       {/* Filters & Table */}
@@ -347,6 +210,8 @@ const Applications: React.FC = () => {
             <input 
               type="text" 
               placeholder="Search by ID, name, or contact..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-gray-900/5 dark:bg-gray-900/50 border-none rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm font-medium"
             />
           </div>
@@ -366,102 +231,68 @@ const Applications: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-900/5 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                <th className="px-6 py-5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reg ID</th>
-                <th className="px-6 py-5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Institution Name</th>
-                <th className="px-6 py-5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date Submitted</th>
-                <th className="px-6 py-5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact Person</th>
-                <th className="px-6 py-5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Action</th>
+              <tr className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800">
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Institution</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date Submitted</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                Array(5).fill(0).map((_, i) => (
-                  <tr key={i}>
-                    <td className="px-6 py-8"><Skeleton className="h-4 w-12" /></td>
-                    <td className="px-6 py-8">
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="w-8 h-8 rounded-lg" />
-                        <div className="space-y-1">
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-3 w-24" />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-8"><Skeleton className="h-4 w-24" /></td>
-                    <td className="px-6 py-8"><Skeleton className="h-6 w-20 rounded-md" /></td>
-                    <td className="px-6 py-8">
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="w-6 h-6 rounded-full" />
-                        <Skeleton className="h-4 w-24" />
-                      </div>
-                    </td>
-                    <td className="px-6 py-8"><Skeleton className="h-6 w-24 rounded-full" /></td>
-                    <td className="px-6 py-8 text-right">
-                       <div className="flex items-center justify-end gap-2">
-                         <Skeleton className="w-8 h-8 rounded-lg" />
-                         <Skeleton className="w-8 h-8 rounded-lg" />
-                       </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                applicationsData.map((app) => (
-                <tr key={app.id} className="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td className="px-6 py-8">
-                    <span className="font-mono text-sm text-gray-500 dark:text-gray-400">#{app.id}</span>
-                  </td>
-                  <td className="px-6 py-8">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {filteredApplications.map((app) => (
+                <tr key={app.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors group">
+                  <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg ${app.logoColor} flex items-center justify-center text-white font-bold text-xs shadow-sm`}>
-                        {app.logo}
+                      {/* Logo Container - Fixed Width to prevent overlapping */}
+                      <div className={`w-10 h-10 rounded-lg ${app.logoColor} flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden`}>
+                        {app.logo.length > 3 ? (
+                           <img src={app.logo} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                           app.logo
+                        )}
                       </div>
-                      <div>
-                        <div className="font-bold text-gray-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{app.institution}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">{app.location}</div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-gray-900 dark:text-white truncate max-w-[200px]" title={app.institution}>{app.institution}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 shrink-0"></span>
+                          <span className="truncate max-w-[150px]">{app.location}</span>
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-8 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 font-medium">
                     {app.dateSubmitted}
                   </td>
-                  <td className="px-6 py-8">
-                    <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+                  <td className="px-6 py-4">
+                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-md text-xs font-bold">
                       {app.type}
                     </span>
                   </td>
-                  <td className="px-6 py-8">
+                  <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <img src={app.contactAvatar} alt={app.contactName} className="w-6 h-6 rounded-full object-cover" />
+                      {app.contactAvatar && <img src={app.contactAvatar} alt={app.contactName} className="w-6 h-6 rounded-full object-cover" />}
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{app.contactName}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-8">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${app.statusColor} border border-current/10`}>
-                        {app.status}
-                      </span>
-                    </div>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${app.statusColor.replace('text-', 'border-').replace('bg-', 'border-opacity-20 ')} ${app.statusColor}`}>
+                      {app.status === 'Approved' && <CheckCircle2 size={12} />}
+                      {app.status === 'New' && <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div>}
+                      {app.status}
+                    </span>
                   </td>
-                  <td className="px-6 py-8 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => navigate(`/super-admin/applications/${app.id}`)}
-                        className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                        title="View Details"
-                      >
-                        <Eye size={18} />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <MoreHorizontal size={18} />
-                      </button>
-                    </div>
+                  <td className="px-6 py-4 text-right">
+                    <button 
+                      onClick={() => navigate(`/super-admin/applications/${app.id}`)}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                      <Eye size={18} />
+                    </button>
                   </td>
                 </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
