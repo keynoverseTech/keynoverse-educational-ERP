@@ -119,6 +119,26 @@ const MarkAttendance = lazy(() => import('./pages/school-admin/academics/attenda
 const AttendanceReport = lazy(() => import('./pages/school-admin/academics/attendance/AttendanceReport'));
 const CGPAMonitoring = lazy(() => import('./pages/school-admin/academics/CGPAMonitoring'));
 
+// School Admin - Research & Projects
+const ResearchDashboard = lazy(() => import('./pages/school-admin/academics/research-projects/ResearchDashboard'));
+const ProjectTopics = lazy(() => import('./pages/school-admin/academics/research-projects/ProjectTopics'));
+const StudentProjects = lazy(() => import('./pages/school-admin/academics/research-projects/StudentProjects'));
+const SupervisorManagement = lazy(() => import('./pages/school-admin/academics/research-projects/SupervisorManagement'));
+const DefenseScheduling = lazy(() => import('./pages/school-admin/academics/research-projects/DefenseScheduling'));
+const ProjectArchive = lazy(() => import('./pages/school-admin/academics/research-projects/ProjectArchive'));
+const ProjectSubmissions = lazy(() => import('./pages/school-admin/academics/research-projects/ProjectSubmissions'));
+const PlagiarismCheck = lazy(() => import('./pages/school-admin/academics/research-projects/PlagiarismCheck'));
+
+// School Admin - LMS
+const LMSDashboard = lazy(() => import('./pages/school-admin/lms/LMSDashboard'));
+const MyCourses = lazy(() => import('./pages/school-admin/lms/MyCourses'));
+const CourseContent = lazy(() => import('./pages/school-admin/lms/CourseContent'));
+const Assignments = lazy(() => import('./pages/school-admin/lms/Assignments'));
+const Discussions = lazy(() => import('./pages/school-admin/lms/Discussions'));
+const Quizzes = lazy(() => import('./pages/school-admin/lms/Quizzes'));
+const Submissions = lazy(() => import('./pages/school-admin/lms/Submissions'));
+const LearningAnalytics = lazy(() => import('./pages/school-admin/lms/LearningAnalytics'));
+
 // School Admin - Help Desk
 const HelpDeskDashboard = lazy(() => import('./pages/school-admin/Help Desk/HelpDeskDashboard'));
 const TicketCategories = lazy(() => import('./pages/school-admin/Help Desk/TicketCategories'));
@@ -220,6 +240,25 @@ const AssetManagement = lazy(() => import('./pages/school-admin/procurement/Asse
 
 // Portals
 const StudentPortalDashboard = lazy(() => import('./pages/student-portal/Dashboard'));
+const StudentLMSDashboard = lazy(() => import('./pages/student-portal/lms/StudentLMSDashboard'));
+const StudentMyCourses = lazy(() => import('./pages/student-portal/lms/StudentMyCourses'));
+const StudentCourseContent = lazy(() => import('./pages/student-portal/lms/StudentCourseContent'));
+const StudentAssignments = lazy(() => import('./pages/student-portal/lms/StudentAssignments'));
+const StudentDiscussions = lazy(() => import('./pages/student-portal/lms/StudentDiscussions'));
+const StudentQuizzes = lazy(() => import('./pages/student-portal/lms/StudentQuizzes'));
+const StudentSubmissions = lazy(() => import('./pages/student-portal/lms/StudentSubmissions'));
+const StudentLearningAnalytics = lazy(() => import('./pages/student-portal/lms/StudentLearningAnalytics'));
+
+// Student Portal - Research & Projects
+const StudentResearchDashboard = lazy(() => import('./pages/student-portal/academics/research-projects/ResearchDashboard'));
+const StudentTopicProposal = lazy(() => import('./pages/student-portal/academics/research-projects/TopicProposal'));
+const StudentMyProject = lazy(() => import('./pages/student-portal/academics/research-projects/MyProject'));
+const StudentProjectSubmissions = lazy(() => import('./pages/student-portal/academics/research-projects/ProjectSubmissions'));
+const StudentSupervisorFeedback = lazy(() => import('./pages/student-portal/academics/research-projects/SupervisorFeedback'));
+const StudentPlagiarismReport = lazy(() => import('./pages/student-portal/academics/research-projects/PlagiarismReport'));
+const StudentDefenseSchedule = lazy(() => import('./pages/student-portal/academics/research-projects/DefenseSchedule'));
+const StudentProjectArchive = lazy(() => import('./pages/student-portal/academics/research-projects/ProjectArchive'));
+
 const StudentFeesDashboard = lazy(() => import('./pages/student-portal/fees/FeesDashboard'));
 const StudentInvoiceDetails = lazy(() => import('./pages/student-portal/fees/StudentInvoiceDetailsPage'));
 const StudentPaymentCheckout = lazy(() => import('./pages/student-portal/fees/PaymentCheckoutPage'));
@@ -248,6 +287,12 @@ const StaffTimetable = lazy(() => import('./pages/staff-portal/academics/Timetab
 const StaffAttendance = lazy(() => import('./pages/staff-portal/academics/attendance/AttendanceDashboard'));
 const StaffMarkAttendance = lazy(() => import('./pages/staff-portal/academics/attendance/MarkAttendance'));
 const StaffStudents = lazy(() => import('./pages/staff-portal/academics/Students'));
+
+// Staff Portal - LMS
+const StaffAssignments = lazy(() => import('./pages/staff-portal/lms/StaffAssignments'));
+const StaffQuizzes = lazy(() => import('./pages/staff-portal/lms/StaffQuizzes'));
+const StaffLMSDashboard = lazy(() => import('./pages/staff-portal/lms/StaffLMSDashboard'));
+const StaffSubmissions = lazy(() => import('./pages/staff-portal/lms/StaffSubmissions'));
 
 // Staff Portal - Assessment
 const StaffMarksEntry = lazy(() => import('./pages/staff-portal/assessment/MarksEntry'));
@@ -307,7 +352,34 @@ const schoolAdminItems = [
           { name: 'Level Promotion', path: '/school-admin/academics/promotion' },
           { name: 'CGPA Monitoring', path: '/school-admin/academics/cgpa-monitoring' }
         ]
+      },
+      {
+        name: 'Research & Projects',
+        subItems: [
+          { name: 'Dashboard', path: '/school-admin/academics/research/dashboard' },
+          { name: 'Project Topics', path: '/school-admin/academics/research/topics' },
+          { name: 'Student Projects', path: '/school-admin/academics/research/projects' },
+          { name: 'Supervisor Mgmt', path: '/school-admin/academics/research/supervisors' },
+          { name: 'Submissions', path: '/school-admin/academics/research/submissions' },
+          { name: 'Plagiarism Check', path: '/school-admin/academics/research/plagiarism' },
+          { name: 'Defense Schedule', path: '/school-admin/academics/research/defense' },
+          { name: 'Archive', path: '/school-admin/academics/research/archive' }
+        ]
       }
+    ]
+  },
+  {
+    name: 'LMS',
+    icon: BookOpen,
+    subItems: [
+      { name: 'Dashboard', path: '/school-admin/lms/dashboard' },
+      { name: 'My Courses', path: '/school-admin/lms/courses' },
+      { name: 'Course Content', path: '/school-admin/lms/content' },
+      { name: 'Assignments', path: '/school-admin/lms/assignments' },
+      { name: 'Discussions', path: '/school-admin/lms/discussions' },
+      { name: 'Quizzes', path: '/school-admin/lms/quizzes' },
+      { name: 'Submissions', path: '/school-admin/lms/submissions' },
+      { name: 'Analytics', path: '/school-admin/lms/analytics' }
     ]
   },
   { 
@@ -516,7 +588,33 @@ const studentItems = [
       { name: 'Enrolled Courses', path: '/student/academics/courses' },
       { name: 'Course Materials', path: '/student/academics/materials' },
       { name: 'Timetable', path: '/student/academics/timetable' },
-      { name: 'Results', path: '/student/academics/results' }
+      { name: 'Results', path: '/student/academics/results' },
+      {
+        name: 'Research & Projects',
+        subItems: [
+          { name: 'Overview', path: '/student/academics/research/dashboard' },
+          { name: 'Topic Proposal', path: '/student/academics/research/proposal' },
+          { name: 'My Project', path: '/student/academics/research/project' },
+          { name: 'Submissions', path: '/student/academics/research/submissions' },
+          { name: 'Supervisor Feedback', path: '/student/academics/research/feedback' },
+          { name: 'Plagiarism Report', path: '/student/academics/research/plagiarism' },
+          { name: 'Defense Schedule', path: '/student/academics/research/defense' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'LMS',
+    icon: BookOpen,
+    subItems: [
+      { name: 'Dashboard', path: '/student/lms/dashboard' },
+      { name: 'My Courses', path: '/student/lms/courses' },
+      { name: 'Course Content', path: '/student/lms/content' },
+      { name: 'Assignments', path: '/student/lms/assignments' },
+      { name: 'Discussions', path: '/student/lms/discussions' },
+      { name: 'Quizzes', path: '/student/lms/quizzes' },
+      { name: 'Submissions', path: '/student/lms/submissions' },
+      { name: 'Analytics', path: '/student/lms/analytics' }
     ]
   },
   {
@@ -574,6 +672,17 @@ const staffItems = [
       { name: 'Timetable', path: '/staff/academics/timetable' },
       { name: 'Attendance', path: '/staff/academics/attendance' },
       { name: 'Students', path: '/staff/academics/students' },
+    ]
+  },
+  {
+    name: 'LMS',
+    icon: BookOpen,
+    subItems: [
+      { name: 'Dashboard', path: '/staff/lms/dashboard' },
+      { name: 'Course Materials', path: '/staff/lms/materials' },
+      { name: 'Assignments', path: '/staff/lms/assignments' },
+      { name: 'Quizzes', path: '/staff/lms/quizzes' },
+      { name: 'Submissions', path: '/staff/lms/submissions' },
     ]
   },
   { 
@@ -793,6 +902,26 @@ function App() {
                         <Route path="/school-admin/academics/attendance/mark/:id" element={<MarkAttendance />} />
                         <Route path="/school-admin/academics/cgpa-monitoring" element={<CGPAMonitoring />} />
 
+                        {/* Research & Projects */}
+                        <Route path="/school-admin/academics/research/dashboard" element={<ResearchDashboard />} />
+                        <Route path="/school-admin/academics/research/topics" element={<ProjectTopics />} />
+                        <Route path="/school-admin/academics/research/projects" element={<StudentProjects />} />
+                        <Route path="/school-admin/academics/research/supervisors" element={<SupervisorManagement />} />
+                        <Route path="/school-admin/academics/research/defense" element={<DefenseScheduling />} />
+                        <Route path="/school-admin/academics/research/archive" element={<ProjectArchive />} />
+                        <Route path="/school-admin/academics/research/submissions" element={<ProjectSubmissions />} />
+                        <Route path="/school-admin/academics/research/plagiarism" element={<PlagiarismCheck />} />
+
+                        {/* LMS */}
+                        <Route path="/school-admin/lms/dashboard" element={<LMSDashboard />} />
+                        <Route path="/school-admin/lms/courses" element={<MyCourses />} />
+                        <Route path="/school-admin/lms/content" element={<CourseContent />} />
+                        <Route path="/school-admin/lms/assignments" element={<Assignments />} />
+                        <Route path="/school-admin/lms/discussions" element={<Discussions />} />
+                        <Route path="/school-admin/lms/quizzes" element={<Quizzes />} />
+                        <Route path="/school-admin/lms/submissions" element={<Submissions />} />
+                        <Route path="/school-admin/lms/analytics" element={<LearningAnalytics />} />
+
                         {/* HelpDesk */}
                         <Route path="/school-admin/helpdesk/dashboard" element={<HelpDeskDashboard />} />
                         <Route path="/school-admin/helpdesk/categories" element={<TicketCategories />} />
@@ -919,12 +1048,34 @@ function App() {
                       }>
                         <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
                         <Route path="/student/dashboard" element={<StudentPortalDashboard />} />
+                        
+                        {/* Student LMS Routes */}
+                        <Route path="/student/lms/dashboard" element={<StudentLMSDashboard />} />
+                        <Route path="/student/lms/courses" element={<StudentMyCourses />} />
+                        <Route path="/student/lms/content" element={<StudentCourseContent />} />
+                        <Route path="/student/lms/assignments" element={<StudentAssignments />} />
+                        <Route path="/student/lms/discussions" element={<StudentDiscussions />} />
+                        <Route path="/student/lms/quizzes" element={<StudentQuizzes />} />
+                        <Route path="/student/lms/submissions" element={<StudentSubmissions />} />
+                        <Route path="/student/lms/analytics" element={<StudentLearningAnalytics />} />
+
                         <Route path="/student/academics" element={<StudentAcademicsDashboard />} />
                         <Route path="/student/academics/courses" element={<StudentAcademicsCourses />} />
                         <Route path="/student/academics/materials" element={<StudentAcademicsMaterials />} />
                         <Route path="/student/academics/results" element={<StudentAcademicsResults />} />
                         <Route path="/student/academics/timetable" element={<StudentAcademicsTimetable />} />
                         <Route path="/student/academics/timetable/exams" element={<StudentExamsTimetable />} />
+
+                        {/* Student Research & Projects */}
+                        <Route path="/student/academics/research/dashboard" element={<StudentResearchDashboard />} />
+                        <Route path="/student/academics/research/proposal" element={<StudentTopicProposal />} />
+                        <Route path="/student/academics/research/project" element={<StudentMyProject />} />
+                        <Route path="/student/academics/research/submissions" element={<StudentProjectSubmissions />} />
+                        <Route path="/student/academics/research/feedback" element={<StudentSupervisorFeedback />} />
+                        <Route path="/student/academics/research/plagiarism" element={<StudentPlagiarismReport />} />
+                        <Route path="/student/academics/research/defense" element={<StudentDefenseSchedule />} />
+                        <Route path="/student/academics/research/archive" element={<StudentProjectArchive />} />
+
                         <Route path="/student/courses" element={<Navigate to="/student/academics/courses" replace />} />
                         <Route path="/student/courses/materials" element={<Navigate to="/student/academics/materials" replace />} />
                         <Route path="/student/results" element={<Navigate to="/student/academics/results" replace />} />
@@ -981,6 +1132,11 @@ function App() {
                         <Route path="academics/attendance" element={<StaffAttendance />} />
                         <Route path="academics/attendance/mark/:id" element={<StaffMarkAttendance />} />
                         <Route path="academics/students" element={<StaffStudents />} />
+                        <Route path="lms/materials" element={<StaffCourseMaterials />} />
+                        <Route path="lms/assignments" element={<StaffAssignments />} />
+                        <Route path="lms/quizzes" element={<StaffQuizzes />} />
+                        <Route path="lms/dashboard" element={<StaffLMSDashboard />} />
+                        <Route path="lms/submissions" element={<StaffSubmissions />} />
                         <Route path="assessment/marks" element={<StaffMarksEntry />} />
                         <Route path="assessment/timetable" element={<StaffExamTimetable />} />
                         <Route path="hr/salary" element={<StaffMySalary />} />

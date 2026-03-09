@@ -5,9 +5,6 @@ import {
   Trash2, 
   Save, 
   Search, 
-  Filter,
-  CheckCircle,
-  AlertCircle,
   ChevronDown,
   Info
 } from 'lucide-react';
