@@ -15,11 +15,12 @@ const TransportRoutes: React.FC = () => {
   const handleAddRoute = (e: React.FormEvent) => {
     e.preventDefault();
     addRoute({
-      name: newRouteName,
-      code: newRouteCode,
+      routeName: newRouteName,
+      description: newRouteCode,
       stops: [], // Default empty stops for now
       fare: newRouteFare,
       capacity: newRouteCapacity,
+      totalStops: 0,
       status: 'Active'
     });
     setIsModalOpen(false);
@@ -51,12 +52,12 @@ const TransportRoutes: React.FC = () => {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">{route.code}</span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">{route.description}</span>
                     <span className={`px-2 py-1 text-xs font-bold rounded ${route.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                       {route.status}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-2">{route.name}</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-2">{route.routeName}</h3>
                 </div>
                 <div className="flex gap-2">
                   <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
@@ -77,8 +78,8 @@ const TransportRoutes: React.FC = () => {
                   <p className="font-semibold text-gray-900 dark:text-white">₦{route.fare.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 dark:text-gray-400">Assigned Bus</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{route.assignedBus || 'Unassigned'}</p>
+                  <p className="text-gray-500 dark:text-gray-400">Total Stops</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{route.totalStops}</p>
                 </div>
               </div>
             </div>

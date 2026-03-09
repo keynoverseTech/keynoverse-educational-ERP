@@ -392,13 +392,4 @@ const Applications: React.FC = () => {
   );
 };
 
-// Helper Components
-
-const FilterSelect: React.FC<{ label: string }> = ({ label }) => (
-  <button className="flex items-center gap-2 px-3 py-1.5 bg-gray-900/5 dark:bg-gray-700 hover:bg-gray-900/10 dark:hover:bg-gray-600 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 transition-colors border border-transparent hover:border-gray-300 dark:hover:border-gray-500">
-    <span>{label}</span>
-    <ChevronLeft size={12} className="-rotate-90 text-gray-400" />
-  </button>
-);
-
 export default Applications;

@@ -20,6 +20,8 @@ interface Topic {
   student: string;
   matricNumber: string;
   department: string;
+  faculty: string;
+  programme: string;
   supervisor: string;
   date: string;
   status: 'Pending' | 'Approved' | 'Rejected';
@@ -31,8 +33,16 @@ interface Topic {
 
 const ProjectTopics: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('All');
+  const [filterFaculty, setFilterFaculty] = useState('All');
+  const [filterDepartment, setFilterDepartment] = useState('All');
+  const [filterProgramme, setFilterProgramme] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+
+  // Mock Filters
+  const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
+  const departments = ['Computer Science', 'Architecture', 'Biology', 'Physics', 'Mathematics'];
+  const programmes = ['B.Sc Computer Science', 'B.Sc Architecture', 'B.Sc Biology'];
 
   // Mock Data
   const [topics, setTopics] = useState<Topic[]>([
@@ -42,6 +52,8 @@ const ProjectTopics: React.FC = () => {
       student: 'John Doe',
       matricNumber: 'SCI/20/001',
       department: 'Computer Science',
+      faculty: 'Faculty of Sciences',
+      programme: 'B.Sc Computer Science',
       supervisor: 'Dr. Alan Smith',
       date: '2024-03-10',
       status: 'Pending',
@@ -56,6 +68,8 @@ const ProjectTopics: React.FC = () => {
       student: 'Jane Smith',
       matricNumber: 'ENV/20/045',
       department: 'Architecture',
+      faculty: 'Faculty of Environmental Sciences',
+      programme: 'B.Sc Architecture',
       supervisor: 'Prof. Sarah Connor',
       date: '2024-03-08',
       status: 'Approved',
@@ -70,6 +84,8 @@ const ProjectTopics: React.FC = () => {
       student: 'Michael Brown',
       matricNumber: 'SCI/20/022',
       department: 'Computer Science',
+      faculty: 'Faculty of Sciences',
+      programme: 'B.Sc Computer Science',
       supervisor: 'Dr. Alan Smith',
       date: '2024-03-05',
       status: 'Rejected',
@@ -91,9 +107,12 @@ const ProjectTopics: React.FC = () => {
 
   const filteredTopics = topics.filter(topic => {
     const matchesStatus = filterStatus === 'All' || topic.status === filterStatus;
+    const matchesFaculty = filterFaculty === 'All' || topic.faculty === filterFaculty;
+    const matchesDepartment = filterDepartment === 'All' || topic.department === filterDepartment;
+    const matchesProgramme = filterProgramme === 'All' || topic.programme === filterProgramme;
     const matchesSearch = topic.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           topic.student.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesSearch && matchesFaculty && matchesDepartment && matchesProgramme;
   });
 
   return (
@@ -106,33 +125,64 @@ const ProjectTopics: React.FC = () => {
           </h1>
           <p className="text-gray-500 dark:text-gray-400">Review and approve student research proposals.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search topics..." 
-              className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-1">
-            {['All', 'Pending', 'Approved', 'Rejected'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  filterStatus === status 
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' 
-                    : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:flex-none">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search topics..." 
+                className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            {/* Filters */}
+            <div className="flex items-center gap-2">
+              <select 
+                value={filterFaculty}
+                onChange={(e) => setFilterFaculty(e.target.value)}
+                className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {status}
-              </button>
-            ))}
+                <option value="All">All Faculties</option>
+                {faculties.map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
+              
+              <select 
+                value={filterDepartment}
+                onChange={(e) => setFilterDepartment(e.target.value)}
+                className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="All">All Departments</option>
+                {departments.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+
+              <select 
+                value={filterProgramme}
+                onChange={(e) => setFilterProgramme(e.target.value)}
+                className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="All">All Programmes</option>
+                {programmes.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-1">
+              {['All', 'Pending', 'Approved', 'Rejected'].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    filterStatus === status 
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' 
+                      : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -141,7 +191,7 @@ const ProjectTopics: React.FC = () => {
             <tr>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Topic Title</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Student</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Department</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Details</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Supervisor</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
@@ -165,7 +215,13 @@ const ProjectTopics: React.FC = () => {
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{topic.department}</td>
+                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs font-bold text-gray-900 dark:text-white">{topic.programme}</span>
+                    <span className="text-xs">{topic.department}</span>
+                    <span className="text-[10px] text-gray-400">{topic.faculty}</span>
+                  </div>
+                </td>
                 <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{topic.supervisor}</td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1 ${
