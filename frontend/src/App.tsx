@@ -137,7 +137,7 @@ const Assignments = lazy(() => import('./pages/school-admin/lms/Assignments'));
 const Discussions = lazy(() => import('./pages/school-admin/lms/Discussions'));
 const Quizzes = lazy(() => import('./pages/school-admin/lms/Quizzes'));
 const Submissions = lazy(() => import('./pages/school-admin/lms/Submissions'));
-const LearningAnalytics = lazy(() => import('./pages/school-admin/lms/LearningAnalytics'));
+// const LearningAnalytics = lazy(() => import('./pages/school-admin/lms/LearningAnalytics'));
 
 // School Admin - Help Desk
 const HelpDeskDashboard = lazy(() => import('./pages/school-admin/Help Desk/HelpDeskDashboard'));
@@ -247,7 +247,7 @@ const StudentAssignments = lazy(() => import('./pages/student-portal/lms/Student
 const StudentDiscussions = lazy(() => import('./pages/student-portal/lms/StudentDiscussions'));
 const StudentQuizzes = lazy(() => import('./pages/student-portal/lms/StudentQuizzes'));
 const StudentSubmissions = lazy(() => import('./pages/student-portal/lms/StudentSubmissions'));
-const StudentLearningAnalytics = lazy(() => import('./pages/student-portal/lms/StudentLearningAnalytics'));
+// const StudentLearningAnalytics = lazy(() => import('./pages/student-portal/lms/StudentLearningAnalytics'));
 
 // Student Portal - Research & Projects
 const StudentResearchDashboard = lazy(() => import('./pages/student-portal/academics/research-projects/ResearchDashboard'));
@@ -378,8 +378,7 @@ const schoolAdminItems = [
       { name: 'Assignments', path: '/school-admin/lms/assignments' },
       { name: 'Discussions', path: '/school-admin/lms/discussions' },
       { name: 'Quizzes', path: '/school-admin/lms/quizzes' },
-      { name: 'Submissions', path: '/school-admin/lms/submissions' },
-      { name: 'Analytics', path: '/school-admin/lms/analytics' }
+      { name: 'Submissions', path: '/school-admin/lms/submissions' }
     ]
   },
   { 
@@ -613,8 +612,7 @@ const studentItems = [
       { name: 'Assignments', path: '/student/lms/assignments' },
       { name: 'Discussions', path: '/student/lms/discussions' },
       { name: 'Quizzes', path: '/student/lms/quizzes' },
-      { name: 'Submissions', path: '/student/lms/submissions' },
-      { name: 'Analytics', path: '/student/lms/analytics' }
+      { name: 'Submissions', path: '/student/lms/submissions' }
     ]
   },
   {
@@ -920,7 +918,7 @@ function App() {
                         <Route path="/school-admin/lms/discussions" element={<Discussions />} />
                         <Route path="/school-admin/lms/quizzes" element={<Quizzes />} />
                         <Route path="/school-admin/lms/submissions" element={<Submissions />} />
-                        <Route path="/school-admin/lms/analytics" element={<LearningAnalytics />} />
+                        {/* <Route path="/school-admin/lms/analytics" element={<LearningAnalytics />} /> */}
 
                         {/* HelpDesk */}
                         <Route path="/school-admin/helpdesk/dashboard" element={<HelpDeskDashboard />} />
@@ -1057,7 +1055,7 @@ function App() {
                         <Route path="/student/lms/discussions" element={<StudentDiscussions />} />
                         <Route path="/student/lms/quizzes" element={<StudentQuizzes />} />
                         <Route path="/student/lms/submissions" element={<StudentSubmissions />} />
-                        <Route path="/student/lms/analytics" element={<StudentLearningAnalytics />} />
+                        {/* <Route path="/student/lms/analytics" element={<StudentLearningAnalytics />} /> */}
 
                         <Route path="/student/academics" element={<StudentAcademicsDashboard />} />
                         <Route path="/student/academics/courses" element={<StudentAcademicsCourses />} />
