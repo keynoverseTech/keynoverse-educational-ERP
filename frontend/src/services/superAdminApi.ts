@@ -17,12 +17,14 @@ const superAdminApi = axios.create({
 // Add request interceptor to attach the token
 superAdminApi.interceptors.request.use(
   (config) => {
-    // FORCE usage of the hardcoded test token provided by the backend dev.
-    // Ignoring localStorage for now to ensure we are not using an old/invalid token.
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN1cGVyYWRtaW5AcGxhbmV0c3RlY2guY29tIiwic3ViIjoiZjNiNmNmMDEtOWExYy00ZWYwLTgxN2YtN2Q5MWQ1YzljZDBkIiwicm9sZSI6InN1cGVyX2FkbWluIiwiaWF0IjoxNzcyOTU5NzY3LCJleHAiOjE3NzMwNDYxNjd9.E1OgdZteXb7iBLhxA8FL9ozsx6jJjvUqFOg_43do6q8';
-    
-    // Uncomment this later when you want to revert to using the user's login token:
-    // const token = localStorage.getItem('auth_token');
+    // Try to get the token from localStorage first (real user session)
+    let token = localStorage.getItem('auth_token');
+
+    // If no local token, use the hardcoded test token as a fallback (dev/test mode)
+    if (!token) {
+      console.warn('Using hardcoded test token for Super Admin API');
+      token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN1cGVyYWRtaW5AcGxhbmV0c3RlY2guY29tIiwic3ViIjoiZjNiNmNmMDEtOWExYy00ZWYwLTgxN2YtN2Q5MWQ1YzljZDBkIiwicm9sZSI6InN1cGVyX2FkbWluIiwiaWF0IjoxNzcyOTU5NzY3LCJleHAiOjE3NzMwNDYxNjd9.E1OgdZteXb7iBLhxA8FL9ozsx6jJjvUqFOg_43do6q8';
+    }
 
     // Always attach the token if it exists
     if (token) {
@@ -68,13 +70,47 @@ export interface ProgramAssignmentData {
 
 export const superAdminService = {
   // Institution Management
-  createInstitution: async (data: InstitutionRegistrationData) => {
-    const response = await superAdminApi.post('/institutions', data);
+  createInstitution: async (data: InstitutionRegistrationData | FormData, onUploadProgress?: (progressEvent: any) => void) => {
+    // If data is FormData, let browser set Content-Type (multipart/form-data)
+    // If it's JSON, use application/json
+    const config = data instanceof FormData 
+        ? { 
+            headers: { 'Content-Type': 'multipart/form-data' },
+            onUploadProgress
+          }
+        : {};
+        
+    const response = await superAdminApi.post('/institutions', data, config);
     return response.data;
   },
 
   getInstitutions: async () => {
     const response = await superAdminApi.get('/institutions');
+    return response.data;
+  },
+
+  getInstitutionsPending: async () => {
+    const response = await superAdminApi.get('/institutions/listpending');
+    return response.data;
+  },
+
+  getInstitutionsApproved: async () => {
+    const response = await superAdminApi.get('/institutions/list/approved');
+    return response.data;
+  },
+
+  getInstitutionsQueried: async () => {
+    const response = await superAdminApi.get('/institutions/list/queried');
+    return response.data;
+  },
+
+  getInstitutionsSuspended: async () => {
+    const response = await superAdminApi.get('/institutions/list/suspended');
+    return response.data;
+  },
+
+  getInstitutionsExpired: async () => {
+    const response = await superAdminApi.get('/institutions/list/subs-expired');
     return response.data;
   },
 
