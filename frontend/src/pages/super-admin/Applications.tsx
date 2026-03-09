@@ -38,10 +38,43 @@ const Applications: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<any[]>([]);
 
+  const [error, setError] = useState('');
+
+  // --- Filtering & Pagination ---
+  const [filterStatus, setFilterStatus] = useState('All'); 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Update fetch function to handle different endpoints based on filter
   useEffect(() => {
     const fetchApplications = async () => {
+      setLoading(true);
+      setError('');
       try {
-        const response = await superAdminService.getInstitutions();
+        let response;
+        
+        // Select endpoint based on filterStatus
+        switch(filterStatus) {
+            case 'Pending':
+                response = await superAdminService.getInstitutionsPending();
+                break;
+            case 'Approved':
+                response = await superAdminService.getInstitutionsApproved();
+                break;
+            case 'Queried':
+                response = await superAdminService.getInstitutionsQueried();
+                break;
+            case 'Suspended':
+                response = await superAdminService.getInstitutionsSuspended();
+                break;
+            case 'Expired':
+                response = await superAdminService.getInstitutionsExpired();
+                break;
+            case 'All':
+            default:
+                response = await superAdminService.getInstitutions();
+                break;
+        }
+
         const data = Array.isArray(response) ? response : (response as any).data || [];
         
         // Map API data to UI structure
@@ -62,26 +95,31 @@ const Applications: React.FC = () => {
             priority: 'Normal'
         }));
         setApplications(mapped);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to fetch applications', err);
+        setError(err.message || 'Failed to load applications');
       } finally {
         setLoading(false);
       }
     };
 
     fetchApplications();
-  }, []);
-
-  // --- Filtering & Pagination ---
-  const [filterStatus] = useState('All'); // TODO: Add setFilterStatus when UI supports it
-  const [searchTerm, setSearchTerm] = useState('');
+  }, [filterStatus]); // Re-fetch when filter changes
 
   const filteredApplications = applications.filter(app => {
-    const matchesStatus = filterStatus === 'All' || app.status === filterStatus;
+    // Status is already filtered by API endpoint, so we only filter by search term locally
+    // unless we are in 'All' mode where we might want client side filtering if needed, 
+    // but typically API handles status. 
+    // However, the previous logic filtered by status locally. 
+    // Since we now fetch specific lists, we can assume the returned list is correct for that status.
+    // Exception: 'All' returns everything.
+    
+    // Actually, to be safe and allow searching within the result set:
     const matchesSearch = 
       app.institution.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.location.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesStatus && matchesSearch;
+      
+    return matchesSearch;
   });
 
   if (loading) {
@@ -90,6 +128,28 @@ const Applications: React.FC = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
           <p className="text-gray-500 font-medium">Loading Applications...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full text-red-600 dark:text-red-400">
+            <TrendingUp size={32} className="rotate-180" /> 
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Unable to load applications</h3>
+            <p className="text-gray-500 dark:text-gray-400 mt-1 max-w-md">{error}</p>
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -217,10 +277,22 @@ const Applications: React.FC = () => {
           
           <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap mr-2">Filters:</span>
-            <FilterSelect label="Status" />
-            <FilterSelect label="Type" />
-            <FilterSelect label="Date" />
-            <button className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded-lg transition-colors">
+            
+            {['All', 'Pending', 'Approved', 'Queried', 'Suspended', 'Expired'].map((status) => (
+                <button 
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${
+                    filterStatus === status 
+                      ? 'bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800' 
+                      : 'bg-gray-900/5 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-transparent hover:border-gray-300 dark:hover:border-gray-500'
+                  }`}
+                >
+                  {status}
+                </button>
+            ))}
+            
+            <button className="p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded-lg transition-colors ml-2">
               <Filter size={18} />
             </button>
           </div>

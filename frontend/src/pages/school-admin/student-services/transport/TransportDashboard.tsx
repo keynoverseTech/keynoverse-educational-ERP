@@ -1,60 +1,61 @@
-import React from 'react';
-import { Bus, MapPin, Users, AlertCircle, Settings, FileText, Route } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Bus, MapPin, Users, AlertCircle, FileText, Route } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BookingWindowCard from '../BookingWindowCard';
 import { useTransport } from '../../../../state/transportContext';
+import { TransportSubnav } from './TransportShared';
 
 const TransportDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { routes, vehicles, subscriptions, bookingWindows } = useTransport();
+  const { routes, vehicles, bookingWindows, transportRequests, allocations } = useTransport();
 
   const activeWindow = bookingWindows.find(w => w.status === 'Active' || w.status === 'Upcoming');
 
+  const totals = useMemo(() => {
+    const totalStops = routes.reduce((sum, r) => sum + r.stops.length, 0);
+    const totalStudentsUsingTransport = allocations.filter(a => a.status === 'Active').length;
+    const pendingRequests = transportRequests.filter(r => r.status === 'Pending').length;
+    return {
+      totalBuses: vehicles.length,
+      totalRoutes: routes.length,
+      totalStops,
+      totalStudentsUsingTransport,
+      pendingRequests,
+    };
+  }, [allocations, routes, transportRequests, vehicles.length]);
+
   const stats = [
-    { label: 'Active Routes', value: routes.length.toString(), icon: MapPin, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { label: 'Registered Students', value: subscriptions.filter(s => s.status === 'Active').length.toString(), icon: Users, color: 'text-purple-600', bg: 'bg-purple-100' },
-    { label: 'Active Buses', value: vehicles.filter(v => v.status === 'Active').length.toString(), icon: Bus, color: 'text-green-600', bg: 'bg-green-100' },
-    { label: 'Pending Requests', value: subscriptions.filter(s => s.status === 'Pending Payment').length.toString(), icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-100' },
+    { label: 'Total Buses', value: totals.totalBuses.toString(), icon: Bus, color: 'text-green-600', bg: 'bg-green-100' },
+    { label: 'Total Routes', value: totals.totalRoutes.toString(), icon: MapPin, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { label: 'Total Bus Stops', value: totals.totalStops.toString(), icon: Route, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { label: 'Students Using Transport', value: totals.totalStudentsUsingTransport.toString(), icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+    { label: 'Pending Requests', value: totals.pendingRequests.toString(), icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-100' },
   ];
 
   const quickActions = [
-    { 
-      label: 'Routes & Stops', 
-      desc: 'Manage shuttle routes', 
-      icon: Route, 
-      path: '/school-admin/student-services/transport/routes',
-      color: 'bg-blue-500'
-    },
-    { 
-      label: 'Vehicles', 
-      desc: 'Manage buses & drivers', 
-      icon: Bus, 
-      path: '/school-admin/student-services/transport/vehicles',
-      color: 'bg-green-500'
-    },
-    { 
-      label: 'Subscriptions', 
-      desc: 'Student bus passes', 
-      icon: FileText, 
-      path: '/school-admin/student-services/transport/subscriptions',
-      color: 'bg-orange-500'
-    },
-    { 
-      label: 'Configuration', 
-      desc: 'Booking windows', 
-      icon: Settings, 
-      path: '/school-admin/student-services/transport/config',
-      color: 'bg-purple-500'
-    }
+    { label: 'Buses', desc: 'Manage buses', icon: Bus, path: '/school-admin/student-services/transport/buses', color: 'bg-green-500' },
+    { label: 'Routes', desc: 'Manage routes', icon: Route, path: '/school-admin/student-services/transport/routes', color: 'bg-blue-500' },
+    { label: 'Bus Stops', desc: 'Manage stops & times', icon: MapPin, path: '/school-admin/student-services/transport/stops', color: 'bg-purple-500' },
+    { label: 'Requests', desc: 'Approve transport requests', icon: FileText, path: '/school-admin/student-services/transport/requests', color: 'bg-orange-500' }
   ];
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Transport Management</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage bus routes and student transportation bookings.</p>
         </div>
+        <TransportSubnav
+          items={[
+            { label: 'Dashboard', to: '/school-admin/student-services/transport' },
+            { label: 'Buses', to: '/school-admin/student-services/transport/buses' },
+            { label: 'Routes', to: '/school-admin/student-services/transport/routes' },
+            { label: 'Bus Stops', to: '/school-admin/student-services/transport/stops' },
+            { label: 'Requests', to: '/school-admin/student-services/transport/requests' },
+            { label: 'Allocations', to: '/school-admin/student-services/transport/allocations' },
+          ]}
+        />
       </div>
 
       {/* Quick Actions */}
@@ -76,7 +77,7 @@ const TransportDashboard: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
             <div className="flex justify-between items-start">

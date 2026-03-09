@@ -117,18 +117,25 @@ const ApplicationDetails: React.FC = () => {
     }
   };
 
-  const handleAction = () => {
+  const handleAction = async () => {
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      if (modalOpen === 'approve') setAppStatus('APPROVED');
-      if (modalOpen === 'reject') setAppStatus('REJECTED');
-      if (modalOpen === 'info') setAppStatus('NEEDS CLARIFICATION');
-      
+    try {
+      if (modalOpen === 'approve' && id) {
+        await superAdminService.approveInstitution(id);
+        setAppStatus('APPROVED');
+      } else if (modalOpen === 'reject') {
+        setAppStatus('REJECTED');
+      } else if (modalOpen === 'info') {
+        setAppStatus('NEEDS CLARIFICATION');
+      }
+    } catch (error) {
+      console.error('Approval action failed', error);
+      alert('Failed to process action. Please try again.');
+    } finally {
       setIsSubmitting(false);
       setModalOpen('none');
       setActionReason('');
-    }, 1000);
+    }
   };
   
   // Render nothing or skeleton if application is not loaded

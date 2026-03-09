@@ -1,378 +1,527 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
-// --- Types ---
+export type HostelGender = 'Male' | 'Female';
+export type RoomType = 'Standard' | 'Premium';
+export type BookingRequestStatus = 'Pending' | 'Approved' | 'Rejected';
+export type AllocationStatus = 'Active' | 'Expired' | 'Completed';
+export type AllocationRuleType = 'Eligible Levels = 100–300' | 'Eligible Levels = 100–500';
+export type ReallocationPolicy = 'Change room every 2 semesters' | 'Keep same room until graduation';
 
-export interface Room {
+export interface HostelBuilding {
   id: string;
-  number: string;
-  capacity: number;
-  occupied: number;
-  type: 'Single' | 'Double' | 'Dormitory';
-  gender: 'Male' | 'Female' | 'Co-ed';
-  floor: number;
+  hostelName: string;
+  gender: HostelGender;
+  description: string;
+  totalFloors: number;
+  createdAt: string;
 }
 
-export interface HostelBlock {
+export interface HostelRoom {
   id: string;
-  name: string;
-  type: 'Male' | 'Female' | 'Mixed';
-  caretaker: string;
-  totalRooms: number;
-  totalCapacity: number;
-  rooms: Room[];
+  hostelId: string;
+  roomNumber: string;
+  bedCapacity: number;
+  occupiedBeds: number;
+  roomType: RoomType;
 }
 
-export interface AllocationRequest {
+export interface HostelAllocationRule {
+  id: string;
+  ruleType: AllocationRuleType;
+  eligibleLevels: string[];
+  allocationDurationSemesters: number;
+  reallocationPolicy: ReallocationPolicy;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface HostelBookingRequest {
   id: string;
   studentName: string;
   studentId: string;
-  programme: string;
   level: string;
-  gender: 'Male' | 'Female';
-  requestedType: string;
-  status: 'Pending' | 'Approved' | 'Rejected' | 'Allocated';
-  date: string;
-  assignedRoom?: string; // e.g., "Block A - 101"
-  assignedRoomId?: string;
-  assignedBlockId?: string;
+  gender: HostelGender;
+  requestedHostelId: string;
+  requestedRoomId: string | null;
+  requestDate: string;
+  status: BookingRequestStatus;
 }
 
-export interface BookingWindow {
+export interface HostelAllocation {
   id: string;
-  type: 'Hostel' | 'Transport';
-  startDate: string;
-  endDate: string;
-  status: 'Active' | 'Upcoming' | 'Closed';
-  description: string;
-  targetGroup: string;
+  studentName: string;
+  studentId: string;
+  hostelId: string;
+  roomId: string;
+  bedSpace: string;
+  startSemester: string;
+  endSemester: string;
+  status: AllocationStatus;
+  createdAt: string;
 }
 
-interface HostelContextType {
-  blocks: HostelBlock[];
-  requests: AllocationRequest[];
-  bookingWindows: BookingWindow[];
-  
-  // Actions
-  addBlock: (block: Omit<HostelBlock, 'id' | 'rooms' | 'totalRooms' | 'totalCapacity'>) => void;
-  updateBlock: (id: string, updates: Partial<HostelBlock>) => void;
-  deleteBlock: (id: string) => void;
-  
-  addRoom: (blockId: string, room: Omit<Room, 'id' | 'occupied'>) => void;
-  updateRoom: (blockId: string, roomId: string, updates: Partial<Room>) => void;
-  deleteRoom: (blockId: string, roomId: string) => void;
-  
-  addRequest: (request: Omit<AllocationRequest, 'id' | 'status' | 'date'>) => void;
-  updateRequestStatus: (requestId: string, status: AllocationRequest['status'], roomId?: string, blockId?: string) => void;
-  autoAllocate: () => { allocated: number; failed: number };
-  manualAllocate: (requestId: string, blockId: string, roomId: string) => boolean;
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
-  updateBookingWindow: (window: BookingWindow) => void;
+export interface ToastMessage {
+  id: string;
+  type: ToastType;
+  title: string;
+  message?: string;
 }
 
-// --- Initial Data ---
+type PersistedState = {
+  hostels: HostelBuilding[];
+  rooms: HostelRoom[];
+  rules: HostelAllocationRule[];
+  bookingRequests: HostelBookingRequest[];
+  allocations: HostelAllocation[];
+};
 
-const initialBlocks: HostelBlock[] = [
-  {
-    id: '1',
-    name: 'Block A (Male)',
-    type: 'Male',
-    caretaker: 'Mr. John Doe',
-    totalRooms: 3,
-    totalCapacity: 10,
-    rooms: [
-      { id: '101', number: '101', capacity: 4, occupied: 3, type: 'Dormitory', gender: 'Male', floor: 1 },
-      { id: '102', number: '102', capacity: 4, occupied: 4, type: 'Dormitory', gender: 'Male', floor: 1 },
-      { id: '103', number: '103', capacity: 2, occupied: 0, type: 'Double', gender: 'Male', floor: 1 },
-    ]
-  },
-  {
-    id: '2',
-    name: 'Block B (Female)',
-    type: 'Female',
-    caretaker: 'Mrs. Jane Smith',
-    totalRooms: 2,
-    totalCapacity: 5,
-    rooms: [
-      { id: '201', number: '201', capacity: 4, occupied: 2, type: 'Dormitory', gender: 'Female', floor: 1 },
-      { id: '202', number: '202', capacity: 1, occupied: 0, type: 'Single', gender: 'Female', floor: 1 },
-    ]
+type HostelContextType = PersistedState & {
+  ready: boolean;
+  toasts: ToastMessage[];
+  createHostel: (input: Omit<HostelBuilding, 'id' | 'createdAt'>) => void;
+  updateHostel: (id: string, updates: Partial<Omit<HostelBuilding, 'id' | 'createdAt'>>) => void;
+  deleteHostel: (id: string) => void;
+  createRoom: (input: Omit<HostelRoom, 'id' | 'occupiedBeds'>) => void;
+  updateRoom: (id: string, updates: Partial<Omit<HostelRoom, 'id'>>) => void;
+  deleteRoom: (id: string) => void;
+  createRule: (input: Omit<HostelAllocationRule, 'id' | 'createdAt' | 'isActive'> & { isActive?: boolean }) => void;
+  updateRule: (id: string, updates: Partial<Omit<HostelAllocationRule, 'id' | 'createdAt'>>) => void;
+  activateRule: (id: string) => void;
+  approveBookingRequest: (requestId: string, overrides?: { hostelId?: string; roomId?: string | null }) => boolean;
+  rejectBookingRequest: (requestId: string) => void;
+  completeAllocation: (allocationId: string) => void;
+  expireAllocation: (allocationId: string) => void;
+  seedBookingRequest: () => void;
+  pushToast: (toast: Omit<ToastMessage, 'id'>) => void;
+  dismissToast: (toastId: string) => void;
+};
+
+const STORAGE_KEY = 'sa_hostel_management_v1';
+
+const createId = () => `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+
+const todayIso = () => new Date().toISOString();
+
+const initialState = (): PersistedState => {
+  const hostels: HostelBuilding[] = [
+    {
+      id: 'hst_1',
+      hostelName: 'Unity Hostel (Male)',
+      gender: 'Male',
+      description: 'Main campus male hostel with standard rooms.',
+      totalFloors: 4,
+      createdAt: '2025-01-12T09:20:00.000Z',
+    },
+    {
+      id: 'hst_2',
+      hostelName: 'Harmony Hostel (Female)',
+      gender: 'Female',
+      description: 'Female hostel close to the library and lecture halls.',
+      totalFloors: 5,
+      createdAt: '2025-02-03T14:10:00.000Z',
+    },
+    {
+      id: 'hst_3',
+      hostelName: 'Scholar Premium Annex (Male)',
+      gender: 'Male',
+      description: 'Premium rooms with limited capacity and priority allocation.',
+      totalFloors: 3,
+      createdAt: '2025-03-20T11:05:00.000Z',
+    },
+  ];
+
+  const rooms: HostelRoom[] = [
+    { id: 'rm_1', hostelId: 'hst_1', roomNumber: '101', bedCapacity: 6, occupiedBeds: 4, roomType: 'Standard' },
+    { id: 'rm_2', hostelId: 'hst_1', roomNumber: '102', bedCapacity: 6, occupiedBeds: 6, roomType: 'Standard' },
+    { id: 'rm_3', hostelId: 'hst_1', roomNumber: '201', bedCapacity: 4, occupiedBeds: 1, roomType: 'Standard' },
+    { id: 'rm_4', hostelId: 'hst_2', roomNumber: 'A11', bedCapacity: 4, occupiedBeds: 2, roomType: 'Standard' },
+    { id: 'rm_5', hostelId: 'hst_2', roomNumber: 'A12', bedCapacity: 4, occupiedBeds: 0, roomType: 'Standard' },
+    { id: 'rm_6', hostelId: 'hst_2', roomNumber: 'B21', bedCapacity: 2, occupiedBeds: 1, roomType: 'Premium' },
+    { id: 'rm_7', hostelId: 'hst_3', roomNumber: 'P01', bedCapacity: 2, occupiedBeds: 2, roomType: 'Premium' },
+    { id: 'rm_8', hostelId: 'hst_3', roomNumber: 'P02', bedCapacity: 2, occupiedBeds: 0, roomType: 'Premium' },
+    { id: 'rm_9', hostelId: 'hst_3', roomNumber: 'P03', bedCapacity: 1, occupiedBeds: 0, roomType: 'Premium' },
+  ];
+
+  const rules: HostelAllocationRule[] = [
+    {
+      id: 'rule_1',
+      ruleType: 'Eligible Levels = 100–300',
+      eligibleLevels: ['100', '200', '300'],
+      allocationDurationSemesters: 2,
+      reallocationPolicy: 'Change room every 2 semesters',
+      isActive: true,
+      createdAt: '2025-01-10T08:00:00.000Z',
+    },
+    {
+      id: 'rule_2',
+      ruleType: 'Eligible Levels = 100–500',
+      eligibleLevels: ['100', '200', '300', '400', '500'],
+      allocationDurationSemesters: 2,
+      reallocationPolicy: 'Keep same room until graduation',
+      isActive: false,
+      createdAt: '2025-03-05T08:00:00.000Z',
+    },
+  ];
+
+  const bookingRequests: HostelBookingRequest[] = [
+    {
+      id: 'req_1',
+      studentName: 'Alex Johnson',
+      studentId: 'STD/2024/001',
+      level: '100',
+      gender: 'Male',
+      requestedHostelId: 'hst_1',
+      requestedRoomId: 'rm_3',
+      requestDate: '2026-03-01',
+      status: 'Pending',
+    },
+    {
+      id: 'req_2',
+      studentName: 'Sarah Williams',
+      studentId: 'STD/2024/045',
+      level: '200',
+      gender: 'Female',
+      requestedHostelId: 'hst_2',
+      requestedRoomId: 'rm_5',
+      requestDate: '2026-03-02',
+      status: 'Pending',
+    },
+    {
+      id: 'req_3',
+      studentName: 'Michael Brown',
+      studentId: 'STD/2024/089',
+      level: '300',
+      gender: 'Male',
+      requestedHostelId: 'hst_3',
+      requestedRoomId: 'rm_8',
+      requestDate: '2026-03-03',
+      status: 'Pending',
+    },
+    {
+      id: 'req_4',
+      studentName: 'Grace Okafor',
+      studentId: 'STD/2023/114',
+      level: '400',
+      gender: 'Female',
+      requestedHostelId: 'hst_2',
+      requestedRoomId: 'rm_6',
+      requestDate: '2026-03-03',
+      status: 'Rejected',
+    },
+  ];
+
+  const allocations: HostelAllocation[] = [
+    {
+      id: 'alc_1',
+      studentName: 'David Musa',
+      studentId: 'STD/2023/055',
+      hostelId: 'hst_1',
+      roomId: 'rm_1',
+      bedSpace: 'B5',
+      startSemester: '2025/2026 • First',
+      endSemester: '2025/2026 • Second',
+      status: 'Active',
+      createdAt: '2025-10-12T10:00:00.000Z',
+    },
+    {
+      id: 'alc_2',
+      studentName: 'Amaka Nwosu',
+      studentId: 'STD/2022/021',
+      hostelId: 'hst_2',
+      roomId: 'rm_4',
+      bedSpace: 'B3',
+      startSemester: '2024/2025 • Second',
+      endSemester: '2025/2026 • First',
+      status: 'Completed',
+      createdAt: '2025-04-05T10:00:00.000Z',
+    },
+  ];
+
+  return { hostels, rooms, rules, bookingRequests, allocations };
+};
+
+const loadState = (): PersistedState => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return initialState();
+    const parsed = JSON.parse(raw) as PersistedState;
+    if (!parsed?.hostels || !parsed?.rooms || !parsed?.rules || !parsed?.bookingRequests || !parsed?.allocations) {
+      return initialState();
+    }
+    return parsed;
+  } catch {
+    return initialState();
   }
-];
-
-const initialRequests: AllocationRequest[] = [
-  {
-    id: '1',
-    studentName: 'Alex Johnson',
-    studentId: 'STD/2024/001',
-    programme: 'Computer Science',
-    level: '100',
-    gender: 'Male',
-    requestedType: 'Dormitory',
-    status: 'Pending',
-    date: '2024-08-20'
-  },
-  {
-    id: '2',
-    studentName: 'Sarah Williams',
-    studentId: 'STD/2024/045',
-    programme: 'Economics',
-    level: '200',
-    gender: 'Female',
-    requestedType: 'Single',
-    status: 'Pending',
-    date: '2024-08-18'
-  },
-  {
-    id: '3',
-    studentName: 'Michael Brown',
-    studentId: 'STD/2024/089',
-    programme: 'Physics',
-    level: '300',
-    gender: 'Male',
-    requestedType: 'Double',
-    status: 'Pending',
-    date: '2024-08-19'
-  }
-];
-
-const initialWindows: BookingWindow[] = [
-  {
-    id: '1',
-    type: 'Hostel',
-    startDate: '2024-09-01',
-    endDate: '2024-09-30',
-    status: 'Active',
-    description: 'First Semester 2024/2025 Allocation',
-    targetGroup: 'All Students'
-  }
-];
-
-// --- Context ---
+};
 
 const HostelContext = createContext<HostelContextType | undefined>(undefined);
 
 export const HostelProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [blocks, setBlocks] = useState<HostelBlock[]>(initialBlocks);
-  const [requests, setRequests] = useState<AllocationRequest[]>(initialRequests);
-  const [bookingWindows, setBookingWindows] = useState<BookingWindow[]>(initialWindows);
+  const [ready, setReady] = useState(false);
+  const [{ hostels, rooms, rules, bookingRequests, allocations }, setPersisted] = useState<PersistedState>(() => loadState());
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const toastTimers = useRef<Record<string, number>>({});
 
-  // --- Block Actions ---
+  useEffect(() => {
+    const t = window.setTimeout(() => setReady(true), 450);
+    return () => window.clearTimeout(t);
+  }, []);
 
-  const addBlock = (blockData: Omit<HostelBlock, 'id' | 'rooms' | 'totalRooms' | 'totalCapacity'>) => {
-    const newBlock: HostelBlock = {
-      ...blockData,
-      id: Date.now().toString(),
-      rooms: [],
-      totalRooms: 0,
-      totalCapacity: 0
-    };
-    setBlocks([...blocks, newBlock]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ hostels, rooms, rules, bookingRequests, allocations }));
+    } catch {
+    }
+  }, [hostels, rooms, rules, bookingRequests, allocations]);
+
+  const pushToast = (toast: Omit<ToastMessage, 'id'>) => {
+    const id = createId();
+    setToasts(prev => [{ ...toast, id }, ...prev].slice(0, 4));
+    if (toastTimers.current[id]) window.clearTimeout(toastTimers.current[id]);
+    toastTimers.current[id] = window.setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+      delete toastTimers.current[id];
+    }, 3200);
   };
 
-  const updateBlock = (id: string, updates: Partial<HostelBlock>) => {
-    setBlocks(blocks.map(b => (b.id === id ? { ...b, ...updates } : b)));
+  const dismissToast = (toastId: string) => {
+    if (toastTimers.current[toastId]) window.clearTimeout(toastTimers.current[toastId]);
+    delete toastTimers.current[toastId];
+    setToasts(prev => prev.filter(t => t.id !== toastId));
   };
 
-  const deleteBlock = (id: string) => {
-    setBlocks(blocks.filter(b => b.id !== id));
+  const createHostel = (input: Omit<HostelBuilding, 'id' | 'createdAt'>) => {
+    const hostel: HostelBuilding = { ...input, id: createId(), createdAt: todayIso() };
+    setPersisted(prev => ({ ...prev, hostels: [hostel, ...prev.hostels] }));
+    pushToast({ type: 'success', title: 'Hostel created', message: hostel.hostelName });
   };
 
-  // --- Room Actions ---
+  const updateHostel = (id: string, updates: Partial<Omit<HostelBuilding, 'id' | 'createdAt'>>) => {
+    setPersisted(prev => ({
+      ...prev,
+      hostels: prev.hostels.map(h => (h.id === id ? { ...h, ...updates } : h)),
+    }));
+    pushToast({ type: 'success', title: 'Hostel updated' });
+  };
 
-  const addRoom = (blockId: string, roomData: Omit<Room, 'id' | 'occupied'>) => {
-    setBlocks(blocks.map(block => {
-      if (block.id !== blockId) return block;
-      
-      const newRoom: Room = {
-        ...roomData,
-        id: Date.now().toString(),
-        occupied: 0
-      };
-      
-      const updatedRooms = [...block.rooms, newRoom];
-      const totalCapacity = updatedRooms.reduce((sum, r) => sum + r.capacity, 0);
-      
+  const deleteHostel = (id: string) => {
+    setPersisted(prev => {
+      const nextRooms = prev.rooms.filter(r => r.hostelId !== id);
+      const nextRequests = prev.bookingRequests.filter(r => r.requestedHostelId !== id);
+      const nextAllocations = prev.allocations.filter(a => a.hostelId !== id);
       return {
-        ...block,
-        rooms: updatedRooms,
-        totalRooms: updatedRooms.length,
-        totalCapacity
+        ...prev,
+        hostels: prev.hostels.filter(h => h.id !== id),
+        rooms: nextRooms,
+        bookingRequests: nextRequests,
+        allocations: nextAllocations,
       };
-    }));
-  };
-
-  const updateRoom = (blockId: string, roomId: string, updates: Partial<Room>) => {
-    setBlocks(blocks.map(block => {
-      if (block.id !== blockId) return block;
-      
-      const updatedRooms = block.rooms.map(r => r.id === roomId ? { ...r, ...updates } : r);
-      const totalCapacity = updatedRooms.reduce((sum, r) => sum + r.capacity, 0);
-      
-      return {
-        ...block,
-        rooms: updatedRooms,
-        totalCapacity
-      };
-    }));
-  };
-
-  const deleteRoom = (blockId: string, roomId: string) => {
-    setBlocks(blocks.map(block => {
-      if (block.id !== blockId) return block;
-      
-      const updatedRooms = block.rooms.filter(r => r.id !== roomId);
-      const totalCapacity = updatedRooms.reduce((sum, r) => sum + r.capacity, 0);
-      
-      return {
-        ...block,
-        rooms: updatedRooms,
-        totalRooms: updatedRooms.length,
-        totalCapacity
-      };
-    }));
-  };
-
-  // --- Request Actions ---
-
-  const addRequest = (requestData: Omit<AllocationRequest, 'id' | 'status' | 'date'>) => {
-    const newRequest: AllocationRequest = {
-      ...requestData,
-      id: Date.now().toString(),
-      status: 'Pending',
-      date: new Date().toISOString().split('T')[0]
-    };
-    setRequests([...requests, newRequest]);
-  };
-
-  const updateRequestStatus = (requestId: string, status: AllocationRequest['status'], roomId?: string, blockId?: string) => {
-    setRequests(requests.map(req => {
-      if (req.id !== requestId) return req;
-      
-      // If allocating, we need to update room occupancy
-      if (status === 'Allocated' && roomId && blockId) {
-        // Find block and room name for display
-        const block = blocks.find(b => b.id === blockId);
-        const room = block?.rooms.find(r => r.id === roomId);
-        const assignedRoomName = block && room ? `${block.name} - ${room.number}` : undefined;
-        
-        return { ...req, status, assignedRoom: assignedRoomName, assignedRoomId: roomId, assignedBlockId: blockId };
-      }
-      
-      return { ...req, status };
-    }));
-  };
-
-  const manualAllocate = (requestId: string, blockId: string, roomId: string): boolean => {
-    // 1. Check if room exists and has space
-    const block = blocks.find(b => b.id === blockId);
-    if (!block) return false;
-    
-    const roomIndex = block.rooms.findIndex(r => r.id === roomId);
-    if (roomIndex === -1) return false;
-    
-    const room = block.rooms[roomIndex];
-    if (room.occupied >= room.capacity) return false;
-
-    // 2. Update Room Occupancy
-    const updatedBlocks = blocks.map(b => {
-      if (b.id !== blockId) return b;
-      const newRooms = [...b.rooms];
-      newRooms[roomIndex] = { ...room, occupied: room.occupied + 1 };
-      return { ...b, rooms: newRooms };
     });
-    setBlocks(updatedBlocks);
-
-    // 3. Update Request Status
-    updateRequestStatus(requestId, 'Allocated', roomId, blockId);
-    
-    return true;
+    pushToast({ type: 'warning', title: 'Hostel deleted' });
   };
 
-  const autoAllocate = () => {
-    let allocatedCount = 0;
-    let failedCount = 0;
-    
-    // Create a copy of blocks to modify locally before setting state once
-    const currentBlocks = JSON.parse(JSON.stringify(blocks)) as HostelBlock[];
-    
-    const pendingRequests = requests.filter(req => req.status === 'Pending');
-    const updatedRequests = [...requests];
+  const createRoom = (input: Omit<HostelRoom, 'id' | 'occupiedBeds'>) => {
+    const room: HostelRoom = { ...input, id: createId(), occupiedBeds: 0 };
+    setPersisted(prev => ({ ...prev, rooms: [room, ...prev.rooms] }));
+    pushToast({ type: 'success', title: 'Room created', message: `${room.roomNumber}` });
+  };
 
-    pendingRequests.forEach(req => {
-      // Find a suitable room
-      let allocated = false;
+  const updateRoom = (id: string, updates: Partial<Omit<HostelRoom, 'id'>>) => {
+    setPersisted(prev => ({
+      ...prev,
+      rooms: prev.rooms.map(r => (r.id === id ? { ...r, ...updates } : r)),
+    }));
+    pushToast({ type: 'success', title: 'Room updated' });
+  };
 
-      // Logic: Iterate blocks matching gender (or mixed), then rooms matching type and having space
-      for (const block of currentBlocks) {
-        if (block.type !== 'Mixed' && block.type !== req.gender) continue;
+  const deleteRoom = (id: string) => {
+    setPersisted(prev => ({
+      ...prev,
+      rooms: prev.rooms.filter(r => r.id !== id),
+      bookingRequests: prev.bookingRequests.map(req => (req.requestedRoomId === id ? { ...req, requestedRoomId: null } : req)),
+      allocations: prev.allocations.filter(a => a.roomId !== id),
+    }));
+    pushToast({ type: 'warning', title: 'Room deleted' });
+  };
 
-        for (const room of block.rooms) {
-          if (room.type === req.requestedType && room.occupied < room.capacity && room.gender === req.gender) {
-            
-            // Allocate!
-            room.occupied += 1;
-            allocated = true;
-            allocatedCount++;
+  const createRule = (input: Omit<HostelAllocationRule, 'id' | 'createdAt' | 'isActive'> & { isActive?: boolean }) => {
+    const isActive = Boolean(input.isActive);
+    const rule: HostelAllocationRule = { ...input, id: createId(), createdAt: todayIso(), isActive };
+    setPersisted(prev => ({
+      ...prev,
+      rules: isActive ? [{ ...rule, isActive: true }, ...prev.rules.map(r => ({ ...r, isActive: false }))] : [rule, ...prev.rules],
+    }));
+    pushToast({ type: 'success', title: 'Rule saved' });
+  };
 
-            // Update request in our local list
-            const reqIndex = updatedRequests.findIndex(r => r.id === req.id);
-            if (reqIndex !== -1) {
-              updatedRequests[reqIndex] = {
-                ...updatedRequests[reqIndex],
-                status: 'Allocated',
-                assignedRoom: `${block.name} - ${room.number}`,
-                assignedRoomId: room.id,
-                assignedBlockId: block.id
-              };
-            }
-            break; // Break room loop
-          }
-        }
-        if (allocated) break; // Break block loop
+  const updateRule = (id: string, updates: Partial<Omit<HostelAllocationRule, 'id' | 'createdAt'>>) => {
+    setPersisted(prev => ({
+      ...prev,
+      rules: prev.rules.map(r => (r.id === id ? { ...r, ...updates } : r)),
+    }));
+    pushToast({ type: 'success', title: 'Rule updated' });
+  };
+
+  const activateRule = (id: string) => {
+    setPersisted(prev => ({
+      ...prev,
+      rules: prev.rules.map(r => ({ ...r, isActive: r.id === id })),
+    }));
+    pushToast({ type: 'success', title: 'Allocation rule activated' });
+  };
+
+  const approveBookingRequest = (requestId: string, overrides?: { hostelId?: string; roomId?: string | null }): boolean => {
+    let ok = true;
+    setPersisted(prev => {
+      const req = prev.bookingRequests.find(r => r.id === requestId);
+      if (!req || req.status !== 'Pending') {
+        ok = false;
+        return prev;
       }
 
-      if (!allocated) failedCount++;
+      const targetHostelId = overrides?.hostelId ?? req.requestedHostelId;
+      const targetRoomId = (overrides?.roomId ?? req.requestedRoomId) ?? null;
+      if (!targetRoomId) {
+        ok = false;
+        return prev;
+      }
+
+      const hostel = prev.hostels.find(h => h.id === targetHostelId);
+      const roomIndex = prev.rooms.findIndex(r => r.id === targetRoomId);
+      const room = roomIndex >= 0 ? prev.rooms[roomIndex] : undefined;
+      if (!hostel || !room || room.hostelId !== hostel.id) {
+        ok = false;
+        return prev;
+      }
+
+      if (hostel.gender !== req.gender) {
+        ok = false;
+        return prev;
+      }
+
+      if (room.occupiedBeds >= room.bedCapacity) {
+        ok = false;
+        return prev;
+      }
+
+      const nextRooms = [...prev.rooms];
+      const nextRoom = { ...room, occupiedBeds: room.occupiedBeds + 1 };
+      nextRooms[roomIndex] = nextRoom;
+
+      const bedSpace = `B${nextRoom.occupiedBeds}`;
+      const allocation: HostelAllocation = {
+        id: createId(),
+        studentName: req.studentName,
+        studentId: req.studentId,
+        hostelId: hostel.id,
+        roomId: room.id,
+        bedSpace,
+        startSemester: '2025/2026 • Second',
+        endSemester: '2026/2027 • First',
+        status: 'Active',
+        createdAt: todayIso(),
+      };
+
+      const nextRequests: HostelBookingRequest[] = prev.bookingRequests.map(r =>
+        r.id === requestId ? { ...r, status: 'Approved' as const } : r
+      );
+      return { ...prev, rooms: nextRooms, bookingRequests: nextRequests, allocations: [allocation, ...prev.allocations] };
     });
 
-    // Update state
-    setBlocks(currentBlocks);
-    setRequests(updatedRequests);
-    
-    return { allocated: allocatedCount, failed: failedCount };
+    if (ok) pushToast({ type: 'success', title: 'Request approved', message: 'Allocation created successfully.' });
+    else pushToast({ type: 'error', title: 'Approval failed', message: 'Room is full, mismatch, or selection is invalid.' });
+    return ok;
   };
 
-  // --- Window Actions ---
-
-  const updateBookingWindow = (window: BookingWindow) => {
-    setBookingWindows(prev => prev.map(w => w.id === window.id ? window : w));
+  const rejectBookingRequest = (requestId: string) => {
+    setPersisted(prev => ({
+      ...prev,
+      bookingRequests: prev.bookingRequests.map(r => (r.id === requestId ? { ...r, status: 'Rejected' as const } : r)),
+    }));
+    pushToast({ type: 'warning', title: 'Request rejected' });
   };
 
-  return (
-    <HostelContext.Provider value={{
-      blocks,
-      requests,
-      bookingWindows,
-      addBlock,
-      updateBlock,
-      deleteBlock,
-      addRoom,
+  const completeAllocation = (allocationId: string) => {
+    setPersisted(prev => ({
+      ...prev,
+      allocations: prev.allocations.map(a => (a.id === allocationId ? { ...a, status: 'Completed' } : a)),
+    }));
+    pushToast({ type: 'success', title: 'Allocation completed' });
+  };
+
+  const expireAllocation = (allocationId: string) => {
+    setPersisted(prev => ({
+      ...prev,
+      allocations: prev.allocations.map(a => (a.id === allocationId ? { ...a, status: 'Expired' } : a)),
+    }));
+    pushToast({ type: 'warning', title: 'Allocation expired' });
+  };
+
+  const seedBookingRequest = () => {
+    const pool = [
+      { name: 'Ibrahim Yusuf', gender: 'Male' as const, level: '200' },
+      { name: 'Maryam Bello', gender: 'Female' as const, level: '100' },
+      { name: 'Chinedu Eze', gender: 'Male' as const, level: '300' },
+      { name: 'Aisha Danjuma', gender: 'Female' as const, level: '500' },
+    ];
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    setPersisted(prev => {
+      const eligibleHostels = prev.hostels.filter(h => h.gender === pick.gender);
+      if (eligibleHostels.length === 0) return prev;
+      const hostel = eligibleHostels[Math.floor(Math.random() * eligibleHostels.length)];
+      const hostelRooms = prev.rooms.filter(r => r.hostelId === hostel.id);
+      const room = hostelRooms[Math.floor(Math.random() * hostelRooms.length)] ?? null;
+      const req: HostelBookingRequest = {
+        id: createId(),
+        studentName: pick.name,
+        studentId: `STD/${new Date().getFullYear()}/${Math.floor(100 + Math.random() * 900)}`,
+        level: pick.level,
+        gender: pick.gender,
+        requestedHostelId: hostel.id,
+        requestedRoomId: room?.id ?? null,
+        requestDate: new Date().toISOString().slice(0, 10),
+        status: 'Pending',
+      };
+      return { ...prev, bookingRequests: [req, ...prev.bookingRequests] };
+    });
+    pushToast({ type: 'info', title: 'New booking request', message: 'Mock request added for testing.' });
+  };
+
+  const value = useMemo<HostelContextType>(() => {
+    return {
+      ready,
+      hostels,
+      rooms,
+      rules,
+      bookingRequests,
+      allocations,
+      toasts,
+      createHostel,
+      updateHostel,
+      deleteHostel,
+      createRoom,
       updateRoom,
       deleteRoom,
-      addRequest,
-      updateRequestStatus,
-      autoAllocate,
-      manualAllocate,
-      updateBookingWindow
-    }}>
-      {children}
-    </HostelContext.Provider>
-  );
+      createRule,
+      updateRule,
+      activateRule,
+      approveBookingRequest,
+      rejectBookingRequest,
+      completeAllocation,
+      expireAllocation,
+      seedBookingRequest,
+      pushToast,
+      dismissToast,
+    };
+  }, [allocations, bookingRequests, hostels, ready, rooms, rules, toasts]);
+
+  return <HostelContext.Provider value={value}>{children}</HostelContext.Provider>;
 };
 
 export const useHostel = () => {
   const context = useContext(HostelContext);
-  if (context === undefined) {
-    throw new Error('useHostel must be used within a HostelProvider');
-  }
+  if (!context) throw new Error('useHostel must be used within a HostelProvider');
   return context;
 };

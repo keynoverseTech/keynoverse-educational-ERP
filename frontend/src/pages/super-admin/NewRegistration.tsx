@@ -39,6 +39,9 @@ const NewRegistration: React.FC = () => {
   const [states, setStates] = useState<{id: string, name: string}[]>([]);
   const [subscriptionPlans, setSubscriptionPlans] = useState<{id: string, name: string, price: number}[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [accreditationFile, setAccreditationFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   
   // UI State
   const [status, setStatus] = useState<'idle' | 'review' | 'success' | 'rejected'>('idle');
@@ -57,6 +60,30 @@ const NewRegistration: React.FC = () => {
     number: /[0-9]/.test(password),
     special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
   };
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [accreditationPreview, setAccreditationPreview] = useState<string | null>(null);
+
+  // Clean up object URLs to avoid memory leaks
+  useEffect(() => {
+    if (logoFile) {
+      const objectUrl = URL.createObjectURL(logoFile);
+      setLogoPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else {
+      setLogoPreview(null);
+    }
+  }, [logoFile]);
+
+  useEffect(() => {
+    if (accreditationFile) {
+      const objectUrl = URL.createObjectURL(accreditationFile);
+      setAccreditationPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else {
+      setAccreditationPreview(null);
+    }
+  }, [accreditationFile]);
 
   // Fetch States and Institution Types on mount
   useEffect(() => {
@@ -119,57 +146,54 @@ const NewRegistration: React.FC = () => {
       console.log('Available States:', states);
       console.log('Selected State ID:', stateId);
 
-      // Attempt to find the first valid state ID from the API response list if available
-      // If the user selected one, use it. If not, use the first one from the list.
-      // If list is empty, try the fallback ID.
-      // The user log showed valid states in the console: FCT, Kaduna, Zamfara.
-      // But the error "FK_76fd..." persisted even when we tried to use one.
-      // This might be because we didn't actually SELECT it in the UI, and the logic
-      // `const validStateId = stateId || ...` might have picked the fallback if `states` was empty at render time?
-      // Wait, the log says "Available States: (3) [...]". So the list IS populated.
-      // And "Selected State ID:" was empty.
-      // So `validStateId` should have become `states[0].id` which is `25afd21c...`.
-      // BUT the error message says `FK_76fd...`.
-      // Let's check which table `FK_76fd...` refers to. It's likely `institution_type_id`.
-      // We are forcing `institution_type_id` to `c639c5d5...`.
-      // If that ID is invalid, we are stuck.
-      // BUT, maybe the "University" ID `16905553...` from your earlier successful-looking log IS the valid one?
-      // Or maybe we should try to fetch types again?
-      // Wait, let's look at the error again.
-      // `FK_76fd...` usually maps to `institution_type_id`.
-      // `FK_7736...` usually maps to `state_id`.
-      
-      // Let's try to be smart. The user's log showed states ARE available.
-      // Let's force pick the FIRST state from the list.
-      const validStateId = states.length > 0 ? states[0].id : 'cad0ed20-83d7-40b2-bfa8-845a24907422';
-      
-      // And for Institution Type, let's try to fetch it from the list if available, 
-      // otherwise use the "University" ID `16905553...` which appeared in a "successful" payload earlier,
-      // instead of the Polytechnic one.
-      const validInstitutionTypeId = institutionTypes.length > 0 ? institutionTypes[0].id : 'c639c5d5-7617-47f0-bd45-bf5f17d0c447';
+      // Validate required fields that cause FK errors
+      if (!stateId) {
+        setError('Please select a valid State of establishment.');
+        setIsLoading(false);
+        return;
+      }
 
-      const safeInstitutionTypeId = institutionTypeId || validInstitutionTypeId; 
-      const safeStateId = stateId || validStateId;
+      if (!institutionTypeId) {
+        setError('Please select a valid Type of Institute.');
+        setIsLoading(false);
+        return;
+      }
 
-      const registrationData = {
-        name: safeInstituteName,
-        address: address || 'N/A', 
-        website: finalWebsite,
-        custom_domain: finalCustomDomain,
-        logo: `https://example.com/logos/test.png?t=${timestamp}`, 
-        accreditation_letter: `https://example.com/docs/test-accreditation.pdf?t=${timestamp}`,
-        rector: safeDirectorName,
-        rector_email: safeDirectorEmail,
-        rector_phone_number: safeDirectorPhone,
-        contact_email: safeAdminEmail,
-        institution_type_id: safeInstitutionTypeId,
-        state_id: safeStateId,
-        status: 'draft' as const
-      };
+      // Create FormData object for file upload
+      const formData = new FormData();
+      formData.append('name', safeInstituteName);
+      formData.append('address', address || 'N/A');
+      formData.append('website', finalWebsite);
+      formData.append('custom_domain', finalCustomDomain);
+      formData.append('rector', safeDirectorName);
+      formData.append('rector_email', safeDirectorEmail);
+      formData.append('rector_phone_number', safeDirectorPhone);
+      formData.append('contact_email', safeAdminEmail);
+      formData.append('institution_type_id', institutionTypeId);
+      formData.append('state_id', stateId);
+      formData.append('status', 'draft');
+
+      // Append files if selected
+      if (logoFile) {
+        formData.append('logo', logoFile);
+      }
       
-      console.log('Submitting Registration Payload:', registrationData);
+      if (accreditationFile) {
+        formData.append('accreditation_letter', accreditationFile);
+      }
 
-      await superAdminService.createInstitution(registrationData);
+      console.log('Submitting Registration FormData:');
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+      
+      setUploadProgress(0);
+
+      await superAdminService.createInstitution(formData, (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setUploadProgress(percentCompleted);
+      });
+      
       setStatus('success');
     } catch (err: any) {
       console.error('Registration failed', err);
@@ -380,7 +404,7 @@ const NewRegistration: React.FC = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden relative">
         <div className="p-8 space-y-8">
           {/* Section 1: Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -661,32 +685,133 @@ const NewRegistration: React.FC = () => {
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Institute Logo <span className="text-red-500">*</span></label>
               <div className="flex items-center justify-center w-full">
-                <label htmlFor="logoUpload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-3 text-gray-400" />
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">JPG, PNG, GIF (MAX. 2MB)</p>
+                {logoPreview ? (
+                  <div className="relative w-full h-32 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden group">
+                    <img src={logoPreview} alt="Logo Preview" className="h-full object-contain" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => window.open(logoPreview, '_blank')}
+                        className="p-2 bg-white/20 hover:bg-white/40 text-white rounded-lg backdrop-blur-sm transition-colors"
+                        title="View Full Size"
+                      >
+                        <Eye size={20} />
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setLogoFile(null)}
+                        className="p-2 bg-red-500/80 hover:bg-red-600 text-white rounded-lg backdrop-blur-sm transition-colors"
+                        title="Remove Logo"
+                      >
+                        <XCircle size={20} />
+                      </button>
+                    </div>
                   </div>
-                  <input id="logoUpload" name="logoUpload" type="file" className="hidden" />
-                </label>
+                ) : (
+                  <label htmlFor="logoUpload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-3 text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">JPG, PNG, GIF (MAX. 2MB)</p>
+                    </div>
+                    <input 
+                      id="logoUpload" 
+                      name="logoUpload" 
+                      type="file" 
+                      accept="image/*"
+                      className="hidden" 
+                      onChange={(e) => e.target.files && setLogoFile(e.target.files[0])}
+                    />
+                  </label>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700 dark:text-gray-300">NBTE Accreditation Approval Letter <span className="text-red-500">*</span></label>
               <div className="flex items-center justify-center w-full">
-                <label htmlFor="accreditationUpload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-3 text-gray-400" />
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">PDF, DOC, DOCX (Mandatory)</p>
-                  </div>
-                  <input id="accreditationUpload" name="accreditationUpload" type="file" className="hidden" />
-                </label>
+                {accreditationFile ? (
+                   <div className="w-full h-32 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center p-4 relative group">
+                      <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full mb-2">
+                        <CheckCircle2 size={24} />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-full px-4 text-center">
+                        {accreditationFile.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {(accreditationFile.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                      
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2 rounded-xl">
+                        {accreditationPreview && (
+                          <button 
+                            type="button"
+                            onClick={() => window.open(accreditationPreview, '_blank')}
+                            className="flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/40 text-white rounded-lg backdrop-blur-sm transition-colors text-sm font-medium"
+                          >
+                            <Eye size={16} />
+                            Preview
+                          </button>
+                        )}
+                        <button 
+                          type="button"
+                          onClick={() => setAccreditationFile(null)}
+                          className="flex items-center gap-2 px-3 py-2 bg-red-500/80 hover:bg-red-600 text-white rounded-lg backdrop-blur-sm transition-colors text-sm font-medium"
+                        >
+                          <XCircle size={16} />
+                          Remove
+                        </button>
+                      </div>
+                   </div>
+                ) : (
+                  <label htmlFor="accreditationUpload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-700 border-dashed rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-3 text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">PDF, DOC, DOCX (Mandatory)</p>
+                    </div>
+                    <input 
+                      id="accreditationUpload" 
+                      name="accreditationUpload" 
+                      type="file" 
+                      accept=".pdf,.doc,.docx"
+                      className="hidden" 
+                      onChange={(e) => e.target.files && setAccreditationFile(e.target.files[0])}
+                    />
+                  </label>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Upload Progress Overlay */}
+        {isLoading && uploadProgress > 0 && (
+          <div className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl animate-in fade-in duration-300">
+            <div className="w-full max-w-md p-8 text-center space-y-4">
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <Upload className="text-blue-600 dark:text-blue-400" size={32} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                  {uploadProgress < 100 ? 'Uploading Documents...' : 'Processing Registration...'}
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  Please wait while we secure your data
+                </p>
+              </div>
+              
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div 
+                  className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out flex items-center justify-end pr-2" 
+                  style={{ width: `${uploadProgress}%` }}
+                >
+                  {uploadProgress > 10 && <span className="text-[10px] text-white font-bold leading-none">{uploadProgress}%</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer Actions */}
         <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 flex justify-end gap-4">
