@@ -2,15 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BookOpen, 
-  CheckCircle, 
   Clock, 
   AlertTriangle, 
   Calendar, 
   Users, 
   FileText, 
   TrendingUp,
-  Search,
-  Plus
+  Search
 } from 'lucide-react';
 
 const ResearchDashboard: React.FC = () => {

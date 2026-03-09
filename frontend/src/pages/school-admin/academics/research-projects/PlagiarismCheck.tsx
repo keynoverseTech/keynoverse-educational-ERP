@@ -1,10 +1,8 @@
 import React from 'react';
 import { 
   AlertTriangle, 
-  Search, 
   CheckCircle, 
   FileText, 
-  BarChart2,
   RefreshCw
 } from 'lucide-react';
 

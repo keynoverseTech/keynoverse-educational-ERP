@@ -249,6 +249,16 @@ const StudentQuizzes = lazy(() => import('./pages/student-portal/lms/StudentQuiz
 const StudentSubmissions = lazy(() => import('./pages/student-portal/lms/StudentSubmissions'));
 const StudentLearningAnalytics = lazy(() => import('./pages/student-portal/lms/StudentLearningAnalytics'));
 
+// Student Portal - Research & Projects
+const StudentResearchDashboard = lazy(() => import('./pages/student-portal/academics/research-projects/ResearchDashboard'));
+const StudentTopicProposal = lazy(() => import('./pages/student-portal/academics/research-projects/TopicProposal'));
+const StudentMyProject = lazy(() => import('./pages/student-portal/academics/research-projects/MyProject'));
+const StudentProjectSubmissions = lazy(() => import('./pages/student-portal/academics/research-projects/ProjectSubmissions'));
+const StudentSupervisorFeedback = lazy(() => import('./pages/student-portal/academics/research-projects/SupervisorFeedback'));
+const StudentPlagiarismReport = lazy(() => import('./pages/student-portal/academics/research-projects/PlagiarismReport'));
+const StudentDefenseSchedule = lazy(() => import('./pages/student-portal/academics/research-projects/DefenseSchedule'));
+const StudentProjectArchive = lazy(() => import('./pages/student-portal/academics/research-projects/ProjectArchive'));
+
 const StudentFeesDashboard = lazy(() => import('./pages/student-portal/fees/FeesDashboard'));
 const StudentInvoiceDetails = lazy(() => import('./pages/student-portal/fees/StudentInvoiceDetailsPage'));
 const StudentPaymentCheckout = lazy(() => import('./pages/student-portal/fees/PaymentCheckoutPage'));
@@ -277,6 +287,12 @@ const StaffTimetable = lazy(() => import('./pages/staff-portal/academics/Timetab
 const StaffAttendance = lazy(() => import('./pages/staff-portal/academics/attendance/AttendanceDashboard'));
 const StaffMarkAttendance = lazy(() => import('./pages/staff-portal/academics/attendance/MarkAttendance'));
 const StaffStudents = lazy(() => import('./pages/staff-portal/academics/Students'));
+
+// Staff Portal - LMS
+const StaffAssignments = lazy(() => import('./pages/staff-portal/lms/StaffAssignments'));
+const StaffQuizzes = lazy(() => import('./pages/staff-portal/lms/StaffQuizzes'));
+const StaffLMSDashboard = lazy(() => import('./pages/staff-portal/lms/StaffLMSDashboard'));
+const StaffSubmissions = lazy(() => import('./pages/staff-portal/lms/StaffSubmissions'));
 
 // Staff Portal - Assessment
 const StaffMarksEntry = lazy(() => import('./pages/staff-portal/assessment/MarksEntry'));
@@ -572,7 +588,19 @@ const studentItems = [
       { name: 'Enrolled Courses', path: '/student/academics/courses' },
       { name: 'Course Materials', path: '/student/academics/materials' },
       { name: 'Timetable', path: '/student/academics/timetable' },
-      { name: 'Results', path: '/student/academics/results' }
+      { name: 'Results', path: '/student/academics/results' },
+      {
+        name: 'Research & Projects',
+        subItems: [
+          { name: 'Overview', path: '/student/academics/research/dashboard' },
+          { name: 'Topic Proposal', path: '/student/academics/research/proposal' },
+          { name: 'My Project', path: '/student/academics/research/project' },
+          { name: 'Submissions', path: '/student/academics/research/submissions' },
+          { name: 'Supervisor Feedback', path: '/student/academics/research/feedback' },
+          { name: 'Plagiarism Report', path: '/student/academics/research/plagiarism' },
+          { name: 'Defense Schedule', path: '/student/academics/research/defense' }
+        ]
+      }
     ]
   },
   {
@@ -644,6 +672,17 @@ const staffItems = [
       { name: 'Timetable', path: '/staff/academics/timetable' },
       { name: 'Attendance', path: '/staff/academics/attendance' },
       { name: 'Students', path: '/staff/academics/students' },
+    ]
+  },
+  {
+    name: 'LMS',
+    icon: BookOpen,
+    subItems: [
+      { name: 'Dashboard', path: '/staff/lms/dashboard' },
+      { name: 'Course Materials', path: '/staff/lms/materials' },
+      { name: 'Assignments', path: '/staff/lms/assignments' },
+      { name: 'Quizzes', path: '/staff/lms/quizzes' },
+      { name: 'Submissions', path: '/staff/lms/submissions' },
     ]
   },
   { 
@@ -1026,6 +1065,17 @@ function App() {
                         <Route path="/student/academics/results" element={<StudentAcademicsResults />} />
                         <Route path="/student/academics/timetable" element={<StudentAcademicsTimetable />} />
                         <Route path="/student/academics/timetable/exams" element={<StudentExamsTimetable />} />
+
+                        {/* Student Research & Projects */}
+                        <Route path="/student/academics/research/dashboard" element={<StudentResearchDashboard />} />
+                        <Route path="/student/academics/research/proposal" element={<StudentTopicProposal />} />
+                        <Route path="/student/academics/research/project" element={<StudentMyProject />} />
+                        <Route path="/student/academics/research/submissions" element={<StudentProjectSubmissions />} />
+                        <Route path="/student/academics/research/feedback" element={<StudentSupervisorFeedback />} />
+                        <Route path="/student/academics/research/plagiarism" element={<StudentPlagiarismReport />} />
+                        <Route path="/student/academics/research/defense" element={<StudentDefenseSchedule />} />
+                        <Route path="/student/academics/research/archive" element={<StudentProjectArchive />} />
+
                         <Route path="/student/courses" element={<Navigate to="/student/academics/courses" replace />} />
                         <Route path="/student/courses/materials" element={<Navigate to="/student/academics/materials" replace />} />
                         <Route path="/student/results" element={<Navigate to="/student/academics/results" replace />} />
@@ -1082,6 +1132,11 @@ function App() {
                         <Route path="academics/attendance" element={<StaffAttendance />} />
                         <Route path="academics/attendance/mark/:id" element={<StaffMarkAttendance />} />
                         <Route path="academics/students" element={<StaffStudents />} />
+                        <Route path="lms/materials" element={<StaffCourseMaterials />} />
+                        <Route path="lms/assignments" element={<StaffAssignments />} />
+                        <Route path="lms/quizzes" element={<StaffQuizzes />} />
+                        <Route path="lms/dashboard" element={<StaffLMSDashboard />} />
+                        <Route path="lms/submissions" element={<StaffSubmissions />} />
                         <Route path="assessment/marks" element={<StaffMarksEntry />} />
                         <Route path="assessment/timetable" element={<StaffExamTimetable />} />
                         <Route path="hr/salary" element={<StaffMySalary />} />
