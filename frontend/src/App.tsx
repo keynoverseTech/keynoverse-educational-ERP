@@ -27,7 +27,9 @@ import { HRProvider } from './state/hrAccessControl';
 import { FinanceProvider } from './state/financeProvider';
 import { LibraryProvider } from './state/libraryProvider';
 import { HostelProvider } from './state/hostelContext';
+import { StudentHostelProvider } from './state/studentHostelContext';
 import { TransportProvider } from './state/transportContext';
+import { StudentTransportProvider } from './state/studentTransportContext';
 import { StudentPortalFinanceProvider } from './state/studentPortalFinanceContext';
 import { EventsProvider } from './state/eventsProvider';
 import { AlumniProvider } from './state/alumniState';
@@ -183,6 +185,11 @@ const BookCatalogPage = lazy(() => import('./pages/school-admin/library/BookCata
 const BookCategoriesPage = lazy(() => import('./pages/school-admin/library/BookCategories'));
 const BorrowingSystemPage = lazy(() => import('./pages/school-admin/library/BorrowingSystem'));
 const ReservationSystemPage = lazy(() => import('./pages/school-admin/library/ReservationSystem'));
+const BusManagement = lazy(() => import('./pages/school-admin/student-services/transport/BusManagement'));
+const RouteManagement = lazy(() => import('./pages/school-admin/student-services/transport/RouteManagement'));
+const BusStops = lazy(() => import('./pages/school-admin/student-services/transport/BusStops'));
+const TransportRequestsPage = lazy(() => import('./pages/school-admin/student-services/transport/TransportRequests'));
+const TransportAllocationsPage = lazy(() => import('./pages/school-admin/student-services/transport/TransportAllocations'));
 
 // School Admin - Events
 const EventsDashboardPage = lazy(() => import('./pages/school-admin/events/EventsDashboard'));
@@ -216,12 +223,13 @@ const StudentPaymentsPage = lazy(() => import('./pages/school-admin/finance/stud
 
 // School Admin - Student Services
 const HostelDashboard = lazy(() => import('./pages/school-admin/student-services/hostel/HostelDashboard'));
+const HostelBuildings = lazy(() => import('./pages/school-admin/student-services/hostel/HostelBuildings'));
 const HostelRooms = lazy(() => import('./pages/school-admin/student-services/hostel/HostelRooms'));
+const HostelBookingRequests = lazy(() => import('./pages/school-admin/student-services/hostel/HostelBookingRequests'));
 const HostelAllocations = lazy(() => import('./pages/school-admin/student-services/hostel/HostelAllocations'));
 const HostelConfig = lazy(() => import('./pages/school-admin/student-services/hostel/HostelConfig'));
 
 const TransportDashboard = lazy(() => import('./pages/school-admin/student-services/transport/TransportDashboard'));
-const TransportRoutes = lazy(() => import('./pages/school-admin/student-services/transport/TransportRoutes'));
 const TransportVehicles = lazy(() => import('./pages/school-admin/student-services/transport/TransportVehicles'));
 const TransportSubscriptions = lazy(() => import('./pages/school-admin/student-services/transport/TransportSubscriptions'));
 const TransportConfig = lazy(() => import('./pages/school-admin/student-services/transport/TransportConfig'));
@@ -277,6 +285,17 @@ const StudentSubmitTicket = lazy(() => import('./pages/student-portal/helpdesk/S
 const StudentTickets = lazy(() => import('./pages/student-portal/helpdesk/Tickets'));
 const StudentBookCatalog = lazy(() => import('./pages/student-portal/library/StudentBookCatalog'));
 const StudentBorrowingHistory = lazy(() => import('./pages/student-portal/library/StudentBorrowingHistory'));
+const StudentHostelDashboard = lazy(() => import('./pages/student-portal/services/hostel/StudentHostelDashboard'));
+const StudentAvailableHostels = lazy(() => import('./pages/student-portal/services/hostel/StudentAvailableHostels'));
+const StudentBookHostel = lazy(() => import('./pages/student-portal/services/hostel/StudentBookHostel'));
+const StudentMyHostel = lazy(() => import('./pages/student-portal/services/hostel/StudentMyHostel'));
+const StudentHostelHistory = lazy(() => import('./pages/student-portal/services/hostel/StudentBookingHistory'));
+const StudentTransportDashboard = lazy(() => import('./pages/student-portal/services/transport/StudentTransportDashboard'));
+const StudentAvailableRoutes = lazy(() => import('./pages/student-portal/services/transport/StudentAvailableRoutes'));
+const StudentApplyTransport = lazy(() => import('./pages/student-portal/services/transport/StudentApplyTransport'));
+const StudentMyTransport = lazy(() => import('./pages/student-portal/services/transport/StudentMyTransport'));
+const StudentTransportHistory = lazy(() => import('./pages/student-portal/services/transport/StudentTransportHistory'));
+const StudentRouteStops = lazy(() => import('./pages/student-portal/services/transport/StudentRouteStops'));
 const StaffPortal = lazy(() => import('./pages/staff-portal/StaffPortal'));
 // const StaffGrading = lazy(() => import('./pages/staff-portal/StaffGrading'));
 
@@ -488,8 +507,14 @@ const schoolAdminItems = [
     name: 'Student Services', 
     icon: Bus,
     subItems: [
-      { name: 'Hostel', path: '/school-admin/student-services/hostel' },
-      { name: 'Transport', path: '/school-admin/student-services/transport' }
+      {
+        name: 'Hostel Management',
+        path: '/school-admin/student-services/hostel'
+      },
+      {
+        name: 'Transportation',
+        path: '/school-admin/student-services/transport'
+      }
     ]
   },
   { 
@@ -638,8 +663,14 @@ const studentItems = [
     name: 'Student Services',
     icon: Bus,
     subItems: [
-      { name: 'Hostel', path: '/student/services/hostel' },
-      { name: 'Transport', path: '/student/services/transport' }
+      {
+        name: 'Hostel',
+        path: '/student/services/hostel'
+      },
+      {
+        name: 'Transportation',
+        path: '/student/services/transport'
+      }
     ]
   },
   {
@@ -725,13 +756,15 @@ function App() {
               <FinanceProvider>
                 <StudentPortalFinanceProvider>
                   <HostelProvider>
-                    <TransportProvider>
-                      <LibraryProvider>
-                        <EventsProvider>
-                          <AuthProvider>
-                            <Router>
-                              <Suspense fallback={<LoadingFallback />}>
-                                <Routes>
+                    <StudentHostelProvider>
+                      <StudentTransportProvider>
+                        <TransportProvider>
+                          <LibraryProvider>
+                            <EventsProvider>
+                              <AuthProvider>
+                                <Router>
+                                  <Suspense fallback={<LoadingFallback />}>
+                                    <Routes>
                           {/* Public Routes */}
                           <Route path="/" element={<Navigate to="/auth" replace />} />
                           <Route path="/auth" element={<AuthSelection />} />
@@ -944,12 +977,19 @@ function App() {
 
                         {/* Student Services */}
                         <Route path="/school-admin/student-services/hostel" element={<HostelDashboard />} />
+                        <Route path="/school-admin/student-services/hostel/hostels" element={<HostelBuildings />} />
                         <Route path="/school-admin/student-services/hostel/rooms" element={<HostelRooms />} />
+                        <Route path="/school-admin/student-services/hostel/requests" element={<HostelBookingRequests />} />
                         <Route path="/school-admin/student-services/hostel/allocations" element={<HostelAllocations />} />
-                        <Route path="/school-admin/student-services/hostel/config" element={<HostelConfig />} />
+                        <Route path="/school-admin/student-services/hostel/rules" element={<HostelConfig />} />
+                        <Route path="/school-admin/student-services/hostel/config" element={<Navigate to="/school-admin/student-services/hostel/rules" replace />} />
 
                         <Route path="/school-admin/student-services/transport" element={<TransportDashboard />} />
-                        <Route path="/school-admin/student-services/transport/routes" element={<TransportRoutes />} />
+                        <Route path="/school-admin/student-services/transport/buses" element={<BusManagement />} />
+                        <Route path="/school-admin/student-services/transport/routes" element={<RouteManagement />} />
+                        <Route path="/school-admin/student-services/transport/stops" element={<BusStops />} />
+                        <Route path="/school-admin/student-services/transport/requests" element={<TransportRequestsPage />} />
+                        <Route path="/school-admin/student-services/transport/allocations" element={<TransportAllocationsPage />} />
                         <Route path="/school-admin/student-services/transport/vehicles" element={<TransportVehicles />} />
                         <Route path="/school-admin/student-services/transport/subscriptions" element={<TransportSubscriptions />} />
                         <Route path="/school-admin/student-services/transport/config" element={<TransportConfig />} />
@@ -1097,8 +1137,17 @@ function App() {
                         <Route path="/student/library/borrows" element={<StudentBorrowingHistory />} />
 
                         {/* Student Services */}
-                        <Route path="/student/services/hostel" element={<HostelDashboard />} />
-                        <Route path="/student/services/transport" element={<TransportDashboard />} />
+                        <Route path="/student/services/hostel" element={<StudentHostelDashboard />} />
+                        <Route path="/student/services/hostel/available" element={<StudentAvailableHostels />} />
+                        <Route path="/student/services/hostel/book" element={<StudentBookHostel />} />
+                        <Route path="/student/services/hostel/my-hostel" element={<StudentMyHostel />} />
+                        <Route path="/student/services/hostel/history" element={<StudentHostelHistory />} />
+                        <Route path="/student/services/transport" element={<StudentTransportDashboard />} />
+                        <Route path="/student/services/transport/available" element={<StudentAvailableRoutes />} />
+                        <Route path="/student/services/transport/routes/:routeId/stops" element={<StudentRouteStops />} />
+                        <Route path="/student/services/transport/apply" element={<StudentApplyTransport />} />
+                        <Route path="/student/services/transport/my-transport" element={<StudentMyTransport />} />
+                        <Route path="/student/services/transport/history" element={<StudentTransportHistory />} />
 
                         {/* Student Events */}
                         <Route path="/student/events" element={<UpcomingEventsPage />} />
@@ -1154,6 +1203,8 @@ function App() {
             </EventsProvider>
           </LibraryProvider>
         </TransportProvider>
+      </StudentTransportProvider>
+      </StudentHostelProvider>
       </HostelProvider>
     </StudentPortalFinanceProvider>
   </FinanceProvider>

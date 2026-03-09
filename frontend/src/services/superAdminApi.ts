@@ -120,6 +120,13 @@ export const superAdminService = {
     return response.data;
   },
 
+  approveInstitution: async (id: string) => {
+    // Approve an institution application
+    // Endpoint provided by user: POST /institutions/approve/:id
+    const response = await superAdminApi.post(`/institutions/approve/${id}`);
+    return response.data;
+  },
+
   // Program Management
   getPrograms: async () => {
     const response = await superAdminApi.get('/programme');
