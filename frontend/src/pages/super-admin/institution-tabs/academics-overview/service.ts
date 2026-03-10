@@ -178,25 +178,6 @@ const getAcademicsOverviewData = (): Promise<AcademicsOverviewData> => {
               { label: 'Deadline', value: '2 Weeks' }
             ]
           },
-          { 
-            id: 'mod-9', 
-            name: 'Course Materials', 
-            description: 'Upload and manage lecture notes.', 
-            path: 'CourseMaterials/', 
-            status: 'Active', 
-            lastUpdated: '4 hours ago', 
-            type: 'Materials',
-            features: [
-              'Upload PDFs, Slides, and Videos',
-              'Organize materials by week/topic',
-              'Track student download activity',
-              'Archive old materials'
-            ],
-            stats: [
-              { label: 'Files Uploaded', value: 1250 },
-              { label: 'Storage Used', value: '4.5 GB' }
-            ]
-          },
         ],
         courses: [
           { id: 'c-1', code: 'CS101', title: 'Intro to Programming', unit: 3, level: '100', semester: 'First', department: 'Computer Science', lecturer: 'Dr. Smith', studentsEnrolled: 120 },

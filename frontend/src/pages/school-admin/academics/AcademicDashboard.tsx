@@ -65,13 +65,6 @@ export const AcademicDashboard: React.FC = () => {
       color: 'bg-orange-600'
     },
     { 
-      title: 'Course Materials', 
-      desc: 'Manage course materials and resources', 
-      icon: BookOpen, 
-      path: '/school-admin/academics/course-materials',
-      color: 'bg-teal-600'
-    },
-    { 
       title: 'Attendance', 
       desc: 'Track and manage student attendance', 
       icon: Clock, 

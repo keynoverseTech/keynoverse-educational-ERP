@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, FileText, Users, ClipboardCheck, Calendar } from 'lucide-react';
+import { BookOpen, Users, ClipboardCheck, Calendar } from 'lucide-react';
 
 const cards = [
   {
@@ -9,13 +9,6 @@ const cards = [
     icon: BookOpen,
     to: '/staff/academics/courses',
     color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  {
-    title: 'Course Materials',
-    description: 'Upload materials for students.',
-    icon: FileText,
-    to: '/staff/academics/materials',
-    color: 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/20',
   },
   {
     title: 'Students',
@@ -50,7 +43,7 @@ const AcademicsDashboard: React.FC = () => {
         <p className="text-sm text-gray-500 dark:text-gray-400">Manage teaching activities and course delivery</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card) => (
           <button
             key={card.title}
@@ -70,4 +63,3 @@ const AcademicsDashboard: React.FC = () => {
 };
 
 export default AcademicsDashboard;
-

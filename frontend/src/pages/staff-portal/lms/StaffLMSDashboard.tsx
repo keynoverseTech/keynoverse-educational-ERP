@@ -1,20 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { LayoutDashboard, BookOpen, Upload, ClipboardList, HelpCircle, BarChart2, Book } from 'lucide-react';
+import { LayoutDashboard, BookOpen, ClipboardList, HelpCircle, BarChart2, Book } from 'lucide-react';
 import { getAssignedCourses } from '../academics/assignedCourses';
-import { courseMaterialService } from '../../school-admin/academics/modules/CourseMaterials/service';
 
 const StaffLMSDashboard: React.FC = () => {
   const assignedCourses = useMemo(() => getAssignedCourses(), []);
   const [selectedCourse, setSelectedCourse] = useState<string>('All');
-  const [materialsCount, setMaterialsCount] = useState(0);
   const [assignmentsCount, setAssignmentsCount] = useState(0);
   const [quizzesCount, setQuizzesCount] = useState(0);
 
   useEffect(() => {
     const allowed = new Set(assignedCourses.map(c => c.code));
-    const materials = courseMaterialService.getMaterials().filter(m => allowed.has(m.courseId));
-    const filteredMaterials = selectedCourse === 'All' ? materials : materials.filter(m => m.courseId === selectedCourse);
-    setMaterialsCount(filteredMaterials.length);
     const assignmentsRaw = localStorage.getItem('staff_lms_assignments');
     const assignments = assignmentsRaw ? JSON.parse(assignmentsRaw) : [];
     const filteredAssignments = (assignments as any[]).filter(a => allowed.has(a.courseCode)).filter(a => selectedCourse === 'All' ? true : a.courseCode === selectedCourse);
@@ -50,17 +45,7 @@ const StaffLMSDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600">
-              <Upload size={24} />
-            </div>
-            <span className="text-xs font-bold text-gray-500">Resources</span>
-          </div>
-          <h3 className="text-3xl font-black text-gray-900 dark:text-white mt-4">{materialsCount}</h3>
-          <p className="text-xs text-gray-500 mt-1">Course Materials</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-purple-600">
@@ -112,9 +97,6 @@ const StaffLMSDashboard: React.FC = () => {
             </h3>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <a href="/staff/lms/materials" className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-bold flex items-center gap-2">
-              <Upload size={16} /> Course Materials
-            </a>
             <a href="/staff/lms/assignments" className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-bold flex items-center gap-2">
               <ClipboardList size={16} /> Assignments
             </a>
@@ -132,4 +114,3 @@ const StaffLMSDashboard: React.FC = () => {
 };
 
 export default StaffLMSDashboard;
-

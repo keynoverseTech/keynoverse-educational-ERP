@@ -56,7 +56,7 @@ const TransportSubscriptions: React.FC = () => {
                      <p className="text-sm text-gray-500">{sub.studentId}</p>
                   </div>
                 </td>
-                <td className="py-4 px-6 text-gray-500 dark:text-gray-400">{sub.routeName}</td>
+                <td className="py-4 px-6 text-gray-500 dark:text-gray-400">{sub.routeId}</td>
                 <td className="py-4 px-6 text-gray-500 dark:text-gray-400">{sub.expiryDate}</td>
                 <td className="py-4 px-6">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${

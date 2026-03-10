@@ -11,7 +11,6 @@ import { DepartmentsPage } from '../../../school-admin/academics/modules/Departm
 import { LevelsPage } from '../../../school-admin/academics/modules/LevelsPage';
 import { CoursesPage } from '../../../school-admin/academics/modules/CoursesPage';
 import CourseRegistrationConfig from '../../../school-admin/academics/modules/CourseRegistrationConfig';
-import CourseMaterialsDashboard from '../../../school-admin/academics/modules/CourseMaterials/CourseMaterialsDashboard';
 
 interface AcademicConfigurationProps {
   configurations: AcademicModule[];
@@ -43,7 +42,6 @@ const AcademicConfiguration: React.FC<AcademicConfigurationProps> = ({ configura
       case 'LevelsPage.tsx': return <LevelsPage />;
       case 'CoursesPage.tsx': return <CoursesPage />;
       case 'CourseRegistrationConfig.tsx': return <CourseRegistrationConfig />;
-      case 'CourseMaterials/': return <CourseMaterialsDashboard />;
       default: return <div className="p-4 text-center text-gray-500">Module content not found.</div>;
     }
   };

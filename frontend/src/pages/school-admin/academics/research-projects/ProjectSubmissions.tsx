@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   FileText, 
   Search, 
-  Filter, 
   CheckCircle, 
   Clock, 
   AlertCircle, 
@@ -11,12 +10,25 @@ import {
 } from 'lucide-react';
 
 const ProjectSubmissions: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterFaculty, setFilterFaculty] = useState('All');
+  const [filterDepartment, setFilterDepartment] = useState('All');
+  const [filterProgramme, setFilterProgramme] = useState('All');
+
+  // Mock Filters
+  const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
+  const departments = ['Computer Science', 'Architecture', 'Biology', 'Physics', 'Mathematics'];
+  const programmes = ['B.Sc Computer Science', 'B.Sc Architecture', 'B.Sc Biology'];
+
   // Mock Data
   const submissions = [
     {
       id: 1,
       student: 'John Doe',
       project: 'AI in Healthcare Diagnostics',
+      department: 'Computer Science',
+      faculty: 'Faculty of Sciences',
+      programme: 'B.Sc Computer Science',
       stage: 'Chapter 3',
       version: 'v2.1',
       date: '2024-03-20',
@@ -27,6 +39,9 @@ const ProjectSubmissions: React.FC = () => {
       id: 2,
       student: 'Jane Smith',
       project: 'Sustainable Urban Planning',
+      department: 'Architecture',
+      faculty: 'Faculty of Environmental Sciences',
+      programme: 'B.Sc Architecture',
       stage: 'Final Draft',
       version: 'v1.0',
       date: '2024-03-19',
@@ -37,6 +52,9 @@ const ProjectSubmissions: React.FC = () => {
       id: 3,
       student: 'Michael Brown',
       project: 'Blockchain Voting',
+      department: 'Computer Science',
+      faculty: 'Faculty of Sciences',
+      programme: 'B.Sc Computer Science',
       stage: 'Proposal',
       version: 'v1.2',
       date: '2024-03-18',
@@ -44,6 +62,16 @@ const ProjectSubmissions: React.FC = () => {
       file: 'proposal_updated.docx'
     }
   ];
+
+  const filteredSubmissions = submissions.filter(sub => {
+    const matchesSearch = sub.project.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          sub.student.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFaculty = filterFaculty === 'All' || sub.faculty === filterFaculty;
+    const matchesDepartment = filterDepartment === 'All' || sub.department === filterDepartment;
+    const matchesProgramme = filterProgramme === 'All' || sub.programme === filterProgramme;
+
+    return matchesSearch && matchesFaculty && matchesDepartment && matchesProgramme;
+  });
 
   return (
     <div className="space-y-6 p-6">
@@ -55,18 +83,44 @@ const ProjectSubmissions: React.FC = () => {
           </h1>
           <p className="text-gray-500 dark:text-gray-400">Track and review student project uploads.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
               placeholder="Search submissions..." 
-              className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium">
-            <Filter size={16} /> Filter
-          </button>
+
+          <select 
+            value={filterFaculty}
+            onChange={(e) => setFilterFaculty(e.target.value)}
+            className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="All">All Faculties</option>
+            {faculties.map(f => <option key={f} value={f}>{f}</option>)}
+          </select>
+          
+          <select 
+            value={filterDepartment}
+            onChange={(e) => setFilterDepartment(e.target.value)}
+            className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="All">All Departments</option>
+            {departments.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+
+          <select 
+            value={filterProgramme}
+            onChange={(e) => setFilterProgramme(e.target.value)}
+            className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="All">All Programmes</option>
+            {programmes.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
         </div>
       </div>
 
@@ -82,11 +136,14 @@ const ProjectSubmissions: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {submissions.map((sub) => (
+            {filteredSubmissions.map((sub) => (
               <tr key={sub.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                 <td className="px-6 py-4">
                   <p className="font-bold text-gray-900 dark:text-white">{sub.student}</p>
                   <p className="text-xs text-gray-500 truncate max-w-xs">{sub.project}</p>
+                  <div className="flex gap-1 mt-1">
+                     <span className="text-[10px] bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">{sub.programme}</span>
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{sub.stage}</span>
