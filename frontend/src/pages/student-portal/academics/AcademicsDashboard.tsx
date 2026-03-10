@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ClipboardCheck, Calendar, FileText } from 'lucide-react';
+import { BookOpen, ClipboardCheck, Calendar } from 'lucide-react';
 
 const cards = [
   {
@@ -9,13 +9,6 @@ const cards = [
     icon: BookOpen,
     to: '/student/academics/courses',
     color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  {
-    title: 'Course Materials',
-    description: 'Access and download course materials.',
-    icon: FileText,
-    to: '/student/academics/materials',
-    color: 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/20',
   },
   {
     title: 'Timetable',

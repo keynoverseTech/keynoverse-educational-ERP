@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Users, ClipboardCheck, Calendar } from 'lucide-react';
+import { Users, ClipboardCheck, Calendar } from 'lucide-react';
 import { getAssignedCourses } from './assignedCourses';
 
 const semesterLabel = (semesterId: string) => {
@@ -26,12 +26,6 @@ const MyCourses: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Courses</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Courses assigned to you for teaching</p>
         </div>
-        <button
-          onClick={() => navigate('/staff/academics/materials')}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-        >
-          <FileText size={16} /> Upload Materials
-        </button>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
@@ -77,13 +71,6 @@ const MyCourses: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => navigate('/staff/academics/materials', { state: { courseId: c.code } })}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                        title="Course Materials"
-                      >
-                        <FileText size={18} />
-                      </button>
                       <button
                         onClick={() => navigate('/staff/academics/students', { state: { courseId: c.code } })}
                         className="p-2 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"

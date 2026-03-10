@@ -119,12 +119,6 @@ const StaffPortal = () => {
                       <Link to="/staff/grading" className="px-3 py-1 text-xs font-medium bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         Grading
                       </Link>
-                      <button 
-                        onClick={() => navigate('/staff/academics/materials', { state: { courseId: course.code } })}
-                        className="px-3 py-1 text-xs font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                      >
-                        Materials
-                      </button>
                     </div>
                   </div>
                 ))}
