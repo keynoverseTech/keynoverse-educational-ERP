@@ -19,8 +19,21 @@ superAdminApi.interceptors.request.use(
   (config) => {
     // Try to get the token from localStorage first (real user session)
     let token = localStorage.getItem('auth_token');
+    const userStr = localStorage.getItem('auth_user');
 
-    // If no local token, use the hardcoded test token as a fallback (dev/test mode)
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.role !== 'super_admin' && user.role !== 'admin') {
+          console.warn('Current user is not Super Admin. Ignoring local token for Super Admin API.');
+          token = null;
+        }
+      } catch (e) {
+        console.error('Error parsing auth_user', e);
+      }
+    }
+
+    // If no local token (or ignored), use the hardcoded test token as a fallback (dev/test mode)
     if (!token) {
       console.warn('Using hardcoded test token for Super Admin API');
       token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN1cGVyYWRtaW5AcGxhbmV0c3RlY2guY29tIiwic3ViIjoiZjNiNmNmMDEtOWExYy00ZWYwLTgxN2YtN2Q5MWQ1YzljZDBkIiwicm9sZSI6InN1cGVyX2FkbWluIiwiaWF0IjoxNzcyOTU5NzY3LCJleHAiOjE3NzMwNDYxNjd9.E1OgdZteXb7iBLhxA8FL9ozsx6jJjvUqFOg_43do6q8';
@@ -68,6 +81,11 @@ export interface ProgramAssignmentData {
   last_modified_by?: string;
 }
 
+export interface InstitutionQueryData {
+  institution_id: string;
+  message: string;
+}
+
 export const superAdminService = {
   // Institution Management
   createInstitution: async (data: InstitutionRegistrationData | FormData, onUploadProgress?: (progressEvent: any) => void) => {
@@ -90,7 +108,7 @@ export const superAdminService = {
   },
 
   getInstitutionsPending: async () => {
-    const response = await superAdminApi.get('/institutions/listpending');
+    const response = await superAdminApi.get('/institutions/list/pending');
     return response.data;
   },
 
@@ -120,10 +138,43 @@ export const superAdminService = {
     return response.data;
   },
 
+  updateInstitution: async (id: string, data: any) => {
+    // Generic update endpoint
+    const response = await superAdminApi.put(`/institutions/${id}`, data);
+    return response.data;
+  },
+
   approveInstitution: async (id: string) => {
     // Approve an institution application
-    // Endpoint provided by user: POST /institutions/approve/:id
-    const response = await superAdminApi.post(`/institutions/approve/${id}`);
+    // Endpoint provided by user: PUT /institutions/approve/:id
+    const response = await superAdminApi.put(`/institutions/approve/${id}`, {});
+    return response.data;
+  },
+
+  rejectInstitution: async (id: string, message?: string) => {
+    // Reject an institution application
+    // Endpoint provided by user: PUT /institutions/reject/:id
+    const body = message ? { message } : {};
+    const response = await superAdminApi.put(`/institutions/reject/${id}`, body);
+    return response.data;
+  },
+
+  suspendInstitution: async (id: string) => {
+    // Suspend an institution
+    // Endpoint provided by user: PUT /institutions/suspend/:id
+    const response = await superAdminApi.put(`/institutions/suspend/${id}`, {});
+    return response.data;
+  },
+
+  reactivateInstitution: async (id: string) => {
+    // Reactivate a suspended institution
+    // Endpoint provided by user: PUT /institutions/reactivate/:id
+    const response = await superAdminApi.put(`/institutions/reactivate/${id}`, {});
+    return response.data;
+  },
+
+  createInstitutionQuery: async (data: InstitutionQueryData) => {
+    const response = await superAdminApi.post('/institution-queries', data);
     return response.data;
   },
 
@@ -138,10 +189,10 @@ export const superAdminService = {
     return response.data;
   },
 
-  updateInstitutionProgram: async (id: string, data: Partial<ProgramAssignmentData>) => {
+  updateInstitutionProgram: async (id: string, _data: Partial<ProgramAssignmentData>) => {
     // Speculative endpoint for updating an assignment
     // Trying PUT instead of PATCH as PATCH returned 404
-    const response = await superAdminApi.put(`/institution/programme/${id}`, data);
+    const response = await superAdminApi.put(`/institution/programme/${id}`, {});
     return response.data;
   },
 

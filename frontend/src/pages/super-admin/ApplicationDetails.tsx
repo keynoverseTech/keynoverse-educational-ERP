@@ -24,6 +24,8 @@ import { Skeleton } from '../../components/ui/Skeleton';
 
 import superAdminService from '../../services/superAdminApi';
 import { useParams } from 'react-router-dom';
+import { sanitizeUrl, isHttpUrl } from '../../utils/sanitizeUrl';
+import LogoAvatar from '../../components/ui/LogoAvatar';
 
 const ApplicationDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -33,7 +35,7 @@ const ApplicationDetails: React.FC = () => {
   const [application, setApplication] = useState<any>(null);
   
   // Action States
-  const [appStatus, setAppStatus] = useState<'PENDING APPROVAL' | 'APPROVED' | 'REJECTED' | 'NEEDS CLARIFICATION'>('PENDING APPROVAL');
+  const [appStatus, setAppStatus] = useState<'PENDING APPROVAL' | 'APPROVED' | 'REJECTED' | 'NEEDS CLARIFICATION' | 'DRAFT'>('PENDING APPROVAL');
   const [modalOpen, setModalOpen] = useState<'none' | 'approve' | 'reject' | 'info'>('none');
   const [actionReason, setActionReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,6 +58,7 @@ const ApplicationDetails: React.FC = () => {
         const data = await superAdminService.getInstitution(id);
         
         // Map API data to UI structure
+        const cleanedLogo = sanitizeUrl(data.logo);
         setApplication({
             id: data.id,
             institution: data.name,
@@ -67,7 +70,7 @@ const ApplicationDetails: React.FC = () => {
             status: (data.status || 'pending').toUpperCase().replace('_', ' '),
             statusColor: 'text-amber-500', // Dynamic based on status?
             statusBg: 'bg-amber-500/10 border-amber-500/20',
-            logo: data.logo || 'GH',
+            logo: isHttpUrl(cleanedLogo) ? cleanedLogo : 'GH',
             logoColor: 'bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400',
             contact: {
               name: data.rector || 'N/A',
@@ -90,6 +93,7 @@ const ApplicationDetails: React.FC = () => {
         const statusMap: any = {
             'approved': 'APPROVED',
             'pending': 'PENDING APPROVAL',
+            'draft': 'DRAFT',
             'rejected': 'REJECTED'
         };
         setAppStatus(statusMap[data.status] || 'PENDING APPROVAL');
@@ -112,6 +116,8 @@ const ApplicationDetails: React.FC = () => {
         return { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-800' };
       case 'NEEDS CLARIFICATION':
         return { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800' };
+      case 'DRAFT':
+        return { color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700' };
       default:
         return { color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' };
     }
@@ -121,11 +127,26 @@ const ApplicationDetails: React.FC = () => {
     setIsSubmitting(true);
     try {
       if (modalOpen === 'approve' && id) {
-        await superAdminService.approveInstitution(id);
-        setAppStatus('APPROVED');
+        if (appStatus === 'DRAFT') {
+          await superAdminService.updateInstitution(id, { status: 'pending' });
+          setApplication((prev: any) => ({ ...prev, status: 'PENDING' }));
+          setAppStatus('PENDING APPROVAL');
+        } else {
+          await superAdminService.approveInstitution(id);
+          setAppStatus('APPROVED');
+        }
       } else if (modalOpen === 'reject') {
+        if (id) {
+          await superAdminService.rejectInstitution(id, actionReason);
+        }
         setAppStatus('REJECTED');
       } else if (modalOpen === 'info') {
+        if (id) {
+          await superAdminService.createInstitutionQuery({
+            institution_id: id,
+            message: actionReason,
+          });
+        }
         setAppStatus('NEEDS CLARIFICATION');
       }
     } catch (error) {
@@ -182,8 +203,12 @@ const ApplicationDetails: React.FC = () => {
                     <CheckCircle2 size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Approve Application</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">This will grant the institution full access.</p>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {appStatus === 'DRAFT' ? 'Move Application to Pending' : 'Approve Application'}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {appStatus === 'DRAFT' ? 'This will move the application to pending for review.' : 'This will grant the institution full access.'}
+                    </p>
                   </div>
                 </div>
               )}
@@ -230,38 +255,46 @@ const ApplicationDetails: React.FC = () => {
               
               {modalOpen === 'approve' && (
                 <div className="space-y-4">
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
-                    Are you sure you want to approve <span className="font-bold text-gray-900 dark:text-white">{application.institution}</span>? 
-                    An automated email with login credentials will be sent to <span className="font-bold">{application.contact.email}</span>.
-                  </p>
+                  {appStatus === 'DRAFT' ? (
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                      Are you sure you want to move <span className="font-bold text-gray-900 dark:text-white">{application.institution}</span> to pending?
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                        Are you sure you want to approve <span className="font-bold text-gray-900 dark:text-white">{application.institution}</span>? 
+                        An automated email with login credentials will be sent to <span className="font-bold">{application.contact.email}</span>.
+                      </p>
 
-                  <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 p-4">
-                    <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                      <Lock size={14} className="text-blue-600 dark:text-blue-400" />
-                      Credentials to be Generated
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Portal Admin:</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{credentials.adminEmail}</span>
+                      <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 p-4">
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                          <Lock size={14} className="text-blue-600 dark:text-blue-400" />
+                          Credentials to be Generated
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Portal Admin:</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{credentials.adminEmail}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Password:</span>
+                            <span className="font-mono font-medium text-gray-900 dark:text-white">{credentials.password}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Login URL:</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 truncate max-w-[200px]">{credentials.loginUrl}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={copyCredentials}
+                          className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-[#1e293b] border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                        >
+                          <Copy size={14} />
+                          Copy Credentials
+                        </button>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Password:</span>
-                        <span className="font-mono font-medium text-gray-900 dark:text-white">{credentials.password}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Login URL:</span>
-                        <span className="font-mono text-blue-600 dark:text-blue-400 truncate max-w-[200px]">{credentials.loginUrl}</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={copyCredentials}
-                      className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-white dark:bg-[#1e293b] border border-blue-200 dark:border-blue-800 rounded-lg text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                    >
-                      <Copy size={14} />
-                      Copy Credentials
-                    </button>
-                  </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -294,7 +327,7 @@ const ApplicationDetails: React.FC = () => {
                   <>Processing...</>
                 ) : (
                   <>
-                    {modalOpen === 'approve' && 'Confirm Approval'}
+                    {modalOpen === 'approve' && (appStatus === 'DRAFT' ? 'Move to Pending' : 'Confirm Approval')}
                     {modalOpen === 'reject' && 'Reject Application'}
                     {modalOpen === 'info' && 'Send Request'}
                   </>
@@ -474,7 +507,17 @@ const ApplicationDetails: React.FC = () => {
                </div>
             </div>
 
-            {appStatus === 'PENDING APPROVAL' ? (
+            {appStatus === 'DRAFT' ? (
+              <div className="flex items-center gap-3 self-start lg:self-center">
+                <button 
+                  onClick={() => setModalOpen('approve')}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-bold shadow-lg shadow-blue-500/20 dark:shadow-blue-900/20"
+                >
+                  <CheckCircle2 size={16} />
+                  <span>Approve to Pending</span>
+                </button>
+              </div>
+            ) : appStatus === 'PENDING APPROVAL' ? (
               <div className="flex items-center gap-3 self-start lg:self-center">
                 <button 
                   onClick={() => setModalOpen('info')}
@@ -536,13 +579,12 @@ const ApplicationDetails: React.FC = () => {
               
               <div className="flex flex-col md:flex-row gap-6">
                 {/* Logo Box */}
-                <div className={`w-24 h-24 rounded-xl ${application.logoColor} flex items-center justify-center text-3xl font-bold shrink-0 border border-gray-100 dark:border-white/5 overflow-hidden`}>
-                  {application.logo && application.logo.length > 3 ? (
-                     <img src={application.logo} alt={application.institution} className="w-full h-full object-cover" />
-                  ) : (
-                     application.logo
-                  )}
-                </div>
+                <LogoAvatar
+                  src={application.logo}
+                  alt={application.institution}
+                  fallback={application.institution ? application.institution.substring(0, 2).toUpperCase() : 'GH'}
+                  className={`w-24 h-24 rounded-xl ${application.logoColor} flex items-center justify-center text-3xl font-bold shrink-0 border border-gray-100 dark:border-white/5 overflow-hidden`}
+                />
                 
                 {/* Details Grid */}
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">

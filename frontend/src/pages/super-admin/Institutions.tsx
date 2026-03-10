@@ -18,6 +18,8 @@ import {
 import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 import { Skeleton } from '../../components/ui/Skeleton';
 import superAdminService from '../../services/superAdminApi';
+import { sanitizeUrl, isHttpUrl } from '../../utils/sanitizeUrl';
+import LogoAvatar from '../../components/ui/LogoAvatar';
 
 // Mock Data for Sparklines (Static for now)
 const sparklineData = {
@@ -36,23 +38,46 @@ const Institutions: React.FC = () => {
   useEffect(() => {
     const fetchInstitutions = async () => {
       try {
-        const response = await superAdminService.getInstitutions();
-        // Handle response format (array or { data: [] })
-        const data = Array.isArray(response) ? response : response.data || [];
+        const [approvedResponse, suspendedResponse] = await Promise.all([
+          superAdminService.getInstitutionsApproved(),
+          superAdminService.getInstitutionsSuspended(),
+        ]);
+
+        const approvedData = Array.isArray(approvedResponse) ? approvedResponse : approvedResponse.data || [];
+        const suspendedData = Array.isArray(suspendedResponse) ? suspendedResponse : suspendedResponse.data || [];
+
+        const mergedById = new Map<string, any>();
+        [...approvedData, ...suspendedData].forEach((inst: any) => {
+          if (inst?.id) mergedById.set(inst.id, inst);
+        });
+        const data = Array.from(mergedById.values());
         
+        const statusNormalizedToLabel = (status: any) => {
+          const normalized = (status || '').toString().toLowerCase();
+          if (normalized === 'approved') return 'Approved';
+          if (normalized === 'suspended') return 'Suspended';
+          return '';
+        };
+
         // Map API data to UI format
-        const mappedData = data.map((inst: any) => ({
+        const mappedData = data
+          .map((inst: any) => ({
           id: inst.id,
           name: inst.name,
-          logo: inst.name.substring(0, 2).toUpperCase(),
+          logo: (() => {
+            const cleaned = sanitizeUrl(inst.logo);
+            if (isHttpUrl(cleaned)) return cleaned;
+            return inst.name.substring(0, 2).toUpperCase();
+          })(),
           logoColor: 'bg-blue-600', // Default color
           adminName: inst.rector || 'N/A',
           adminEmail: inst.contact_email || inst.rector_email || 'N/A',
           location: inst.address || 'N/A',
           joinedDate: new Date(inst.created_at || Date.now()).toLocaleDateString(),
           subscription: 'Basic', // Placeholder
-          status: inst.status || 'Pending',
-        }));
+          status: statusNormalizedToLabel(inst.status),
+        }))
+          .filter((inst: any) => inst.status === 'Approved' || inst.status === 'Suspended');
         
         setInstitutions(mappedData);
       } catch (err) {
@@ -251,9 +276,12 @@ const Institutions: React.FC = () => {
                     >
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-xl ${inst.logoColor} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
-                            {inst.logo}
-                          </div>
+                           <LogoAvatar
+                             src={inst.logo}
+                             alt="Logo"
+                             fallback={inst.name.substring(0, 2).toUpperCase()}
+                             className={`w-10 h-10 rounded-xl ${inst.logoColor} flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden`}
+                           />
                           <div>
                             <div className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{inst.name}</div>
                             <div className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">ID: {inst.id}</div>
@@ -334,9 +362,12 @@ const Institutions: React.FC = () => {
                   <div className="px-6 relative flex flex-col flex-grow">
                     {/* Floating Logo & Status */}
                     <div className="flex justify-between items-end -mt-10 mb-4">
-                      <div className={`w-20 h-20 rounded-2xl ${inst.logoColor} flex items-center justify-center text-white font-bold text-3xl shadow-lg ring-4 ring-white dark:ring-[#151e32] group-hover:scale-105 transition-transform duration-300`}>
-                        {inst.logo}
-                      </div>
+                      <LogoAvatar
+                        src={inst.logo}
+                        alt="Logo"
+                        fallback={inst.name.substring(0, 2).toUpperCase()}
+                        className={`w-20 h-20 rounded-2xl ${inst.logoColor} flex items-center justify-center text-white font-bold text-3xl shadow-lg ring-4 ring-white dark:ring-[#151e32] group-hover:scale-105 transition-transform duration-300 overflow-hidden`}
+                      />
                       <StatusBadge status={inst.status} />
                     </div>
 
