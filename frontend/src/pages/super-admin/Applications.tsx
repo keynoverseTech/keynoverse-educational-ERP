@@ -15,6 +15,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 
 import superAdminService from '../../services/superAdminApi';
+import { sanitizeUrl, isHttpUrl } from '../../utils/sanitizeUrl';
+import LogoAvatar from '../../components/ui/LogoAvatar';
 
 // Mock Data for Charts (until real stats endpoint is available)
 const chartData = [
@@ -54,6 +56,9 @@ const Applications: React.FC = () => {
         
         // Select endpoint based on filterStatus
         switch(filterStatus) {
+            case 'Draft':
+                response = await superAdminService.getInstitutions();
+                break;
             case 'Pending':
                 response = await superAdminService.getInstitutionsPending();
                 break;
@@ -77,24 +82,78 @@ const Applications: React.FC = () => {
 
         const data = Array.isArray(response) ? response : (response as any).data || [];
         
+        const toStatusNormalized = (status: any) => (status || 'pending').toString().toLowerCase();
+        const getStatusMeta = (statusNormalized: string) => {
+          switch (statusNormalized) {
+            case 'approved':
+              return {
+                label: 'Approved',
+                pillClass: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+              };
+            case 'pending':
+              return {
+                label: 'Pending',
+                pillClass: 'text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+              };
+            case 'queried':
+              return {
+                label: 'Queried',
+                pillClass: 'text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 dark:border-blue-800',
+              };
+            case 'suspended':
+              return {
+                label: 'Suspended',
+                pillClass: 'text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border-red-200 dark:border-red-800',
+              };
+            case 'draft':
+              return {
+                label: 'Draft',
+                pillClass: 'text-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700',
+              };
+            case 'rejected':
+              return {
+                label: 'Rejected',
+                pillClass: 'text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border-red-200 dark:border-red-800',
+              };
+            default:
+              return {
+                label: statusNormalized ? `${statusNormalized.charAt(0).toUpperCase()}${statusNormalized.slice(1)}` : 'Pending',
+                pillClass: 'text-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700',
+              };
+          }
+        };
+
         // Map API data to UI structure
-        const mapped = data.map((inst: any) => ({
+        const mapped = data.map((inst: any) => {
+          const statusNormalized = toStatusNormalized(inst.status);
+          const statusMeta = getStatusMeta(statusNormalized);
+          return {
             id: inst.id,
             institution: inst.name,
             location: inst.address || 'N/A',
-            logo: inst.logo && inst.logo.includes('http') ? inst.logo : (inst.name.charAt(0) + (inst.name.split(' ')[1] || '').charAt(0)).toUpperCase(), 
-            logoColor: 'bg-blue-600', // Randomize or map if available
+            logo: (() => {
+              const cleaned = sanitizeUrl(inst.logo);
+              if (isHttpUrl(cleaned)) return cleaned;
+              return (inst.name.charAt(0) + (inst.name.split(' ')[1] || '').charAt(0)).toUpperCase();
+            })(),
+            logoColor: 'bg-blue-600',
             dateSubmitted: new Date(inst.created_at || Date.now()).toLocaleDateString(),
-            type: inst.institution_type_id ? 'Institution' : 'Unknown', // Map type ID if needed
+            type: inst.institution_type_id ? 'Institution' : 'Unknown',
             contactName: inst.rector || 'N/A',
-            contactAvatar: '', // No avatar in API yet
-            status: (inst.status || 'pending').charAt(0).toUpperCase() + (inst.status || 'pending').slice(1),
-            statusColor: inst.status === 'approved' 
-                ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' 
-                : 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
+            contactAvatar: '',
+            status: statusMeta.label,
+            statusNormalized,
+            statusPillClass: statusMeta.pillClass,
             priority: 'Normal'
-        }));
-        setApplications(mapped);
+          };
+        });
+
+        const normalizedFilter = filterStatus.toLowerCase();
+        const filteredByStatus = normalizedFilter === 'all'
+          ? mapped
+          : mapped.filter((row: any) => row.statusNormalized === normalizedFilter);
+
+        setApplications(filteredByStatus);
       } catch (err: any) {
         console.error('Failed to fetch applications', err);
         setError(err.message || 'Failed to load applications');
@@ -278,7 +337,7 @@ const Applications: React.FC = () => {
           <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap mr-2">Filters:</span>
             
-            {['All', 'Pending', 'Approved', 'Queried', 'Suspended', 'Expired'].map((status) => (
+            {['All', 'Draft', 'Pending', 'Approved', 'Queried', 'Suspended', 'Expired'].map((status) => (
                 <button 
                   key={status}
                   onClick={() => setFilterStatus(status)}
@@ -317,13 +376,12 @@ const Applications: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {/* Logo Container - Fixed Width to prevent overlapping */}
-                      <div className={`w-10 h-10 rounded-lg ${app.logoColor} flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden`}>
-                        {app.logo.length > 3 ? (
-                           <img src={app.logo} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                           app.logo
-                        )}
-                      </div>
+                      <LogoAvatar
+                        src={app.logo}
+                        alt="Logo"
+                        fallback={app.institution ? app.institution.substring(0, 2).toUpperCase() : 'IN'}
+                        className={`w-10 h-10 rounded-lg ${app.logoColor} flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden`}
+                      />
                       <div className="min-w-0">
                         <div className="font-bold text-gray-900 dark:text-white truncate max-w-[200px]" title={app.institution}>{app.institution}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
@@ -348,9 +406,12 @@ const Applications: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${app.statusColor.replace('text-', 'border-').replace('bg-', 'border-opacity-20 ')} ${app.statusColor}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${app.statusPillClass}`}>
                       {app.status === 'Approved' && <CheckCircle2 size={12} />}
-                      {app.status === 'New' && <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div>}
+                      {app.status === 'Pending' && <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div>}
+                      {app.status === 'Draft' && <div className="w-1.5 h-1.5 rounded-full bg-current"></div>}
+                      {app.status === 'Suspended' && <div className="w-1.5 h-1.5 rounded-full bg-current"></div>}
+                      {app.status === 'Queried' && <div className="w-1.5 h-1.5 rounded-full bg-current"></div>}
                       {app.status}
                     </span>
                   </td>

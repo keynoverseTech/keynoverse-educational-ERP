@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Skeleton } from '../../components/ui/Skeleton';
+import ConfirmationModal from '../../components/ui/ConfirmationModal';
 import { 
   ChevronRight, 
   Building2, 
@@ -11,12 +12,15 @@ import {
   CreditCard,
   FileText,
   Ban,
-  Edit,
   BookOpen,
-  Key
+  Key,
+  CheckCircle2,
+  Send
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import superAdminService from '../../services/superAdminApi';
+import { sanitizeUrl, isHttpUrl } from '../../utils/sanitizeUrl';
+import LogoAvatar from '../../components/ui/LogoAvatar';
 
 // Tabs
 import Overview from './institution-tabs/Overview';
@@ -33,6 +37,23 @@ const InstitutionDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showCredentials, setShowCredentials] = useState(false);
   const [institution, setInstitution] = useState<any>(null); // State for fetched data
+  
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    type: 'danger' | 'success' | 'warning' | 'info';
+    title: string;
+    message: string;
+    confirmText?: string;
+    onConfirm: () => Promise<void>;
+  }>({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: '',
+    onConfirm: async () => {},
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -45,14 +66,18 @@ const InstitutionDetails: React.FC = () => {
         const found = institutions.find((inst: any) => inst.id === id);
         
         if (found) {
+          const cleanedLogo = sanitizeUrl(found.logo);
+          const resolvedLogo = isHttpUrl(cleanedLogo)
+            ? cleanedLogo
+            : (found.name ? found.name.substring(0, 2).toUpperCase() : 'GH');
           // Map API data to UI structure
           setInstitution({
             id: found.id,
             name: found.name,
-            logo: found.logo || 'GH',
+            logo: resolvedLogo,
             logoColor: 'bg-indigo-600', // Randomize or map if available
             type: found.institution_type_id ? 'Polytechnic' : 'Institution', // Map type ID to name if possible
-            status: found.status || 'Active',
+            status: (found.status || 'pending').toString().toLowerCase(),
             joinedDate: new Date(found.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
             email: found.contact_email,
             phone: found.rector_phone_number || 'N/A',
@@ -80,13 +105,15 @@ const InstitutionDetails: React.FC = () => {
     logo: 'GH',
     logoColor: 'bg-indigo-600',
     type: 'K-12 Education',
-    status: 'Active',
+    status: 'pending',
     joinedDate: 'Oct 12, 2023',
     email: 'admin@gha.edu',
     phone: '+1 (555) 012-3456',
     address: '123 Education Lane, New York, NY',
     subscription: 'Enterprise Plan'
   };
+  const statusNormalized = (displayInstitution.status || '').toString().toLowerCase();
+  const statusLabel = statusNormalized ? `${statusNormalized.charAt(0).toUpperCase()}${statusNormalized.slice(1)}` : '';
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -114,6 +141,132 @@ const InstitutionDetails: React.FC = () => {
       default:
         return <Overview />;
     }
+  };
+
+  const refreshInstitutionStatus = async (institutionId: string) => {
+    const attempts = 6;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const refreshed = await superAdminService.getInstitution(institutionId);
+        const refreshedStatus = (refreshed?.status || '').toString().toLowerCase();
+        if (refreshedStatus) {
+          setInstitution((prev: any) => ({ ...(prev || {}), status: refreshedStatus }));
+        }
+        if (refreshedStatus && refreshedStatus !== 'suspended') return refreshedStatus;
+      } catch {
+        // ignore and retry
+      }
+      await new Promise((r) => setTimeout(r, 700));
+    }
+    return (institution?.status || '').toString().toLowerCase();
+  };
+
+  const handleSubmit = () => {
+    if (!id) return;
+    setConfirmModal({
+      isOpen: true,
+      type: 'info',
+      title: 'Submit Application',
+      message: 'Are you sure you want to submit this application for review? It will be moved to pending status.',
+      confirmText: 'Submit',
+      onConfirm: async () => {
+        try {
+          setIsProcessing(true);
+          await superAdminService.updateInstitution(id, { status: 'pending' });
+          setInstitution((prev: any) => ({ ...prev, status: 'pending' }));
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Failed to submit application', error);
+          alert('Failed to submit application');
+        } finally {
+          setIsProcessing(false);
+        }
+      }
+    });
+  };
+
+  const handleSuspend = () => {
+    if (!id) return;
+    setConfirmModal({
+      isOpen: true,
+      type: 'danger',
+      title: 'Suspend Institution',
+      message: 'Are you sure you want to suspend this institution? This will restrict access for all users under this institution.',
+      confirmText: 'Suspend',
+      onConfirm: async () => {
+        try {
+          setIsProcessing(true);
+          await superAdminService.suspendInstitution(id);
+          // Refresh or update state
+          setInstitution((prev: any) => ({ ...prev, status: 'suspended' }));
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Failed to suspend institution', error);
+          alert('Failed to suspend institution');
+        } finally {
+          setIsProcessing(false);
+        }
+      }
+    });
+  };
+
+  const handleReactivate = () => {
+    if (!id) return;
+    setConfirmModal({
+      isOpen: true,
+      type: 'success',
+      title: 'Reactivate Institution',
+      message: 'Are you sure you want to reactivate this institution? Access will be restored.',
+      confirmText: 'Reactivate',
+      onConfirm: async () => {
+        try {
+          setIsProcessing(true);
+          await superAdminService.reactivateInstitution(id);
+          const newStatus = await refreshInstitutionStatus(id);
+          if (newStatus === 'suspended') {
+            alert('Reactivation was requested, but the institution is still suspended. This usually means the backend did not change the status. Please try again or check the server logs.');
+          }
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Failed to reactivate institution', error);
+          alert('Failed to reactivate institution');
+        } finally {
+          setIsProcessing(false);
+        }
+      }
+    });
+  };
+
+  const handleApprove = () => {
+    if (!id) return;
+    setConfirmModal({
+      isOpen: true,
+      type: 'success',
+      title: 'Approve Institution',
+      message: 'Are you sure you want to approve this institution? This will grant full access to the portal.',
+      confirmText: 'Approve',
+      onConfirm: async () => {
+        try {
+          setIsProcessing(true);
+          
+          if (statusNormalized === 'suspended') {
+            await superAdminService.reactivateInstitution(id);
+            await refreshInstitutionStatus(id);
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            return;
+          }
+
+          await superAdminService.approveInstitution(id);
+          await refreshInstitutionStatus(id);
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        } catch (error) {
+          console.error('Failed to approve institution', error);
+          alert('Failed to approve institution');
+        } finally {
+          setIsProcessing(false);
+        }
+      }
+    });
   };
 
   return (
@@ -174,19 +327,27 @@ const InstitutionDetails: React.FC = () => {
               
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                 <div className="flex items-start gap-5">
-                  <div className={`w-20 h-20 rounded-2xl ${displayInstitution.logoColor} flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-indigo-500/20 ring-4 ring-white dark:ring-[#151e32] overflow-hidden`}>
-                    {displayInstitution.logo.startsWith('http') ? (
-                        <img src={displayInstitution.logo} alt="Logo" className="w-full h-full object-cover" />
-                    ) : (
-                        displayInstitution.logo
-                    )}
-                  </div>
+                  <LogoAvatar
+                    src={displayInstitution.logo}
+                    alt="Logo"
+                    fallback={displayInstitution.name ? displayInstitution.name.substring(0, 2).toUpperCase() : 'GH'}
+                    className={`w-20 h-20 rounded-2xl ${displayInstitution.logoColor} flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-indigo-500/20 ring-4 ring-white dark:ring-[#151e32] overflow-hidden`}
+                  />
                   <div className="pt-1">
                     <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3 mb-2">
                       {displayInstitution.name}
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold border border-emerald-200 dark:border-emerald-500/20 uppercase tracking-wide flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        {displayInstitution.status}
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border uppercase tracking-wide flex items-center gap-1.5 ${
+                        statusNormalized === 'suspended' 
+                          ? 'bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20'
+                          : statusNormalized === 'draft' || statusNormalized === 'pending' || statusNormalized === 'queried'
+                          ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
+                          : 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          statusNormalized === 'suspended' ? 'bg-red-500' : 
+                          statusNormalized === 'draft' || statusNormalized === 'pending' || statusNormalized === 'queried' ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'
+                        }`}></span>
+                        {statusLabel}
                       </span>
                     </h1>
                     <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -214,14 +375,39 @@ const InstitutionDetails: React.FC = () => {
                     <Key size={16} />
                     <span>Credentials</span>
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
-                    <Edit size={16} />
-                    <span>Edit</span>
+                  {statusNormalized === 'draft' ? (
+                    <button 
+                      onClick={handleSubmit}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl text-sm font-bold hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors"
+                    >
+                      <Send size={16} />
+                      <span>Submit Application</span>
+                    </button>
+                ) : statusNormalized === 'suspended' ? (
+                  <button
+                    onClick={handleReactivate}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Reactivate</span>
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
-                    <Ban size={16} />
-                    <span>Suspend</span>
-                  </button>
+                ) : statusNormalized === 'pending' || statusNormalized === 'queried' ? (
+                  <button
+                      onClick={handleApprove}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"
+                    >
+                      <CheckCircle2 size={16} />
+                      <span>Approve</span>
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={handleSuspend}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <Ban size={16} />
+                      <span>Suspend</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -284,6 +470,17 @@ const InstitutionDetails: React.FC = () => {
       <div className="max-w-[1600px] mx-auto min-h-[400px]">
         {renderContent()}
       </div>
+
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        type={confirmModal.type}
+        isLoading={isProcessing}
+      />
     </div>
   );
 };
