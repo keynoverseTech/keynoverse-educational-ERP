@@ -12,6 +12,9 @@ export interface User {
   avatar?: string;
   passwordUpdated?: boolean;
   permissions?: PermissionSet;
+  level?: string | number;
+  cgpa?: number;
+  completedCourses?: string[];
 }
 
 export interface LoginResponse {

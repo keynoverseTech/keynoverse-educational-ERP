@@ -73,7 +73,7 @@ const getAcademicsOverviewData = (): Promise<AcademicsOverviewData> => {
             lastUpdated: '1 week ago', 
             type: 'Core',
             features: [
-              'Add new degree programmes (B.Sc, M.Sc)',
+              'Add new programmes (ND, HND)',
               'Set programme duration (years)',
               'Assign programmes to departments',
               'Define graduation requirements'

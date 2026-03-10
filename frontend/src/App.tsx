@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, type ReactElement } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -10,6 +10,7 @@ import {
   Calendar,
   Users,
   FileText,
+  Lock,
   Settings as SettingsIcon,
   DollarSign,
   MessageSquare,
@@ -22,7 +23,7 @@ import {
 import './App.css';
 
 // Context Providers
-import { AuthProvider } from './state/authContext';
+import { AuthProvider, useAuth } from './state/authContext';
 import { HRProvider } from './state/hrAccessControl';
 import { FinanceProvider } from './state/financeProvider';
 import { LibraryProvider } from './state/libraryProvider';
@@ -749,6 +750,116 @@ const staffItems = [
   { name: 'Profile', path: '/staff/profile', icon: Users },
 ];
 
+type ResearchProjectsEligibilityConfig = {
+  enabled: boolean;
+  eligibleLevels: string[];
+  minCgpa: number | null;
+  requiredCourses: string[];
+  restrictedMessage: string;
+};
+
+const getResearchProjectsEligibilityConfig = (): ResearchProjectsEligibilityConfig => {
+  const fallback: ResearchProjectsEligibilityConfig = {
+    enabled: false,
+    eligibleLevels: ['ND2', 'HND2'],
+    minCgpa: null,
+    requiredCourses: [],
+    restrictedMessage: 'Access restricted. Contact your department for more information.',
+  };
+
+  const raw = localStorage.getItem('research_projects_eligibility');
+  if (!raw) return fallback;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<ResearchProjectsEligibilityConfig>;
+    return {
+      enabled: Boolean(parsed.enabled),
+      eligibleLevels: Array.isArray(parsed.eligibleLevels) && parsed.eligibleLevels.length ? parsed.eligibleLevels : fallback.eligibleLevels,
+      minCgpa: typeof parsed.minCgpa === 'number' && Number.isFinite(parsed.minCgpa) ? parsed.minCgpa : null,
+      requiredCourses: Array.isArray(parsed.requiredCourses) ? parsed.requiredCourses : [],
+      restrictedMessage:
+        typeof parsed.restrictedMessage === 'string' && parsed.restrictedMessage.trim().length
+          ? parsed.restrictedMessage.trim()
+          : fallback.restrictedMessage,
+    };
+  } catch {
+    return fallback;
+  }
+};
+
+const normalizeLevel = (level: unknown) => {
+  if (typeof level === 'number') return String(level);
+  if (typeof level !== 'string') return '';
+  return level.trim().toUpperCase().replace(/\s+/g, '');
+};
+
+const normalizeCourseCode = (code: unknown) => {
+  if (typeof code !== 'string') return '';
+  return code.trim().toUpperCase().replace(/\s+/g, ' ');
+};
+
+const StudentResearchGuard = ({ children }: { children: ReactElement }) => {
+  const { user } = useAuth();
+  const config = getResearchProjectsEligibilityConfig();
+
+  if (!config.enabled) return children;
+
+  const reasons: string[] = [];
+
+  const userLevel = normalizeLevel((user as any)?.level ?? (user as any)?.currentLevel ?? (user as any)?.academicLevel);
+  const eligibleLevels = config.eligibleLevels.map((l) => normalizeLevel(l));
+  if (!userLevel) {
+    reasons.push('Student level is not available to verify eligibility.');
+  } else if (!eligibleLevels.includes(userLevel)) {
+    reasons.push(`Only students in ${config.eligibleLevels.join(' / ')} can access Research & Projects.`);
+  }
+
+  const userCgpa = (user as any)?.cgpa;
+  if (config.minCgpa !== null) {
+    if (typeof userCgpa !== 'number' || !Number.isFinite(userCgpa)) {
+      reasons.push('Student CGPA is not available to verify eligibility.');
+    } else if (userCgpa < config.minCgpa) {
+      reasons.push(`Minimum CGPA required is ${config.minCgpa}.`);
+    }
+  }
+
+  if (config.requiredCourses.length) {
+    const completed: string[] = Array.isArray((user as any)?.completedCourses) ? (user as any)?.completedCourses : [];
+    const normalizedCompleted = new Set(completed.map(normalizeCourseCode));
+    const missing = config.requiredCourses.map(normalizeCourseCode).filter((c) => c && !normalizedCompleted.has(c));
+    if (!completed.length) {
+      reasons.push('Completed courses are not available to verify eligibility.');
+    } else if (missing.length) {
+      reasons.push(`Required courses not completed: ${missing.join(', ')}.`);
+    }
+  }
+
+  if (reasons.length === 0) return children;
+
+  return (
+    <div className="p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-sm text-center">
+        <div className="w-16 h-16 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-4">
+          <Lock className="text-red-600 dark:text-red-400" size={28} />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Access Restricted</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">{config.restrictedMessage}</p>
+        <div className="mt-6 text-left max-w-2xl mx-auto bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Eligibility Details</p>
+          <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-200">
+            {reasons.map((r, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
+                <span>{r}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   return (
     <HRProvider>
@@ -1106,14 +1217,14 @@ function App() {
                         <Route path="/student/academics/timetable/exams" element={<StudentExamsTimetable />} />
 
                         {/* Student Research & Projects */}
-                        <Route path="/student/academics/research/dashboard" element={<StudentResearchDashboard />} />
-                        <Route path="/student/academics/research/proposal" element={<StudentTopicProposal />} />
-                        <Route path="/student/academics/research/project" element={<StudentMyProject />} />
-                        <Route path="/student/academics/research/submissions" element={<StudentProjectSubmissions />} />
-                        <Route path="/student/academics/research/feedback" element={<StudentSupervisorFeedback />} />
-                        <Route path="/student/academics/research/plagiarism" element={<StudentPlagiarismReport />} />
-                        <Route path="/student/academics/research/defense" element={<StudentDefenseSchedule />} />
-                        <Route path="/student/academics/research/archive" element={<StudentProjectArchive />} />
+                        <Route path="/student/academics/research/dashboard" element={<StudentResearchGuard><StudentResearchDashboard /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/proposal" element={<StudentResearchGuard><StudentTopicProposal /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/project" element={<StudentResearchGuard><StudentMyProject /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/submissions" element={<StudentResearchGuard><StudentProjectSubmissions /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/feedback" element={<StudentResearchGuard><StudentSupervisorFeedback /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/plagiarism" element={<StudentResearchGuard><StudentPlagiarismReport /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/defense" element={<StudentResearchGuard><StudentDefenseSchedule /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/archive" element={<StudentResearchGuard><StudentProjectArchive /></StudentResearchGuard>} />
 
                         <Route path="/student/courses" element={<Navigate to="/student/academics/courses" replace />} />
                         <Route path="/student/results" element={<Navigate to="/student/academics/results" replace />} />

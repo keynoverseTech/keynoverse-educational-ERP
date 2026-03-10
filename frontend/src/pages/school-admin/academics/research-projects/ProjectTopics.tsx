@@ -11,7 +11,8 @@ import {
   Tag, 
   Download,
   X,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 
 interface Topic {
@@ -31,6 +32,37 @@ interface Topic {
   documentUrl: string;
 }
 
+interface ArchiveProject {
+  id: number;
+  title: string;
+  student: string;
+  year: string;
+  department: string;
+  faculty: string;
+  programme: string;
+  abstract: string;
+  keywords: string[];
+}
+
+type SemanticCheckVerdict = 'none' | 'low' | 'moderate' | 'high';
+
+interface SemanticMatch {
+  projectId: number;
+  title: string;
+  year: string;
+  department: string;
+  programme: string;
+  student: string;
+  score: number;
+}
+
+interface SemanticCheckState {
+  status: 'idle' | 'checking' | 'done';
+  verdict: SemanticCheckVerdict;
+  matches: SemanticMatch[];
+  maxScore: number;
+}
+
 const ProjectTopics: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterFaculty, setFilterFaculty] = useState('All');
@@ -38,11 +70,17 @@ const ProjectTopics: React.FC = () => {
   const [filterProgramme, setFilterProgramme] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [semanticCheck, setSemanticCheck] = useState<SemanticCheckState>({
+    status: 'idle',
+    verdict: 'none',
+    matches: [],
+    maxScore: 0
+  });
 
   // Mock Filters
   const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
   const departments = ['Computer Science', 'Architecture', 'Biology', 'Physics', 'Mathematics'];
-  const programmes = ['B.Sc Computer Science', 'B.Sc Architecture', 'B.Sc Biology'];
+  const programmes = ['HND Computer Science', 'HND Architecture', 'HND Biology'];
 
   // Mock Data
   const [topics, setTopics] = useState<Topic[]>([
@@ -53,7 +91,7 @@ const ProjectTopics: React.FC = () => {
       matricNumber: 'SCI/20/001',
       department: 'Computer Science',
       faculty: 'Faculty of Sciences',
-      programme: 'B.Sc Computer Science',
+      programme: 'HND Computer Science',
       supervisor: 'Dr. Alan Smith',
       date: '2024-03-10',
       status: 'Pending',
@@ -69,7 +107,7 @@ const ProjectTopics: React.FC = () => {
       matricNumber: 'ENV/20/045',
       department: 'Architecture',
       faculty: 'Faculty of Environmental Sciences',
-      programme: 'B.Sc Architecture',
+      programme: 'HND Architecture',
       supervisor: 'Prof. Sarah Connor',
       date: '2024-03-08',
       status: 'Approved',
@@ -85,7 +123,7 @@ const ProjectTopics: React.FC = () => {
       matricNumber: 'SCI/20/022',
       department: 'Computer Science',
       faculty: 'Faculty of Sciences',
-      programme: 'B.Sc Computer Science',
+      programme: 'HND Computer Science',
       supervisor: 'Dr. Alan Smith',
       date: '2024-03-05',
       status: 'Rejected',
@@ -95,6 +133,131 @@ const ProjectTopics: React.FC = () => {
       documentUrl: '#'
     },
   ]);
+
+  const archive: ArchiveProject[] = [
+    {
+      id: 1,
+      title: 'Machine Learning in Agriculture',
+      student: 'David Green',
+      year: '2023',
+      department: 'Computer Science',
+      faculty: 'Faculty of Sciences',
+      programme: 'HND Computer Science',
+      abstract: 'Optimizing crop yield using predictive analytics and IoT sensors.',
+      keywords: ['ML', 'IoT', 'Agriculture'],
+    },
+    {
+      id: 2,
+      title: 'Renewable Energy Systems for Rural Areas',
+      student: 'Emily White',
+      year: '2022',
+      department: 'Electrical Engineering',
+      faculty: 'Faculty of Engineering',
+      programme: 'B.Eng Electrical Engineering',
+      abstract: 'Design and implementation of cost-effective solar-wind hybrid systems.',
+      keywords: ['Solar', 'Wind', 'Rural Electrification'],
+    },
+    {
+      id: 3,
+      title: 'AI-Assisted Medical Imaging Diagnostics',
+      student: 'Grace Peter',
+      year: '2023',
+      department: 'Computer Science',
+      faculty: 'Faculty of Sciences',
+      programme: 'HND Computer Science',
+      abstract: 'Using deep learning to detect anomalies in radiology images for faster clinical decision support.',
+      keywords: ['AI', 'Deep Learning', 'Healthcare', 'Diagnosis'],
+    },
+    {
+      id: 4,
+      title: 'Blockchain-Based Secure E-Voting',
+      student: 'Michael Okon',
+      year: '2022',
+      department: 'Computer Science',
+      faculty: 'Faculty of Sciences',
+      programme: 'HND Computer Science',
+      abstract: 'A decentralized voting framework leveraging blockchain immutability and cryptographic verification.',
+      keywords: ['Blockchain', 'Voting', 'Security', 'Decentralization'],
+    },
+  ];
+
+  const tokenize = (text: string) =>
+    text
+      .toLowerCase()
+      .split(/[^a-z0-9]+/g)
+      .filter((t) => t.length >= 3);
+
+  const jaccard = (a: string[], b: string[]) => {
+    const aSet = new Set(a);
+    const bSet = new Set(b);
+    if (aSet.size === 0 && bSet.size === 0) return 0;
+    let intersection = 0;
+    for (const token of aSet) {
+      if (bSet.has(token)) intersection += 1;
+    }
+    const union = aSet.size + bSet.size - intersection;
+    return union === 0 ? 0 : intersection / union;
+  };
+
+  const getVerdictFromScore = (score: number): SemanticCheckVerdict => {
+    if (score <= 0) return 'none';
+    if (score >= 70) return 'high';
+    if (score >= 40) return 'moderate';
+    return 'low';
+  };
+
+  const runSemanticSimilarityCheck = async (topic: Topic) => {
+    setSemanticCheck({
+      status: 'checking',
+      verdict: 'none',
+      matches: [],
+      maxScore: 0
+    });
+
+    await new Promise<void>((resolve) => {
+      window.setTimeout(() => resolve(), 1400);
+    });
+
+    const titleTokens = tokenize(topic.title);
+    const abstractTokens = tokenize(topic.abstract);
+    const keywordTokens = topic.keywords.map((k) => k.toLowerCase());
+
+    const matches: SemanticMatch[] = archive
+      .map((p) => {
+        const pTitleTokens = tokenize(p.title);
+        const pAbstractTokens = tokenize(p.abstract);
+        const pKeywordTokens = p.keywords.map((k) => k.toLowerCase());
+
+        const titleSim = jaccard(titleTokens, pTitleTokens);
+        const keywordSim = jaccard(keywordTokens, pKeywordTokens);
+        const abstractSim = jaccard(abstractTokens, pAbstractTokens);
+
+        const score = Math.round((titleSim * 0.6 + keywordSim * 0.3 + abstractSim * 0.1) * 100);
+
+        return {
+          projectId: p.id,
+          title: p.title,
+          year: p.year,
+          department: p.department,
+          programme: p.programme,
+          student: p.student,
+          score
+        };
+      })
+      .filter((m) => m.score >= 20)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    const maxScore = matches.length ? matches[0].score : 0;
+    const verdict = getVerdictFromScore(maxScore);
+
+    setSemanticCheck({
+      status: 'done',
+      verdict,
+      matches,
+      maxScore
+    });
+  };
 
   const handleStatusChange = (id: number, newStatus: 'Approved' | 'Rejected') => {
     setTopics(topics.map(topic => 
@@ -238,7 +401,15 @@ const ProjectTopics: React.FC = () => {
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
-                      onClick={() => setSelectedTopic(topic)}
+                      onClick={() => {
+                        setSelectedTopic(topic);
+                        setSemanticCheck({
+                          status: 'idle',
+                          verdict: 'none',
+                          matches: [],
+                          maxScore: 0
+                        });
+                      }}
                       className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-500 dark:text-gray-400" 
                       title="View Details"
                     >
@@ -375,6 +546,114 @@ const ProjectTopics: React.FC = () => {
                     ))}
                   </div>
                 </div>
+                {selectedTopic.status === 'Pending' && (
+                  <div className="md:col-span-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Semantic Similarity</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                          Check this topic against the Project Archive for similar or existing projects.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => runSemanticSimilarityCheck(selectedTopic)}
+                        disabled={semanticCheck.status === 'checking'}
+                        className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+                          semanticCheck.status === 'checking'
+                            ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        {semanticCheck.status === 'checking' ? (
+                          <>
+                            <Loader2 size={16} className="animate-spin" />
+                            Checking...
+                          </>
+                        ) : (
+                          <>
+                            <Search size={16} />
+                            Check Similarity
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {semanticCheck.status === 'done' && (
+                      <div className="mt-4">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                                semanticCheck.verdict === 'high'
+                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                  : semanticCheck.verdict === 'moderate'
+                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                  : semanticCheck.verdict === 'low'
+                                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                  : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                              }`}
+                            >
+                              {semanticCheck.verdict === 'high'
+                                ? 'High similarity'
+                                : semanticCheck.verdict === 'moderate'
+                                ? 'Moderate similarity'
+                                : semanticCheck.verdict === 'low'
+                                ? 'Low similarity'
+                                : 'No similarity'}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              Top match: {semanticCheck.maxScore ? `${semanticCheck.maxScore}%` : 'N/A'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                            {semanticCheck.verdict === 'high'
+                              ? 'Recommendation: Reject or request a different topic.'
+                              : semanticCheck.verdict === 'moderate'
+                              ? 'Recommendation: Review carefully before approving.'
+                              : semanticCheck.verdict === 'low'
+                              ? 'Recommendation: Safe to approve.'
+                              : 'Recommendation: Safe to approve.'}
+                          </span>
+                        </div>
+
+                        <div className="mt-3 space-y-2">
+                          {semanticCheck.matches.length === 0 ? (
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              No similar projects found in the archive.
+                            </div>
+                          ) : (
+                            semanticCheck.matches.map((m) => (
+                              <div
+                                key={m.projectId}
+                                className="flex flex-col md:flex-row md:items-center justify-between gap-2 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl"
+                              >
+                                <div>
+                                  <p className="text-sm font-bold text-gray-900 dark:text-white">{m.title}</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {m.programme} • {m.department} • {m.year} • {m.student}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2 md:justify-end">
+                                  <div className="w-28 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-2 rounded-full ${
+                                        m.score >= 70 ? 'bg-red-500' : m.score >= 40 ? 'bg-amber-500' : 'bg-green-500'
+                                      }`}
+                                      style={{ width: `${Math.min(100, Math.max(0, m.score))}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-200 w-10 text-right">
+                                    {m.score}%
+                                  </span>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="md:col-span-2">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Proposal Document</label>
                   <div className="mt-2 flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 hover:border-blue-500 transition-colors cursor-pointer group">

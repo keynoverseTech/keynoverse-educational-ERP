@@ -47,7 +47,7 @@ const MOCK_SESSIONS: AttendanceSession[] = [
     courseTitle: 'Operating Systems',
     lecturerName: 'Dr. Alan Turing',
     department: 'Computer Science',
-    program: 'B.Sc. Computer Science',
+    program: 'HND Computer Science',
     date: '2024-03-20',
     startTime: '10:00',
     endTime: '12:00',

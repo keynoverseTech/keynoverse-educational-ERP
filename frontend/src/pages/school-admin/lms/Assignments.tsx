@@ -47,7 +47,7 @@ const Assignments: React.FC = () => {
   // Mock Data for Dropdowns
   const faculties = ['Faculty of Science', 'Faculty of Engineering', 'Faculty of Arts'];
   const departments = ['Computer Science', 'Electrical Engineering', 'English'];
-  const programmes = ['B.Sc. Computer Science', 'B.Eng. Electrical', 'B.A. English'];
+  const programmes = ['HND Computer Science', 'B.Eng. Electrical', 'B.A. English'];
   const courses = [
     { code: 'CSC 401', title: 'Advanced Software Engineering' },
     { code: 'CSC 402', title: 'Artificial Intelligence' },
