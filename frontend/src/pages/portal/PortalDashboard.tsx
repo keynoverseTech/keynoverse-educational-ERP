@@ -1,6 +1,8 @@
-import { CheckCircle2, Clock, ArrowRight, ShieldCheck, Building2, User, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, Clock, ArrowRight, ShieldCheck, Building2, User, FileText, Ticket, BookOpen } from 'lucide-react';
 
 const PortalDashboard = () => {
+  const navigate = useNavigate();
   const steps = [
     { id: 1, title: 'Registration Submitted', status: 'completed', date: 'Oct 12, 2023' },
     { id: 2, title: 'Documents Uploaded', subtitle: '(Logo and Accreditation Letter)', status: 'completed', date: 'Oct 14, 2023' },
@@ -94,7 +96,10 @@ const PortalDashboard = () => {
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-sm">
             <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 flex items-center gap-4 group cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all">
+              <div
+                onClick={() => navigate('/portal/payments')}
+                className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 flex items-center gap-4 group cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all"
+              >
                 <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Clock size={20} />
                 </div>
@@ -104,7 +109,10 @@ const PortalDashboard = () => {
                 </div>
                 <ArrowRight size={18} className="text-blue-600 group-hover:translate-x-1 transition-transform" />
               </div>
-              <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30 flex items-center gap-4 group cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all">
+              <div
+                onClick={() => navigate('/portal/documents')}
+                className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30 flex items-center gap-4 group cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-all"
+              >
                 <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
                   <FileText size={20} />
                 </div>
@@ -113,6 +121,32 @@ const PortalDashboard = () => {
                   <div className="text-[11px] text-emerald-700/70 dark:text-emerald-300/70 font-bold">View already uploaded files</div>
                 </div>
                 <ArrowRight size={18} className="text-emerald-600 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <div
+                onClick={() => navigate('/portal/tickets')}
+                className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 flex items-center gap-4 group cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Ticket size={20} />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-black text-amber-900 dark:text-amber-100">Submit Ticket</div>
+                  <div className="text-[11px] text-amber-700/70 dark:text-amber-300/70 font-bold">Get support from our team</div>
+                </div>
+                <ArrowRight size={18} className="text-amber-600 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <div
+                onClick={() => navigate('/portal/manual')}
+                className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30 flex items-center gap-4 group cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all"
+              >
+                <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BookOpen size={20} />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-black text-purple-900 dark:text-purple-100">Open Manual</div>
+                  <div className="text-[11px] text-purple-700/70 dark:text-purple-300/70 font-bold">Step-by-step onboarding guide</div>
+                </div>
+                <ArrowRight size={18} className="text-purple-600 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </div>
@@ -162,7 +196,10 @@ const PortalDashboard = () => {
             <p className="text-sm text-blue-100/90 mt-2 font-medium">
               If you encounter any issues during the onboarding process, our technical team is here to help.
             </p>
-            <button className="mt-6 w-full py-3 bg-white text-blue-700 rounded-xl font-black text-sm hover:bg-blue-50 transition-colors">
+            <button
+              onClick={() => navigate('/portal/tickets')}
+              className="mt-6 w-full py-3 bg-white text-blue-700 rounded-xl font-black text-sm hover:bg-blue-50 transition-colors"
+            >
               Contact Support
             </button>
           </div>
@@ -180,6 +217,12 @@ const PortalDashboard = () => {
                  </div>
                ))}
             </div>
+            <button
+              onClick={() => navigate('/portal/manual')}
+              className="mt-5 w-full py-3 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-black text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              Open Full Manual
+            </button>
           </div>
         </div>
       </div>

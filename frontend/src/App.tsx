@@ -62,6 +62,8 @@ const PortalLayout = lazy(() => import('./pages/portal/PortalLayout'));
 const PortalDashboard = lazy(() => import('./pages/portal/PortalDashboard'));
 const PortalDocuments = lazy(() => import('./pages/portal/PortalDocuments'));
 const PortalPayments = lazy(() => import('./pages/portal/PortalPayments'));
+const PortalTickets = lazy(() => import('./pages/portal/PortalTickets'));
+const PortalManual = lazy(() => import('./pages/portal/PortalManual'));
 
 // Super Admin
 const SuperAdminDashboard = lazy(() => import('./pages/super-admin/Dashboard'));
@@ -218,10 +220,10 @@ const EnquiriesLog = lazy(() => import('./pages/school-admin/Reception/Enquiries
 const MailLog = lazy(() => import('./pages/school-admin/Reception/MailLog'));
 
 // School Admin - Finance
+const FinanceDashboard = lazy(() => import('./pages/school-admin/finance/FinanceDashboard'));
 const GeneralLedgerPage = lazy(() => import('./pages/school-admin/finance/administrative-accounting/GeneralLedger'));
 const PayrollDisbursementPage = lazy(() => import('./pages/school-admin/finance/administrative-accounting/PayrollDisbursement'));
 const AccountsPage = lazy(() => import('./pages/school-admin/finance/AccountsPage'));
-const StudentFinanceDashboard = lazy(() => import('./pages/school-admin/finance/student-accounting/FinanceDashboard'));
 const StudentFeeConfigurationPage = lazy(() => import('./pages/school-admin/finance/student-accounting/FeeConfigurationPage'));
 const StudentInvoicesPage = lazy(() => import('./pages/school-admin/finance/student-accounting/InvoicesPage'));
 const StudentInvoiceDetailsPage = lazy(() => import('./pages/school-admin/finance/student-accounting/InvoiceDetailsPage'));
@@ -472,11 +474,11 @@ const schoolAdminItems = [
     name: 'Finance', 
     icon: DollarSign,
     subItems: [
+      { name: 'Dashboard', path: '/school-admin/finance/dashboard' },
       { name: 'Bank Accounts', path: '/school-admin/finance/accounts' },
       {
         name: 'Student Accounting',
         subItems: [
-          { name: 'Dashboard', path: '/school-admin/finance/student-accounting/dashboard' },
           { name: 'Fee Configuration', path: '/school-admin/finance/student-accounting/fee-structure' },
           { name: 'Invoices', path: '/school-admin/finance/student-accounting/invoices' },
           { name: 'Payments & Receipts', path: '/school-admin/finance/student-accounting/payments' },
@@ -902,6 +904,8 @@ function App() {
                             <Route path="dashboard" element={<PortalDashboard />} />
                             <Route path="documents" element={<PortalDocuments />} />
                             <Route path="payments" element={<PortalPayments />} />
+                            <Route path="tickets" element={<PortalTickets />} />
+                            <Route path="manual" element={<PortalManual />} />
                           </Route>
 
                           {/* Super Admin Routes */}
@@ -1182,7 +1186,8 @@ function App() {
                         <Route path="/school-admin/events/upcoming" element={<UpcomingEventsPage />} />
 
                         {/* Finance - Student Accounting */}
-                        <Route path="/school-admin/finance/student-accounting/dashboard" element={<StudentFinanceDashboard />} />
+                        <Route path="/school-admin/finance/dashboard" element={<FinanceDashboard />} />
+                        <Route path="/school-admin/finance/student-accounting/dashboard" element={<Navigate to="/school-admin/finance/dashboard" replace />} />
                         <Route path="/school-admin/finance/student-accounting/fee-structure" element={<StudentFeeConfigurationPage />} />
                         <Route path="/school-admin/finance/student-accounting/invoices" element={<StudentInvoicesPage />} />
                         <Route path="/school-admin/finance/student-accounting/invoices/:id" element={<StudentInvoiceDetailsPage />} />

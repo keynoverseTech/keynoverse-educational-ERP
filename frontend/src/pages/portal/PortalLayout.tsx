@@ -4,6 +4,8 @@ import {
   LayoutDashboard, 
   FileText, 
   CreditCard, 
+  Ticket,
+  BookOpen,
   LogOut, 
   Menu, 
   X,
@@ -23,6 +25,8 @@ const PortalLayout = () => {
     { label: 'Dashboard', path: '/portal/dashboard', icon: LayoutDashboard },
     { label: 'Documents', path: '/portal/documents', icon: FileText },
     { label: 'Payments', path: '/portal/payments', icon: CreditCard },
+    { label: 'Tickets', path: '/portal/tickets', icon: Ticket },
+    { label: 'Manual', path: '/portal/manual', icon: BookOpen },
   ];
 
   return (
