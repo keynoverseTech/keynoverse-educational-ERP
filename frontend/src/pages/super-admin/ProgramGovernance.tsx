@@ -3,7 +3,6 @@ import {
   GraduationCap, 
   Plus, 
   Edit2, 
-  Trash2, 
   Globe, 
   Search,
   Building2,
@@ -11,9 +10,12 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Calendar
+  Calendar,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react';
 import superAdminService from '../../services/superAdminApi';
+import type { ProgramAssignmentData } from '../../services/superAdminApi';
 
 // --- Interfaces ---
 
@@ -91,7 +93,7 @@ const ProgramGovernance: React.FC = () => {
             
             degreeType: p.programme?.type || p.degree_type || p.type || 'N/A',
             yearGranted: p.year_granted || p.date_granted?.split('-')[0],
-            accreditationStatus: (p.accreditation_status === 'approved' || p.status === 'approved') ? 'Approved' : 'Pending',
+            accreditationStatus: deriveAccreditationStatus(p),
             expirationDate: p.expiration_date,
             studentCapacity: p.capacity || p.student_capacity,
             institutionId: selectedInstitutionId,
@@ -137,6 +139,23 @@ const ProgramGovernance: React.FC = () => {
   }, [programmes, searchQuery]);
 
   // --- Handlers ---
+  const normalizeAccreditationStatus = (
+    value: GlobalProgramme['accreditationStatus']
+  ): ProgramAssignmentData['accreditation_status'] => {
+    if (value === 'Approved') return 'approved';
+    if (value === 'Expired') return 'denied';
+    return 'pending';
+  };
+
+  const deriveAccreditationStatus = (p: any) => {
+    const raw = (p?.accreditation_status || p?.status || '').toString().toLowerCase();
+    const expirationDate = p?.expiration_date ? new Date(p.expiration_date) : null;
+    const isExpiredByDate = expirationDate ? expirationDate.getTime() < Date.now() : false;
+    if (raw === 'denied' || raw === 'expired' || isExpiredByDate) return 'Expired' as const;
+    if (raw === 'approved') return 'Approved' as const;
+    return 'Pending' as const;
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedInstitutionId) return;
@@ -156,7 +175,7 @@ const ProgramGovernance: React.FC = () => {
            institution_id: selectedInstitutionId,
            programme_id: currentItem.programmeId,
            year_granted: parseInt(currentItem.yearGranted || '2024'),
-           accreditation_status: (currentItem.accreditationStatus?.toLowerCase() || 'pending') as any,
+           accreditation_status: normalizeAccreditationStatus(currentItem.accreditationStatus),
            capacity: currentItem.studentCapacity || 100,
            expiration_date: currentItem.expirationDate || '2030-01-01',
            is_active: true
@@ -167,11 +186,16 @@ const ProgramGovernance: React.FC = () => {
           // UPDATE EXISTING ASSIGNMENT
           // Use the Assignment ID (currentItem.id)
           // Ensure we include institution_id and programme_id even for updates if required by validation
+          if (!currentItem.programmeId) {
+            alert('Programme is missing for this assignment');
+            setIsSubmitting(false);
+            return;
+          }
           const payload = {
             institution_id: selectedInstitutionId,
             programme_id: currentItem.programmeId,
             year_granted: parseInt(currentItem.yearGranted || '2024'),
-            accreditation_status: (currentItem.accreditationStatus?.toLowerCase() || 'pending') as any,
+            accreditation_status: normalizeAccreditationStatus(currentItem.accreditationStatus),
             capacity: currentItem.studentCapacity || 100,
             expiration_date: currentItem.expirationDate,
             is_active: currentItem.status === 'active'
@@ -206,7 +230,7 @@ const ProgramGovernance: React.FC = () => {
                   'Unknown Program',
             degreeType: p.programme?.type || p.degree_type || 'N/A',
             yearGranted: p.year_granted,
-            accreditationStatus: (p.accreditation_status === 'approved') ? 'Approved' : 'Pending',
+            accreditationStatus: deriveAccreditationStatus(p),
             expirationDate: p.expiration_date,
             studentCapacity: p.capacity,
             institutionId: selectedInstitutionId,
@@ -225,15 +249,30 @@ const ProgramGovernance: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to remove this program assignment?')) return;
-    
+  const handleToggleActive = async (prog: GlobalProgramme) => {
+    if (!selectedInstitutionId || !prog.id) return;
+    if (!prog.programmeId) {
+      alert('Programme is missing for this assignment');
+      return;
+    }
     try {
-        await superAdminService.deleteInstitutionProgram(id);
-        setProgrammes(programmes.filter(p => p.id !== id));
+      const nextIsActive = prog.status !== 'active';
+      const payload = {
+        institution_id: selectedInstitutionId,
+        programme_id: prog.programmeId,
+        year_granted: parseInt((prog.yearGranted || '2024').toString()),
+        accreditation_status: normalizeAccreditationStatus(prog.accreditationStatus),
+        capacity: prog.studentCapacity || 100,
+        expiration_date: prog.expirationDate || '2030-01-01',
+        is_active: nextIsActive,
+      };
+      await superAdminService.updateInstitutionProgram(prog.id, payload);
+      setProgrammes(prev =>
+        prev.map(p => (p.id === prog.id ? { ...p, status: nextIsActive ? 'active' : 'inactive' } : p))
+      );
     } catch (err) {
-        console.error('Failed to delete', err);
-        alert('Failed to delete program assignment');
+      console.error('Failed to update programme status', err);
+      alert('Failed to update programme status');
     }
   };
 
@@ -372,15 +411,22 @@ const ProgramGovernance: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase w-fit ${
-                          prog.accreditationStatus === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' :
-                          prog.accreditationStatus === 'Expired' ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' :
-                          'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-                        }`}>
-                          {prog.accreditationStatus === 'Approved' ? <CheckCircle2 size={10} /> : 
-                           prog.accreditationStatus === 'Expired' ? <XCircle size={10} /> : <AlertTriangle size={10} />}
-                          {prog.accreditationStatus}
-                        </span>
+                        {prog.status !== 'active' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase w-fit bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                            <ToggleLeft size={10} />
+                            Disabled
+                          </span>
+                        ) : (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase w-fit ${
+                            prog.accreditationStatus === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' :
+                            prog.accreditationStatus === 'Expired' ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' :
+                            'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                          }`}>
+                            {prog.accreditationStatus === 'Approved' ? <CheckCircle2 size={10} /> : 
+                             prog.accreditationStatus === 'Expired' ? <XCircle size={10} /> : <AlertTriangle size={10} />}
+                            {prog.accreditationStatus}
+                          </span>
+                        )}
                         <span className="text-[10px] text-gray-400">Exp: {prog.expirationDate || 'N/A'}</span>
                       </div>
                     </td>
@@ -399,10 +445,14 @@ const ProgramGovernance: React.FC = () => {
                           <Edit2 size={14} />
                         </button>
                         <button 
-                          onClick={() => handleDelete(prog.id)}
-                          className="p-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40"
+                          onClick={() => handleToggleActive(prog)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            prog.status === 'active'
+                              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                          }`}
                         >
-                          <Trash2 size={14} />
+                          {prog.status === 'active' ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                         </button>
                       </div>
                     </td>

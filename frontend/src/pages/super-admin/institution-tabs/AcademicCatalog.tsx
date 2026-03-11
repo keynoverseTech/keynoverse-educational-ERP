@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   GraduationCap, 
   Search,
@@ -15,6 +15,7 @@ import superAdminService from '../../../services/superAdminApi';
 
 interface Programme {
   id: string;
+  programmeId?: string;
   name: string;
   degreeType: string;
   status: 'active' | 'inactive';
@@ -34,6 +35,16 @@ const AcademicCatalog: React.FC<AcademicCatalogProps> = ({ institutionId }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [availableGlobalPrograms, setAvailableGlobalPrograms] = useState<any[]>([]);
+  const lastFetchedInstitutionIdRef = useRef<string | undefined>(undefined);
+
+  const deriveAccreditationStatus = (p: any) => {
+    const raw = (p?.accreditation_status || p?.status || '').toString().toLowerCase();
+    const expirationDate = p?.expiration_date ? new Date(p.expiration_date) : null;
+    const isExpiredByDate = expirationDate ? expirationDate.getTime() < Date.now() : false;
+    if (raw === 'denied' || raw === 'expired' || isExpiredByDate) return 'Expired' as const;
+    if (raw === 'approved') return 'Approved' as const;
+    return 'Pending' as const;
+  };
 
   // Fetch Global Programs first (for mapping names)
   useEffect(() => {
@@ -49,9 +60,28 @@ const AcademicCatalog: React.FC<AcademicCatalogProps> = ({ institutionId }) => {
     fetchGlobal();
   }, []);
 
+  useEffect(() => {
+    if (availableGlobalPrograms.length === 0) return;
+    setProgrammes(prev =>
+      prev.map(p => {
+        if (!p.programmeId) return p;
+        if (p.name && p.name !== 'Unknown Program') return p;
+        const match = availableGlobalPrograms.find((gp: any) => gp.id === p.programmeId);
+        if (!match) return p;
+        return {
+          ...p,
+          name: match.name || p.name,
+          degreeType: match.type || p.degreeType,
+        };
+      })
+    );
+  }, [availableGlobalPrograms]);
+
   // Fetch Institution Programs
   useEffect(() => {
     if (!institutionId) return;
+    if (lastFetchedInstitutionIdRef.current === institutionId) return;
+    lastFetchedInstitutionIdRef.current = institutionId;
 
     const fetchPrograms = async () => {
       setLoading(true);
@@ -61,6 +91,7 @@ const AcademicCatalog: React.FC<AcademicCatalogProps> = ({ institutionId }) => {
         
         const mapped = data.map((p: any) => ({
             id: p.id,
+            programmeId: p.programme_id,
             // Map name using global list if necessary
             name: p.programme?.name || 
                   (availableGlobalPrograms.find((gp: any) => gp.id === p.programme_id)?.name) ||
@@ -68,7 +99,7 @@ const AcademicCatalog: React.FC<AcademicCatalogProps> = ({ institutionId }) => {
             degreeType: p.programme?.type || 'N/A', // You might need to map this too if missing
             status: p.is_active ? 'active' : 'inactive',
             yearGranted: p.year_granted?.toString() || 'N/A',
-            accreditationStatus: (p.accreditation_status === 'approved' || p.status === 'approved') ? 'Approved' : 'Pending',
+            accreditationStatus: deriveAccreditationStatus(p),
             approvedStream: p.approved_stream || 'General',
             expirationDate: p.expiration_date,
             studentCapacity: p.capacity
@@ -76,18 +107,15 @@ const AcademicCatalog: React.FC<AcademicCatalogProps> = ({ institutionId }) => {
         setProgrammes(mapped);
       } catch (err) {
         console.error('Failed to fetch institution programs', err);
+        lastFetchedInstitutionIdRef.current = undefined;
       } finally {
         setLoading(false);
       }
     };
 
-    // Only fetch/map when we have the global list (or if it's empty but we tried)
-    // Actually, we should try to map even if global list is empty, just to show something.
-    // But ideally we wait for global list to populate for better names.
-    // Given the dependency array, it will re-run when availableGlobalPrograms changes.
     fetchPrograms();
 
-  }, [institutionId, availableGlobalPrograms]);
+  }, [institutionId]);
 
   const handleToggleStatus = (id: string) => {
     // In a real app, you would call an API here
@@ -123,7 +151,7 @@ const AcademicCatalog: React.FC<AcademicCatalogProps> = ({ institutionId }) => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input 
             type="text"
-            placeholder="Search approved programmes..."
+            placeholder="Search programmes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 pr-4 py-2 bg-white dark:bg-[#151e32] border border-gray-200 dark:border-gray-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white w-full"
@@ -167,15 +195,22 @@ const AcademicCatalog: React.FC<AcademicCatalogProps> = ({ institutionId }) => {
                 </div>
 
                 <div className="flex flex-col items-center">
-                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase w-fit mb-1 ${
-                      prog.accreditationStatus === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' :
-                      prog.accreditationStatus === 'Expired' ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' :
-                      'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
-                    }`}>
-                      {prog.accreditationStatus === 'Approved' ? <CheckCircle2 size={10} /> : 
-                       prog.accreditationStatus === 'Expired' ? <XCircle size={10} /> : <AlertTriangle size={10} />}
-                      {prog.accreditationStatus}
-                    </span>
+                   {prog.status !== 'active' ? (
+                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase w-fit mb-1 bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                       <XCircle size={10} />
+                       Disabled
+                     </span>
+                   ) : (
+                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase w-fit mb-1 ${
+                        prog.accreditationStatus === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' :
+                        prog.accreditationStatus === 'Expired' ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' :
+                        'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                      }`}>
+                        {prog.accreditationStatus === 'Approved' ? <CheckCircle2 size={10} /> : 
+                         prog.accreditationStatus === 'Expired' ? <XCircle size={10} /> : <AlertTriangle size={10} />}
+                        {prog.accreditationStatus}
+                      </span>
+                   )}
                     <span className="text-[10px] text-gray-400">Exp: {prog.expirationDate || 'N/A'}</span>
                 </div>
 
@@ -206,7 +241,7 @@ const AcademicCatalog: React.FC<AcademicCatalogProps> = ({ institutionId }) => {
           <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-400 mb-4">
             <Search size={32} />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">No approved programmes found</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">No programmes found</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search or add programmes in Program Governance</p>
         </div>
       )}
