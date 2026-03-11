@@ -53,6 +53,8 @@ const AuthSelection = lazy(() => import('./pages/auth/AuthSelection'));
 const SuperAdminLogin = lazy(() => import('./pages/auth/SuperAdminLogin'));
 const SchoolAdminLogin = lazy(() => import('./pages/auth/SchoolAdminLogin'));
 const StudentLogin = lazy(() => import('./pages/auth/StudentLogin'));
+const RegistrationPortal = lazy(() => import('./pages/registration/RegistrationPortal'));
+const InstitutionRegistration = lazy(() => import('./pages/registration/InstitutionRegistration'));
 
 // Super Admin
 const SuperAdminDashboard = lazy(() => import('./pages/super-admin/Dashboard'));
@@ -885,6 +887,8 @@ function App() {
                           <Route path="/auth/super-admin" element={<SuperAdminLogin />} />
                           <Route path="/auth/school-admin" element={<SchoolAdminLogin />} />
                           <Route path="/auth/student" element={<StudentLogin />} />
+                          <Route path="/register" element={<RegistrationPortal />} />
+                          <Route path="/register/new" element={<InstitutionRegistration />} />
 
                           {/* Super Admin Routes */}
                           <Route element={<SuperAdminLayout />}>
