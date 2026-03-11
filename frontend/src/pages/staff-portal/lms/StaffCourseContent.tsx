@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { 
   Folder, 
   FileText, 
-  Video, 
-  Link as LinkIcon, 
+  Download,
   MoreVertical,
   Plus,
   ChevronDown,
@@ -13,11 +12,12 @@ import {
   Calendar,
   BookOpen
 } from 'lucide-react';
+import { getAssignedCourses } from '../academics/assignedCourses';
 
 interface ContentItem {
   id: number;
   title: string;
-  type: 'pdf' | 'video' | 'doc' | 'slide' | 'link';
+  type: 'pdf' | 'doc' | 'slide';
   size: string;
   date: string;
   allowDownload: boolean;
@@ -31,11 +31,36 @@ interface Module {
   items: ContentItem[];
 }
 
-const StaffCourseContent: React.FC = () => {
-  useEffect(() => {
-    console.log("StaffCourseContent mounted");
-  }, []);
+type ModulesByCourse = Record<string, Module[]>;
 
+const STORAGE_KEY = 'staff_lms_course_content';
+
+const loadModulesByCourse = (): ModulesByCourse => {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as ModulesByCourse;
+  } catch {
+    return {};
+  }
+};
+
+const saveModulesByCourse = (data: ModulesByCourse) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+  }
+};
+
+const inferDocType = (fileName: string): ContentItem['type'] => {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  if (ext === 'ppt' || ext === 'pptx') return 'slide';
+  if (ext === 'doc' || ext === 'docx') return 'doc';
+  return 'pdf';
+};
+
+const StaffCourseContent = () => {
+  const assignedCourses = useMemo(() => getAssignedCourses(), []);
   const [expandedModules, setExpandedModules] = useState<number[]>([1]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -49,41 +74,14 @@ const StaffCourseContent: React.FC = () => {
     topic: '',
     description: '',
     uploadDate: new Date().toISOString().split('T')[0],
-    contentType: 'file', // file or link
-    linkUrl: '',
     allowDownload: true,
     files: null as FileList | null
   });
 
-  // Mock Data for Assigned Courses
-  const myCourses = [
-    { code: 'CSC 401', title: 'Advanced Software Engineering' },
-    { code: 'CSC 402', title: 'Artificial Intelligence' },
-    { code: 'ENG 301', title: 'Digital Logic Design' }
-  ];
+  const myCourses = useMemo(() => assignedCourses.map(c => ({ code: c.code, title: c.title })), [assignedCourses]);
 
-  // Mock Modules Data (would be filtered by course in real app)
-  const [modules, setModules] = useState<Module[]>([
-    {
-      id: 1,
-      title: 'Week 1: Introduction to Software Engineering',
-      description: 'Overview of SDLC models and methodologies.',
-      items: [
-        { id: 1, title: 'Lecture Slides - Week 1', type: 'slide', size: '2.4 MB', date: '2024-03-10', allowDownload: true },
-        { id: 2, title: 'Introduction Video', type: 'video', size: '15 mins', date: '2024-03-10', allowDownload: false },
-        { id: 3, title: 'Reading List', type: 'doc', size: '150 KB', date: '2024-03-10', allowDownload: true },
-      ]
-    },
-    {
-      id: 2,
-      title: 'Week 2: Requirements Engineering',
-      description: 'Techniques for gathering and analyzing requirements.',
-      items: [
-        { id: 4, title: 'Lecture Slides - Week 2', type: 'pdf', size: '1.8 MB', date: '2024-03-17', allowDownload: true },
-        { id: 5, title: 'Case Study: Hospital System', type: 'link', size: 'External', date: '2024-03-17', allowDownload: true },
-      ]
-    },
-  ]);
+  const [modulesByCourse, setModulesByCourse] = useState<ModulesByCourse>(() => loadModulesByCourse());
+  const modules = modulesByCourse[selectedCourse] ?? [];
 
   const toggleModule = (id: number) => {
     setExpandedModules(prev => 
@@ -91,14 +89,21 @@ const StaffCourseContent: React.FC = () => {
     );
   };
 
-  const getIcon = (type: string) => {
+  const getIcon = (type: ContentItem['type']) => {
     switch (type) {
-      case 'video': return <Video size={18} className="text-red-500" />;
-      case 'link': return <LinkIcon size={18} className="text-blue-500" />;
       case 'slide': return <BookOpen size={18} className="text-orange-500" />;
       default: return <FileText size={18} className="text-gray-500" />;
     }
   };
+
+  useEffect(() => {
+    if (!selectedCourse) {
+      setExpandedModules([1]);
+      return;
+    }
+    const firstId = modulesByCourse[selectedCourse]?.[0]?.id;
+    setExpandedModules(firstId ? [firstId] : []);
+  }, [modulesByCourse, selectedCourse]);
 
   const handleOpenModal = () => {
     // Pre-fill course info if selected
@@ -110,8 +115,6 @@ const StaffCourseContent: React.FC = () => {
       topic: '',
       description: '',
       uploadDate: new Date().toISOString().split('T')[0],
-      contentType: 'file',
-      linkUrl: '',
       allowDownload: true,
       files: null
     }));
@@ -135,39 +138,43 @@ const StaffCourseContent: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would send data to backend
-    
-    // Mock adding a new module/item for demonstration
-    const newItem: ContentItem = {
-      id: Date.now(),
-      title: formData.files && formData.files[0] ? formData.files[0].name : (formData.linkUrl || 'New Content'),
-      type: formData.contentType === 'link' ? 'link' : 'pdf', // Mock type
-      size: formData.files && formData.files[0] ? `${(formData.files[0].size / 1024 / 1024).toFixed(1)} MB` : 'External',
+    const files = formData.files ? Array.from(formData.files) : [];
+    if (!selectedCourse || files.length === 0) return;
+
+    const newItems: ContentItem[] = files.map((file) => ({
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      title: file.name,
+      type: inferDocType(file.name),
+      size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
       date: formData.uploadDate,
       allowDownload: formData.allowDownload
-    };
+    }));
 
-    setModules(prev => {
-      const existingModuleIndex = prev.findIndex(m => m.title === formData.topic);
-      
+    setModulesByCourse(prev => {
+      const current = prev[selectedCourse] ?? [];
+      const existingModuleIndex = current.findIndex(m => m.title === formData.topic);
+      let next: Module[];
+
       if (existingModuleIndex >= 0) {
-        // Add to existing module
-        const updatedModules = [...prev];
+        const updatedModules = [...current];
         updatedModules[existingModuleIndex] = {
           ...updatedModules[existingModuleIndex],
-          items: [...updatedModules[existingModuleIndex].items, newItem]
+          items: [...updatedModules[existingModuleIndex].items, ...newItems]
         };
-        return updatedModules;
+        next = updatedModules;
       } else {
-        // Create new module
         const newModule: Module = {
           id: Date.now() + 1,
           title: formData.topic || 'New Week/Topic',
           description: formData.description,
-          items: [newItem]
+          items: newItems
         };
-        return [...prev, newModule];
+        next = [...current, newModule];
       }
+
+      const updated = { ...prev, [selectedCourse]: next };
+      saveModulesByCourse(updated);
+      return updated;
     });
 
     setIsModalOpen(false);
@@ -180,9 +187,9 @@ const StaffCourseContent: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Folder className="text-orange-600" />
-            My Course Content
+            Course Content
           </h1>
-          <p className="text-gray-500 dark:text-gray-400">Upload and manage learning materials for your students</p>
+          <p className="text-gray-500 dark:text-gray-400">Upload and manage documents for your assigned courses</p>
         </div>
         <button 
           onClick={handleOpenModal}
@@ -262,14 +269,11 @@ const StaffCourseContent: React.FC = () => {
                           <p className="text-[10px] text-gray-400">{item.type.toUpperCase()} • {item.size} • {item.date}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {item.allowDownload && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Downloadable</span>
-                        )}
+                      {item.allowDownload && (
                         <button className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors">
-                          <MoreVertical size={18} />
+                          <Download size={18} />
                         </button>
-                      </div>
+                      )}
                     </div>
                   ))}
                   {module.items.length === 0 && (
@@ -362,61 +366,33 @@ const StaffCourseContent: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Content Type</label>
-                  <select 
-                    name="contentType"
-                    value={formData.contentType}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-orange-500 outline-none"
-                  >
-                    <option value="file">File Upload (PDF, Slides, Video)</option>
-                    <option value="link">External Link</option>
-                  </select>
-                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {formData.contentType === 'file' ? 'Upload Files' : 'External Link URL'}
-                </label>
-                
-                {formData.contentType === 'file' ? (
-                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-orange-500 dark:hover:border-orange-400 transition-colors cursor-pointer bg-gray-50 dark:bg-gray-900/50">
-                    <input 
-                      type="file" 
-                      id="content-upload" 
-                      className="hidden" 
-                      multiple
-                      onChange={handleFileChange}
-                    />
-                    <label htmlFor="content-upload" className="cursor-pointer">
-                      <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Upload size={24} />
-                      </div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                        {formData.files && formData.files.length > 0 
-                          ? `${formData.files.length} file(s) selected` 
-                          : 'Click to upload files or drag and drop'}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        PDF, MP4, PPTX, DOCX (Max. 50MB)
-                      </p>
-                    </label>
-                  </div>
-                ) : (
-                  <div className="relative">
-                     <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                     <input 
-                      type="url" 
-                      name="linkUrl"
-                      value={formData.linkUrl}
-                      onChange={handleInputChange}
-                      placeholder="https://..."
-                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-orange-500 outline-none"
-                    />
-                  </div>
-                )}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Documents</label>
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-orange-500 dark:hover:border-orange-400 transition-colors cursor-pointer bg-gray-50 dark:bg-gray-900/50">
+                  <input 
+                    type="file" 
+                    id="content-upload" 
+                    className="hidden"
+                    multiple
+                    accept=".pdf,.doc,.docx,.ppt,.pptx"
+                    onChange={handleFileChange}
+                  />
+                  <label htmlFor="content-upload" className="cursor-pointer">
+                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Upload size={24} />
+                    </div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                      {formData.files && formData.files.length > 0 
+                        ? `${formData.files.length} file(s) selected` 
+                        : 'Click to upload files or drag and drop'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      PDF, PPTX, DOCX (Max. 50MB)
+                    </p>
+                  </label>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">

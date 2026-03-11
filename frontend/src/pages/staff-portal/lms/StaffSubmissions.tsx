@@ -3,12 +3,14 @@ import { BookOpen, CheckCircle, Clock, Filter, X, Save, Book } from 'lucide-reac
 import { getAssignedCourses } from '../academics/assignedCourses';
 
 type SubmissionStatus = 'Submitted' | 'Late' | 'Missing' | 'Graded';
+type SubmissionType = 'Assignment' | 'Quiz';
 
 interface Submission {
   id: string;
   student: string;
   matric: string;
-  assignmentTitle: string;
+  title: string;
+  type: SubmissionType;
   courseCode: string;
   date: string;
   status: SubmissionStatus;
@@ -34,6 +36,7 @@ const saveGrades = (data: Record<string, string>) => {
 const StaffSubmissions: React.FC = () => {
   const assigned = useMemo(() => getAssignedCourses(), []);
   const [selectedCourse, setSelectedCourse] = useState<string>('All');
+  const [typeFilter, setTypeFilter] = useState<'All' | SubmissionType>('All');
   const [isGradeOpen, setIsGradeOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [newGrade, setNewGrade] = useState('');
@@ -42,9 +45,9 @@ const StaffSubmissions: React.FC = () => {
   const allowed = useMemo(() => new Set(assigned.map(c => c.code)), [assigned]);
 
   const baseSubmissions: Submission[] = [
-    { id: '1', student: 'John Doe', matric: 'SCI/20/001', assignmentTitle: 'Project Charter Submission', courseCode: assigned[0]?.code || 'CSC 401', date: '2024-03-24', status: 'Submitted', grade: '-' },
-    { id: '2', student: 'Jane Smith', matric: 'SCI/20/002', assignmentTitle: 'Project Charter Submission', courseCode: assigned[0]?.code || 'CSC 401', date: '2024-03-24', status: 'Submitted', grade: '-' },
-    { id: '3', student: 'Michael Brown', matric: 'SCI/20/022', assignmentTitle: 'Vector Spaces', courseCode: assigned[1]?.code || 'MTH 302', date: '-', status: 'Missing', grade: '-' }
+    { id: '1', student: 'John Doe', matric: 'SCI/20/001', title: 'Project Charter Submission', type: 'Assignment', courseCode: assigned[0]?.code || 'CSC 401', date: '2024-03-24', status: 'Submitted', grade: '-' },
+    { id: '2', student: 'Jane Smith', matric: 'SCI/20/002', title: 'Project Charter Submission', type: 'Assignment', courseCode: assigned[0]?.code || 'CSC 401', date: '2024-03-24', status: 'Submitted', grade: '-' },
+    { id: '3', student: 'Michael Brown', matric: 'SCI/20/022', title: 'Quiz 1: Vector Spaces', type: 'Quiz', courseCode: assigned[1]?.code || 'MTH 302', date: '-', status: 'Missing', grade: '-' }
   ];
 
   useEffect(() => {
@@ -57,9 +60,10 @@ const StaffSubmissions: React.FC = () => {
 
   const submissions = useMemo(() => {
     const inScope = baseSubmissions.filter(s => allowed.has(s.courseCode));
-    const list = selectedCourse === 'All' ? inScope : inScope.filter(s => s.courseCode === selectedCourse);
+    const list = (selectedCourse === 'All' ? inScope : inScope.filter(s => s.courseCode === selectedCourse))
+      .filter(s => typeFilter === 'All' ? true : s.type === typeFilter);
     return list.map(s => ({ ...s, grade: grades[s.id] || s.grade }));
-  }, [allowed, baseSubmissions, selectedCourse, grades]);
+  }, [allowed, baseSubmissions, selectedCourse, grades, typeFilter]);
 
   const openGrade = (s: Submission) => {
     setSelectedSubmission(s);
@@ -102,6 +106,18 @@ const StaffSubmissions: React.FC = () => {
             ))}
           </select>
         </div>
+        <div className="relative w-56">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as 'All' | SubmissionType)}
+            className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <option value="All">All Types</option>
+            <option value="Assignment">Assignments</option>
+            <option value="Quiz">Quizzes</option>
+          </select>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -110,7 +126,8 @@ const StaffSubmissions: React.FC = () => {
             <tr>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Student</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Matric</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Assignment</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Type</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Title</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Course</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Submitted</th>
               <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Status</th>
@@ -123,7 +140,14 @@ const StaffSubmissions: React.FC = () => {
               <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                 <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{s.student}</td>
                 <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{s.matric}</td>
-                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{s.assignmentTitle}</td>
+                <td className="px-6 py-4 text-sm">
+                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                    s.type === 'Assignment' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {s.type}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{s.title}</td>
                 <td className="px-6 py-4 text-sm">
                   <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-bold">{s.courseCode}</span>
                 </td>
@@ -166,7 +190,7 @@ const StaffSubmissions: React.FC = () => {
             </div>
             <form onSubmit={saveGrade} className="p-6 space-y-6">
               <div>
-                <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedSubmission.assignmentTitle}</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedSubmission.title}</p>
                 <p className="text-xs text-gray-500">{selectedSubmission.student} • {selectedSubmission.matric}</p>
               </div>
               <div>
@@ -203,4 +227,3 @@ const StaffSubmissions: React.FC = () => {
 };
 
 export default StaffSubmissions;
-

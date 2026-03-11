@@ -140,7 +140,6 @@ const PlagiarismCheck = lazy(() => import('./pages/school-admin/academics/resear
 
 // School Admin - LMS
 const LMSDashboard = lazy(() => import('./pages/school-admin/lms/LMSDashboard'));
-const MyCourses = lazy(() => import('./pages/school-admin/lms/MyCourses'));
 const CourseContent = lazy(() => import('./pages/school-admin/lms/CourseContent'));
 const Assignments = lazy(() => import('./pages/school-admin/lms/Assignments'));
 const Discussions = lazy(() => import('./pages/school-admin/lms/Discussions'));
@@ -256,7 +255,6 @@ const AssetManagement = lazy(() => import('./pages/school-admin/procurement/Asse
 // Portals
 const StudentPortalDashboard = lazy(() => import('./pages/student-portal/Dashboard'));
 const StudentLMSDashboard = lazy(() => import('./pages/student-portal/lms/StudentLMSDashboard'));
-const StudentMyCourses = lazy(() => import('./pages/student-portal/lms/StudentMyCourses'));
 const StudentCourseContent = lazy(() => import('./pages/student-portal/lms/StudentCourseContent'));
 const StudentAssignments = lazy(() => import('./pages/student-portal/lms/StudentAssignments'));
 const StudentDiscussions = lazy(() => import('./pages/student-portal/lms/StudentDiscussions'));
@@ -318,6 +316,7 @@ const StaffQuizzes = lazy(() => import('./pages/staff-portal/lms/StaffQuizzes'))
 const StaffLMSDashboard = lazy(() => import('./pages/staff-portal/lms/StaffLMSDashboard'));
 const StaffSubmissions = lazy(() => import('./pages/staff-portal/lms/StaffSubmissions'));
 const StaffCourseContent = lazy(() => import('./pages/staff-portal/lms/StaffCourseContent'));
+const StaffDiscussions = lazy(() => import('./pages/staff-portal/lms/StaffDiscussions'));
 
 // Staff Portal - Assessment
 const StaffMarksEntry = lazy(() => import('./pages/staff-portal/assessment/MarksEntry'));
@@ -403,10 +402,9 @@ const schoolAdminItems = [
     icon: BookOpen,
     subItems: [
       { name: 'Dashboard', path: '/school-admin/lms/dashboard' },
-      { name: 'My Courses', path: '/school-admin/lms/courses' },
       { name: 'Course Content', path: '/school-admin/lms/content' },
-      { name: 'Assignments', path: '/school-admin/lms/assignments' },
       { name: 'Discussions', path: '/school-admin/lms/discussions' },
+      { name: 'Assignments', path: '/school-admin/lms/assignments' },
       { name: 'Quizzes', path: '/school-admin/lms/quizzes' },
       { name: 'Submissions', path: '/school-admin/lms/submissions' }
     ]
@@ -640,10 +638,9 @@ const studentItems = [
     icon: BookOpen,
     subItems: [
       { name: 'Dashboard', path: '/student/lms/dashboard' },
-      { name: 'My Courses', path: '/student/lms/courses' },
       { name: 'Course Content', path: '/student/lms/content' },
-      { name: 'Assignments', path: '/student/lms/assignments' },
       { name: 'Discussions', path: '/student/lms/discussions' },
+      { name: 'Assignments', path: '/student/lms/assignments' },
       { name: 'Quizzes', path: '/student/lms/quizzes' },
       { name: 'Submissions', path: '/student/lms/submissions' }
     ]
@@ -724,6 +721,8 @@ const staffItems = [
     icon: BookOpen,
     subItems: [
       { name: 'Dashboard', path: '/staff/lms/dashboard' },
+      { name: 'Course Content', path: '/staff/lms/content' },
+      { name: 'Discussions', path: '/staff/lms/discussions' },
       { name: 'Assignments', path: '/staff/lms/assignments' },
       { name: 'Quizzes', path: '/staff/lms/quizzes' },
       { name: 'Submissions', path: '/staff/lms/submissions' },
@@ -1077,7 +1076,6 @@ function App() {
 
                         {/* LMS */}
                         <Route path="/school-admin/lms/dashboard" element={<LMSDashboard />} />
-                        <Route path="/school-admin/lms/courses" element={<MyCourses />} />
                         <Route path="/school-admin/lms/content" element={<CourseContent />} />
                         <Route path="/school-admin/lms/assignments" element={<Assignments />} />
                         <Route path="/school-admin/lms/discussions" element={<Discussions />} />
@@ -1221,7 +1219,6 @@ function App() {
                         
                         {/* Student LMS Routes */}
                         <Route path="/student/lms/dashboard" element={<StudentLMSDashboard />} />
-                        <Route path="/student/lms/courses" element={<StudentMyCourses />} />
                         <Route path="/student/lms/content" element={<StudentCourseContent />} />
                         <Route path="/student/lms/assignments" element={<StudentAssignments />} />
                         <Route path="/student/lms/discussions" element={<StudentDiscussions />} />
@@ -1317,6 +1314,7 @@ function App() {
 
                         <Route path="lms/dashboard" element={<StaffLMSDashboard />} />
                         <Route path="lms/content" element={<StaffCourseContent />} />
+                        <Route path="lms/discussions" element={<StaffDiscussions />} />
                         <Route path="lms/assignments" element={<StaffAssignments />} />
                         <Route path="lms/quizzes" element={<StaffQuizzes />} />
                         <Route path="lms/submissions" element={<StaffSubmissions />} />
