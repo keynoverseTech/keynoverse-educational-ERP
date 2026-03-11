@@ -189,21 +189,33 @@ export const superAdminService = {
     return response.data;
   },
 
-  updateInstitutionProgram: async (id: string, _data: Partial<ProgramAssignmentData>) => {
-    // Speculative endpoint for updating an assignment
-    // Trying PUT instead of PATCH as PATCH returned 404
-    const response = await superAdminApi.put(`/institution/programme/${id}`, {});
+  updateInstitutionProgram: async (id: string, data: Partial<ProgramAssignmentData>) => {
+    const response = await superAdminApi.put(`/institution/programme/${id}`, data);
     return response.data;
   },
 
   deleteInstitutionProgram: async (id: string) => {
-    // Speculative endpoint for deleting an assignment
-    // Failed: DELETE /institution/programme/:id (404)
-    // Failed: DELETE /institution/programme/delete/:id (404)
-    
-    // Trying 'remove' pattern: DELETE /institution/programme/remove/:id
-    const response = await superAdminApi.delete(`/institution/programme/remove/${id}`);
-    return response.data;
+    const endpoints = [
+      `/institution/programme/${id}`,
+      `/institution/programme/remove/${id}`,
+      `/institution/programme/delete/${id}`,
+    ];
+
+    let lastError: any;
+    for (const endpoint of endpoints) {
+      try {
+        const response = await superAdminApi.delete(endpoint);
+        return response.data;
+      } catch (err: any) {
+        const status = err?.response?.status;
+        if (status === 404) {
+          lastError = err;
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastError;
   },
 
   getInstitutionPrograms: async (institutionId: string) => {
@@ -223,7 +235,14 @@ export const superAdminService = {
     // But if that was the one returning data, we must go back to it!
     
     const response = await superAdminApi.get(`/institution/programme/list/${institutionId}`);
-    return response.data;
+    const data = response.data;
+    if (Array.isArray(data) && data.some((p: any) => p?.institution_id || p?.institutionId || p?.institution?.id)) {
+      return data.filter((p: any) => {
+        const id = p?.institution_id || p?.institutionId || p?.institution?.id;
+        return id === institutionId;
+      });
+    }
+    return data;
   },
 
   // Utilities
@@ -258,15 +277,8 @@ export const superAdminService = {
   },
 
   getSubscriptionPlans: async () => {
-    // const response = await superAdminApi.get('/subscription-plan');
-    // return response.data;
-    // Mock data for plans since endpoint returns 404
-    return [
-      { id: 'plan-basic', name: 'Basic Tier (0-1,000 Students)', price: 500000 },
-      { id: 'plan-standard', name: 'Standard Tier (1,001-5,000 Students)', price: 1500000 },
-      { id: 'plan-premium', name: 'Premium Tier (5,001-10,000 Students)', price: 3000000 },
-      { id: 'plan-enterprise', name: 'Enterprise Tier (10,000+ Students)', price: 5000000 }
-    ];
+    const response = await superAdminApi.get('/subscription-plan');
+    return response.data;
   },
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   CreditCard, 
   Users, 
@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   X
 } from 'lucide-react';
+import superAdminService from '../../../services/superAdminApi';
 
 interface SubscriptionPlan {
   id: string;
@@ -20,44 +21,70 @@ interface SubscriptionPlan {
 }
 
 const SubscriptionPlans: React.FC = () => {
-  // Mock Data
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([
-    { 
-      id: 'PLAN-001', 
-      name: 'Tier 1 (Starter)', 
-      minStudents: 0, 
-      maxStudents: 1000, 
-      amount: 1500000,
-      features: ['Basic Modules', 'Email Support', '1 Admin Account'] 
-    },
-    { 
-      id: 'PLAN-002', 
-      name: 'Tier 2 (Growth)', 
-      minStudents: 1001, 
-      maxStudents: 5000, 
-      amount: 3000000,
-      features: ['All Modules', 'Priority Support', '5 Admin Accounts', 'Finance Dashboard'] 
-    },
-    { 
-      id: 'PLAN-003', 
-      name: 'Tier 3 (Enterprise)', 
-      minStudents: 5001, 
-      maxStudents: 10000, 
-      amount: 5000000,
-      features: ['All Modules', '24/7 Support', 'Unlimited Admins', 'Custom Reports', 'API Access'] 
-    },
-    { 
-      id: 'PLAN-004', 
-      name: 'Tier 4 (Unlimited)', 
-      minStudents: 10001, 
-      maxStudents: null, 
-      amount: 7500000,
-      features: ['All Modules', 'Dedicated Account Manager', 'On-premise Deployment Option'] 
-    }
-  ]);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const response = await superAdminService.getSubscriptionPlans();
+        const data = Array.isArray(response) ? response : (response as any)?.data || [];
+
+        const mapped: SubscriptionPlan[] = data.map((p: any) => {
+          const featuresRaw = p.features ?? p.benefits ?? p.modules ?? [];
+          const features =
+            Array.isArray(featuresRaw)
+              ? featuresRaw.map((f: any) => String(f))
+              : typeof featuresRaw === 'string'
+                ? featuresRaw
+                    .split(/\r?\n|,/g)
+                    .map((s: string) => s.trim())
+                    .filter(Boolean)
+                : [];
+
+          const minStudents =
+            p.minStudents ??
+            p.min_students ??
+            p.min_student_population ??
+            p.min_students_population ??
+            0;
+
+          const maxStudents =
+            p.maxStudents ??
+            p.max_students ??
+            p.max_student_population ??
+            p.max_students_population ??
+            null;
+
+          const amount = p.amount ?? p.price ?? p.cost ?? 0;
+
+          return {
+            id: String(p.id ?? p.plan_id ?? p.code ?? ''),
+            name: String(p.name ?? p.title ?? 'Subscription Plan'),
+            minStudents: Number(minStudents) || 0,
+            maxStudents: maxStudents === null || maxStudents === undefined ? null : Number(maxStudents),
+            amount: Number(amount) || 0,
+            features,
+          };
+        }).filter((p: SubscriptionPlan) => p.id);
+
+        setPlans(mapped);
+      } catch (err: any) {
+        console.error('Failed to fetch subscription plans', err);
+        setError('Failed to load subscription plans');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this plan?')) {
@@ -130,10 +157,30 @@ const SubscriptionPlans: React.FC = () => {
         </button>
       </div>
 
+      {error && (
+        <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 rounded-xl p-4 text-sm font-medium">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {plans.map(plan => (
-          <PlanCard key={plan.id} plan={plan} />
-        ))}
+        {loading ? (
+          [...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-8">
+              <div className="h-12 w-12 bg-gray-100 dark:bg-gray-700 rounded-xl mb-6"></div>
+              <div className="h-6 w-2/3 bg-gray-100 dark:bg-gray-700 rounded mb-3"></div>
+              <div className="h-4 w-1/2 bg-gray-100 dark:bg-gray-700 rounded mb-6"></div>
+              <div className="h-10 w-1/2 bg-gray-100 dark:bg-gray-700 rounded mb-6"></div>
+              <div className="space-y-3">
+                <div className="h-4 w-full bg-gray-100 dark:bg-gray-700 rounded"></div>
+                <div className="h-4 w-5/6 bg-gray-100 dark:bg-gray-700 rounded"></div>
+                <div className="h-4 w-2/3 bg-gray-100 dark:bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          ))
+        ) : (
+          plans.map(plan => <PlanCard key={plan.id} plan={plan} />)
+        )}
         
         {/* Add Plan Card Placeholder */}
         <button 
