@@ -17,12 +17,20 @@ const RegistrationPortal = () => {
               <div className="text-xs text-gray-500 dark:text-gray-400">Institution Registration</div>
             </div>
           </div>
-          <button
-            onClick={() => navigate('/auth')}
-            className="px-4 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-sm font-bold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            Sign in
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/portal/login')}
+              className="px-4 py-2 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-sm font-bold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              Portal Login
+            </button>
+            <button
+              onClick={() => navigate('/auth')}
+              className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+            >
+              ERP Login
+            </button>
+          </div>
         </header>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center py-10">
@@ -38,7 +46,7 @@ const RegistrationPortal = () => {
               The NBTE Education ERP helps institutions manage academics, finance, HR, student services, library, communication, and reporting from one unified platform.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3">
               <button
                 onClick={() => navigate('/register/new')}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-colors"
@@ -47,10 +55,16 @@ const RegistrationPortal = () => {
                 <ArrowRight size={18} />
               </button>
               <button
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/portal/login')}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl font-bold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                Login to ERP
+                Login to Portal
+              </button>
+              <button
+                onClick={() => navigate('/auth')}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/20 transition-colors"
+              >
+                Direct ERP Access
               </button>
             </div>
 

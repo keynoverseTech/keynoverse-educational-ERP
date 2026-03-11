@@ -56,6 +56,13 @@ const StudentLogin = lazy(() => import('./pages/auth/StudentLogin'));
 const RegistrationPortal = lazy(() => import('./pages/registration/RegistrationPortal'));
 const InstitutionRegistration = lazy(() => import('./pages/registration/InstitutionRegistration'));
 
+// Portal
+const PortalLogin = lazy(() => import('./pages/portal/PortalLogin'));
+const PortalLayout = lazy(() => import('./pages/portal/PortalLayout'));
+const PortalDashboard = lazy(() => import('./pages/portal/PortalDashboard'));
+const PortalDocuments = lazy(() => import('./pages/portal/PortalDocuments'));
+const PortalPayments = lazy(() => import('./pages/portal/PortalPayments'));
+
 // Super Admin
 const SuperAdminDashboard = lazy(() => import('./pages/super-admin/Dashboard'));
 const Institutions = lazy(() => import('./pages/super-admin/Institutions'));
@@ -889,6 +896,14 @@ function App() {
                           <Route path="/auth/student" element={<StudentLogin />} />
                           <Route path="/register" element={<RegistrationPortal />} />
                           <Route path="/register/new" element={<InstitutionRegistration />} />
+                          <Route path="/portal/login" element={<PortalLogin />} />
+
+                          <Route path="/portal" element={<PortalLayout />}>
+                            <Route index element={<Navigate to="dashboard" replace />} />
+                            <Route path="dashboard" element={<PortalDashboard />} />
+                            <Route path="documents" element={<PortalDocuments />} />
+                            <Route path="payments" element={<PortalPayments />} />
+                          </Route>
 
                           {/* Super Admin Routes */}
                           <Route element={<SuperAdminLayout />}>
