@@ -16,7 +16,7 @@ const ProjectArchive: React.FC = () => {
   // Mock Filters
   const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
   const departments = ['Computer Science', 'Architecture', 'Biology', 'Physics', 'Mathematics', 'Electrical Engineering'];
-  const programmes = ['B.Sc Computer Science', 'B.Sc Architecture', 'B.Sc Biology', 'B.Eng Electrical Engineering'];
+  const programmes = ['HND Computer Science', 'HND Architecture', 'HND Biology', 'B.Eng Electrical Engineering'];
   const years = ['2024', '2023', '2022', '2021', '2020'];
 
   // Mock Data
@@ -28,7 +28,7 @@ const ProjectArchive: React.FC = () => {
       year: '2023',
       department: 'Computer Science',
       faculty: 'Faculty of Sciences',
-      programme: 'B.Sc Computer Science',
+      programme: 'HND Computer Science',
       abstract: 'Optimizing crop yield using predictive analytics and IoT sensors.',
       keywords: ['ML', 'IoT', 'Agriculture'],
     },

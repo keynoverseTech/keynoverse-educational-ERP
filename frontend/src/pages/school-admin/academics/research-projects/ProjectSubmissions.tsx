@@ -18,7 +18,7 @@ const ProjectSubmissions: React.FC = () => {
   // Mock Filters
   const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
   const departments = ['Computer Science', 'Architecture', 'Biology', 'Physics', 'Mathematics'];
-  const programmes = ['B.Sc Computer Science', 'B.Sc Architecture', 'B.Sc Biology'];
+  const programmes = ['HND Computer Science', 'HND Architecture', 'HND Biology'];
 
   // Mock Data
   const submissions = [
@@ -28,7 +28,7 @@ const ProjectSubmissions: React.FC = () => {
       project: 'AI in Healthcare Diagnostics',
       department: 'Computer Science',
       faculty: 'Faculty of Sciences',
-      programme: 'B.Sc Computer Science',
+      programme: 'HND Computer Science',
       stage: 'Chapter 3',
       version: 'v2.1',
       date: '2024-03-20',
@@ -41,7 +41,7 @@ const ProjectSubmissions: React.FC = () => {
       project: 'Sustainable Urban Planning',
       department: 'Architecture',
       faculty: 'Faculty of Environmental Sciences',
-      programme: 'B.Sc Architecture',
+      programme: 'HND Architecture',
       stage: 'Final Draft',
       version: 'v1.0',
       date: '2024-03-19',
@@ -54,7 +54,7 @@ const ProjectSubmissions: React.FC = () => {
       project: 'Blockchain Voting',
       department: 'Computer Science',
       faculty: 'Faculty of Sciences',
-      programme: 'B.Sc Computer Science',
+      programme: 'HND Computer Science',
       stage: 'Proposal',
       version: 'v1.2',
       date: '2024-03-18',

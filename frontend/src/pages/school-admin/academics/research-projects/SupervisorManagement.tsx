@@ -65,7 +65,7 @@ const SupervisorManagement: React.FC = () => {
 
   // Mock Filters
   const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
-  const programmes = ['B.Sc Computer Science', 'B.Sc Architecture', 'B.Sc Biology'];
+  const programmes = ['HND Computer Science', 'HND Architecture', 'HND Biology'];
 
   // Mock Departments
   const departments = [

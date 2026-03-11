@@ -15,7 +15,7 @@ const StudentProjects: React.FC = () => {
   // Mock Filters
   const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
   const departments = ['Computer Science', 'Architecture', 'Biology', 'Physics', 'Mathematics'];
-  const programmes = ['B.Sc Computer Science', 'B.Sc Architecture', 'B.Sc Biology'];
+  const programmes = ['HND Computer Science', 'HND Architecture', 'HND Biology'];
 
   // Mock Data
   const projects = [
@@ -26,7 +26,7 @@ const StudentProjects: React.FC = () => {
       supervisor: 'Dr. Alan Smith',
       department: 'Computer Science',
       faculty: 'Faculty of Sciences',
-      programme: 'B.Sc Computer Science',
+      programme: 'HND Computer Science',
       session: '2023/2024',
       status: 'Active',
       progress: 60,
@@ -38,7 +38,7 @@ const StudentProjects: React.FC = () => {
       supervisor: 'Prof. Sarah Connor',
       department: 'Architecture',
       faculty: 'Faculty of Environmental Sciences',
-      programme: 'B.Sc Architecture',
+      programme: 'HND Architecture',
       session: '2023/2024',
       status: 'Completed',
       progress: 100,
@@ -50,7 +50,7 @@ const StudentProjects: React.FC = () => {
       supervisor: 'Dr. Alan Smith',
       department: 'Computer Science',
       faculty: 'Faculty of Sciences',
-      programme: 'B.Sc Computer Science',
+      programme: 'HND Computer Science',
       session: '2023/2024',
       status: 'Pending',
       progress: 10,

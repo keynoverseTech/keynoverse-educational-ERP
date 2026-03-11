@@ -101,23 +101,42 @@ const AuthSelection: React.FC = () => {
                     {/* Student Portal Card */}
                     <button 
                         onClick={() => navigate('/auth/student')}
-                        className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-orange-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(249,115,22,0.3)] animate-fade-in-up"
+                        className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-amber-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(245,158,11,0.3)] animate-fade-in-up"
                         style={{ animationDelay: '400ms' }}
                     >
-                        <div className="p-4 rounded-full bg-orange-500/10 text-orange-400 mb-4 group-hover:bg-orange-500/20 group-hover:scale-110 transition-all duration-300">
+                        <div className="p-4 rounded-full bg-amber-500/10 text-amber-400 mb-4 group-hover:bg-amber-500/20 group-hover:scale-110 transition-all duration-300">
                             <School className="w-8 h-8" />
                         </div>
                         
-                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">Student Portal</h3>
+                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-amber-400 transition-colors">Student Portal</h3>
                         <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                            Courses, results & fees.
+                            Academics & registration.
                         </p>
 
-                        <div className="mt-auto flex items-center gap-2 text-xs font-semibold text-orange-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
+                        <div className="mt-auto flex items-center gap-2 text-xs font-semibold text-amber-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
                             Access Portal <ArrowRight className="w-3 h-3" />
                         </div>
                     </button>
 
+                    {/* Onboarding Portal Card */}
+                    <button 
+                        onClick={() => navigate('/portal/login')}
+                        className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] animate-fade-in-up lg:col-start-2 lg:col-span-2"
+                        style={{ animationDelay: '500ms' }}
+                    >
+                        <div className="p-4 rounded-full bg-blue-500/10 text-blue-400 mb-4 group-hover:bg-blue-500/20 group-hover:scale-110 transition-all duration-300">
+                            <Shield className="w-8 h-8" />
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Institution Onboarding</h3>
+                        <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                            Track your registration and payment status before ERP activation.
+                        </p>
+
+                        <div className="mt-auto flex items-center gap-2 text-xs font-semibold text-blue-400 opacity-80 group-hover:opacity-100 group-hover:gap-3 transition-all duration-300">
+                            Track Application <ArrowRight className="w-3 h-3" />
+                        </div>
+                    </button>
                 </div>
 
                 {/* Footer */}

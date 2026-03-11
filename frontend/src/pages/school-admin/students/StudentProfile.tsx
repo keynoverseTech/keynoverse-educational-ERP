@@ -233,7 +233,7 @@ const MOCK_STUDENTS: Student[] = [
       { id: 'h4', code: 'ENG 101', title: 'Intro to Engineering', units: 2, grade: 'B', score: 68, session: '2023/2024', semester: 'First' }
     ],
     documents: [
-      { name: 'B.Sc Certificate', type: 'PDF', dateUploaded: '2023-09-15', status: 'verified' },
+      { name: 'HND Certificate', type: 'PDF', dateUploaded: '2023-09-15', status: 'verified' },
       { name: 'NYSC Certificate', type: 'PDF', dateUploaded: '2023-09-15', status: 'verified' },
       { name: 'Passport Photo', type: 'JPG', dateUploaded: '2023-09-15', status: 'verified' },
     ]
