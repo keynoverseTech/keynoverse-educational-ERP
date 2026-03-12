@@ -59,11 +59,11 @@ const StaffResearchDashboard = () => {
             </p>
           </div>
           <button 
-            onClick={() => navigate('/staff/academics/research/reviews')}
+            onClick={() => navigate('/staff/academics/research/submissions')}
             className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm border border-white/20 transition-colors flex items-center gap-2"
           >
             <FileText size={18} />
-            Review Submissions
+            Submissions
           </button>
         </div>
       </div>
@@ -91,7 +91,7 @@ const StaffResearchDashboard = () => {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Pending Reviews</h3>
             <button 
-              onClick={() => navigate('/staff/academics/research/reviews')}
+              onClick={() => navigate('/staff/academics/research/submissions')}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               View All
@@ -110,7 +110,12 @@ const StaffResearchDashboard = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <button className="text-sm font-medium text-blue-600 hover:text-blue-700">Review</button>
+                  <button
+                    onClick={() => navigate('/staff/academics/research/submissions')}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    Review
+                  </button>
                   <p className="text-xs text-gray-400 mt-1">{review.date}</p>
                 </div>
               </div>
@@ -129,6 +134,16 @@ const StaffResearchDashboard = () => {
               <div className="flex items-center gap-3">
                 <Users size={18} className="text-gray-500 group-hover:text-blue-600" />
                 <span className="font-medium text-sm">View Assigned Students</span>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => navigate('/staff/academics/research/submissions')}
+              className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <FileText size={18} className="text-gray-500 group-hover:text-amber-600" />
+                <span className="font-medium text-sm">Review Submissions</span>
               </div>
             </button>
             

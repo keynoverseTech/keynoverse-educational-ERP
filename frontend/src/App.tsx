@@ -336,7 +336,9 @@ const StaffDirectMessaging = lazy(() => import('./pages/staff-portal/communicati
 
 // Staff Portal - Research & Projects
 const StaffResearchDashboard = lazy(() => import('./pages/staff-portal/academics/research-projects/StaffResearchDashboard'));
+const StaffProjectTopics = lazy(() => import('./pages/staff-portal/academics/research-projects/ProjectTopics'));
 const StaffAssignedStudents = lazy(() => import('./pages/staff-portal/academics/research-projects/AssignedStudents'));
+const StaffProjectSubmissions = lazy(() => import('./pages/staff-portal/academics/research-projects/ProjectSubmissions'));
 const StaffProjectReviews = lazy(() => import('./pages/staff-portal/academics/research-projects/ProjectReviews'));
 const StaffPlagiarismCheck = lazy(() => import('./pages/staff-portal/academics/research-projects/PlagiarismCheck'));
 
@@ -711,7 +713,9 @@ const staffItems = [
         name: 'Research & Projects',
         subItems: [
           { name: 'Dashboard', path: '/staff/academics/research/dashboard' },
+          { name: 'Project Topics', path: '/staff/academics/research/topics' },
           { name: 'Assigned Students', path: '/staff/academics/research/students' },
+          { name: 'Submissions', path: '/staff/academics/research/submissions' },
           { name: 'Project Reviews', path: '/staff/academics/research/reviews' },
           { name: 'Plagiarism Check', path: '/staff/academics/research/plagiarism' },
         ]
@@ -1313,7 +1317,9 @@ function App() {
                         
                         {/* Staff Research & Projects */}
                         <Route path="academics/research/dashboard" element={<StaffResearchDashboard />} />
+                        <Route path="academics/research/topics" element={<StaffProjectTopics />} />
                         <Route path="academics/research/students" element={<StaffAssignedStudents />} />
+                        <Route path="academics/research/submissions" element={<StaffProjectSubmissions />} />
                         <Route path="academics/research/reviews" element={<StaffProjectReviews />} />
                         <Route path="academics/research/plagiarism" element={<StaffPlagiarismCheck />} />
 

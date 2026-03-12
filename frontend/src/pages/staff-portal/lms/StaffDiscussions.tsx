@@ -3,7 +3,6 @@ import {
   MessageSquare,
   Plus,
   MessageCircle,
-  ThumbsUp,
   Filter,
   BookOpen,
   Paperclip,
@@ -36,7 +35,6 @@ type Discussion = {
   createdAt: string;
   content: string;
   replies: Reply[];
-  likes: number;
   isPinned?: boolean;
 };
 
@@ -132,7 +130,6 @@ const StaffDiscussions = () => {
         role: 'Lecturer',
         createdAt: new Date().toISOString(),
         content: 'Use this space to ask questions about lectures, assignments, and announcements for this course.',
-        likes: 0,
         isPinned: true,
         replies: [
           {
@@ -198,7 +195,6 @@ const StaffDiscussions = () => {
       createdAt: new Date().toISOString(),
       content: newTopicData.content.trim(),
       replies: [],
-      likes: 0,
       isPinned: false
     };
 
@@ -363,10 +359,6 @@ const StaffDiscussions = () => {
                       <MessageCircle size={16} />
                       <span>{discussion.replies.length} Replies</span>
                     </div>
-                    <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                      <ThumbsUp size={16} />
-                      <span>{discussion.likes} Likes</span>
-                    </div>
                   </div>
                 </div>
               ))}
@@ -426,12 +418,6 @@ const StaffDiscussions = () => {
                     <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
                       <p>{selectedDiscussion.content}</p>
                     </div>
-
-                    <div className="mt-4 flex items-center gap-4">
-                      <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600 transition-colors">
-                        <ThumbsUp size={16} /> {selectedDiscussion.likes} Likes
-                      </button>
-                    </div>
                   </div>
 
                   <div className="p-6 space-y-6">
@@ -460,7 +446,6 @@ const StaffDiscussions = () => {
                             <p className="text-sm text-gray-700 dark:text-gray-300">{reply.content}</p>
                           </div>
                           <div className="flex items-center gap-4 px-2">
-                            <button className="text-xs font-medium text-gray-500 hover:text-blue-600">Like</button>
                             <button className="text-xs font-medium text-gray-500 hover:text-blue-600">Reply</button>
                             <button className="text-xs font-medium text-gray-400 hover:text-red-500 ml-auto">Delete</button>
                           </div>
@@ -595,4 +580,3 @@ const StaffDiscussions = () => {
 };
 
 export default StaffDiscussions;
-

@@ -3,7 +3,6 @@ import {
   MessageSquare, 
   Plus, 
   MessageCircle,
-  ThumbsUp,
   Filter,
   BookOpen,
   Paperclip,
@@ -33,7 +32,6 @@ interface Discussion {
   date: string;
   content: string;
   replies: Reply[];
-  likes: number;
   isPinned?: boolean;
 }
 
@@ -77,7 +75,6 @@ const Discussions: React.FC = () => {
       role: 'Student',
       date: '2 hours ago',
       content: 'I am a bit confused about the requirements for the third section of the assignment. Can anyone clarify if we need to include UML diagrams for the database schema?',
-      likes: 12,
       isPinned: false,
       replies: [
         {
@@ -104,7 +101,6 @@ const Discussions: React.FC = () => {
       role: 'Lecturer',
       date: '1 day ago',
       content: 'Here is a link to a fascinating article I found regarding our discussion on quantum algorithms yesterday. Worth a read!',
-      likes: 24,
       isPinned: true,
       replies: []
     },
@@ -131,7 +127,6 @@ const Discussions: React.FC = () => {
       date: 'Just now',
       content: newTopicData.content,
       replies: [],
-      likes: 0,
       isPinned: false
     };
     setDiscussions([newDiscussion, ...discussions]);
@@ -346,10 +341,6 @@ const Discussions: React.FC = () => {
                       <MessageCircle size={16} />
                       <span>{discussion.replies.length} Replies</span>
                     </div>
-                    <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                      <ThumbsUp size={16} />
-                      <span>{discussion.likes} Likes</span>
-                    </div>
                   </div>
                 </div>
               ))}
@@ -411,12 +402,6 @@ const Discussions: React.FC = () => {
                     <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
                       <p>{selectedDiscussion.content}</p>
                     </div>
-
-                    <div className="mt-4 flex items-center gap-4">
-                       <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600 transition-colors">
-                         <ThumbsUp size={16} /> {selectedDiscussion.likes} Likes
-                       </button>
-                    </div>
                   </div>
 
                   {/* Replies */}
@@ -459,7 +444,6 @@ const Discussions: React.FC = () => {
                             )}
                           </div>
                           <div className="flex items-center gap-4 px-2">
-                            <button className="text-xs font-medium text-gray-500 hover:text-blue-600">Like</button>
                             <button className="text-xs font-medium text-gray-500 hover:text-blue-600">Reply</button>
                             <button className="text-xs font-medium text-gray-400 hover:text-red-500 ml-auto">Delete</button>
                           </div>
