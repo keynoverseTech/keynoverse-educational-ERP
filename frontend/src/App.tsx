@@ -133,8 +133,7 @@ const CGPAMonitoring = lazy(() => import('./pages/school-admin/academics/CGPAMon
 // School Admin - Research & Projects
 const ResearchDashboard = lazy(() => import('./pages/school-admin/academics/research-projects/ResearchDashboard'));
 const ProjectTopics = lazy(() => import('./pages/school-admin/academics/research-projects/ProjectTopics'));
-const StudentProjects = lazy(() => import('./pages/school-admin/academics/research-projects/StudentProjects'));
-const SupervisorManagement = lazy(() => import('./pages/school-admin/academics/research-projects/SupervisorManagement'));
+const Supervisor = lazy(() => import('./pages/school-admin/academics/research-projects/Supervisor'));
 const DefenseScheduling = lazy(() => import('./pages/school-admin/academics/research-projects/DefenseScheduling'));
 const ProjectArchive = lazy(() => import('./pages/school-admin/academics/research-projects/ProjectArchive'));
 const ProjectSubmissions = lazy(() => import('./pages/school-admin/academics/research-projects/ProjectSubmissions'));
@@ -341,6 +340,7 @@ const StaffAssignedStudents = lazy(() => import('./pages/staff-portal/academics/
 const StaffProjectSubmissions = lazy(() => import('./pages/staff-portal/academics/research-projects/ProjectSubmissions'));
 const StaffProjectReviews = lazy(() => import('./pages/staff-portal/academics/research-projects/ProjectReviews'));
 const StaffPlagiarismCheck = lazy(() => import('./pages/staff-portal/academics/research-projects/PlagiarismCheck'));
+const StaffDefenseSchedule = lazy(() => import('./pages/staff-portal/academics/research-projects/DefenseSchedule'));
 
 // Staff Portal - Events
 const StaffEvents = lazy(() => import('./pages/staff-portal/events/StaffEvents'));
@@ -391,8 +391,7 @@ const schoolAdminItems = [
         subItems: [
           { name: 'Dashboard', path: '/school-admin/academics/research/dashboard' },
           { name: 'Project Topics', path: '/school-admin/academics/research/topics' },
-          { name: 'Student Projects', path: '/school-admin/academics/research/projects' },
-          { name: 'Supervisor Mgmt', path: '/school-admin/academics/research/supervisors' },
+          { name: 'Supervisor', path: '/school-admin/academics/research/supervisors' },
           { name: 'Submissions', path: '/school-admin/academics/research/submissions' },
           { name: 'Plagiarism Check', path: '/school-admin/academics/research/plagiarism' },
           { name: 'Defense Schedule', path: '/school-admin/academics/research/defense' },
@@ -718,6 +717,7 @@ const staffItems = [
           { name: 'Submissions', path: '/staff/academics/research/submissions' },
           { name: 'Project Reviews', path: '/staff/academics/research/reviews' },
           { name: 'Plagiarism Check', path: '/staff/academics/research/plagiarism' },
+          { name: 'Defense Schedule', path: '/staff/academics/research/defense' },
         ]
       },
     ]
@@ -1075,8 +1075,7 @@ function App() {
                         {/* Research & Projects */}
                         <Route path="/school-admin/academics/research/dashboard" element={<ResearchDashboard />} />
                         <Route path="/school-admin/academics/research/topics" element={<ProjectTopics />} />
-                        <Route path="/school-admin/academics/research/projects" element={<StudentProjects />} />
-                        <Route path="/school-admin/academics/research/supervisors" element={<SupervisorManagement />} />
+                        <Route path="/school-admin/academics/research/supervisors" element={<Supervisor />} />
                         <Route path="/school-admin/academics/research/defense" element={<DefenseScheduling />} />
                         <Route path="/school-admin/academics/research/archive" element={<ProjectArchive />} />
                         <Route path="/school-admin/academics/research/submissions" element={<ProjectSubmissions />} />
@@ -1322,6 +1321,7 @@ function App() {
                         <Route path="academics/research/submissions" element={<StaffProjectSubmissions />} />
                         <Route path="academics/research/reviews" element={<StaffProjectReviews />} />
                         <Route path="academics/research/plagiarism" element={<StaffPlagiarismCheck />} />
+                        <Route path="academics/research/defense" element={<StaffDefenseSchedule />} />
 
                         <Route path="lms/dashboard" element={<StaffLMSDashboard />} />
                         <Route path="lms/content" element={<StaffCourseContent />} />
