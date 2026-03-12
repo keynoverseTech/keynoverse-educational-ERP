@@ -35,9 +35,6 @@ type StudentProfile = {
 type ProjectSubmission = {
   id: string;
   studentMatric: string;
-  faculty: string;
-  department: string;
-  programme: string;
   stage: string;
   title: string;
   version: string;
@@ -51,67 +48,10 @@ type ProjectSubmission = {
   plagiarism: PlagiarismResult | null;
 };
 
-const STORAGE_KEY = 'school_admin_research_project_submissions';
+type ViewState = 'select_student' | 'student_submissions';
 
-const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
-
-const departmentsByFaculty: Record<string, string[]> = {
-  'Faculty of Sciences': ['Computer Science', 'Biology', 'Physics', 'Mathematics'],
-  'Faculty of Engineering': ['Electrical Engineering', 'Mechanical Engineering'],
-  'Faculty of Arts': ['English', 'History'],
-  'Faculty of Environmental Sciences': ['Architecture']
-};
-
-const programmesByDepartment: Record<string, string[]> = {
-  'Computer Science': ['HND Computer Science'],
-  Biology: ['HND Biology'],
-  Physics: ['HND Physics'],
-  Mathematics: ['HND Mathematics'],
-  'Electrical Engineering': ['B.Eng Electrical Engineering'],
-  'Mechanical Engineering': ['B.Eng Mechanical Engineering'],
-  English: ['B.A English'],
-  History: ['B.A History'],
-  Architecture: ['HND Architecture']
-};
-
-const seedStudents: StudentProfile[] = [
-  {
-    name: 'John Doe',
-    matricNumber: 'CS/2020/001',
-    department: 'Computer Science',
-    faculty: 'Faculty of Sciences',
-    programme: 'HND Computer Science',
-    supervisor: 'Dr. Sarah',
-    topicTitle: 'AI in Healthcare Diagnostics'
-  },
-  {
-    name: 'Jane Smith',
-    matricNumber: 'AR/2020/015',
-    department: 'Architecture',
-    faculty: 'Faculty of Environmental Sciences',
-    programme: 'HND Architecture',
-    supervisor: 'Prof. Sarah Connor',
-    topicTitle: 'Sustainable Urban Planning'
-  },
-  {
-    name: 'Michael Brown',
-    matricNumber: 'CS/2020/042',
-    department: 'Computer Science',
-    faculty: 'Faculty of Sciences',
-    programme: 'HND Computer Science',
-    supervisor: 'Dr. Alan Smith',
-    topicTitle: 'Blockchain for Voting Systems'
-  },
-  {
-    name: 'Grace Peter',
-    matricNumber: 'EE/2020/008',
-    department: 'Electrical Engineering',
-    faculty: 'Faculty of Engineering',
-    programme: 'B.Eng Electrical Engineering',
-    supervisor: 'Dr. Musa Ibrahim',
-    topicTitle: 'Smart Grid Monitoring with IoT'
-  }
-];
+const STORAGE_KEY = 'staff_research_project_submissions';
+const currentSupervisor = 'Dr. Sarah';
 
 const loadSubmissions = (): ProjectSubmission[] => {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -131,13 +71,40 @@ const saveSubmissions = (submissions: ProjectSubmission[]) => {
   }
 };
 
+const seedStudents: StudentProfile[] = [
+  {
+    name: 'John Doe',
+    matricNumber: 'CS/2020/001',
+    department: 'Computer Science',
+    faculty: 'Faculty of Science',
+    programme: 'HND Computer Science',
+    supervisor: currentSupervisor,
+    topicTitle: 'AI in Healthcare'
+  },
+  {
+    name: 'Jane Smith',
+    matricNumber: 'CS/2020/015',
+    department: 'Computer Science',
+    faculty: 'Faculty of Science',
+    programme: 'HND Computer Science',
+    supervisor: currentSupervisor,
+    topicTitle: 'Sustainable Energy Monitoring System'
+  },
+  {
+    name: 'Michael Brown',
+    matricNumber: 'CS/2020/042',
+    department: 'Computer Science',
+    faculty: 'Faculty of Science',
+    programme: 'HND Computer Science',
+    supervisor: currentSupervisor,
+    topicTitle: 'Blockchain Voting System'
+  }
+];
+
 const seedSubmissions = (): ProjectSubmission[] => [
   {
-    id: 'sa-sub-1',
+    id: 'sub-1',
     studentMatric: 'CS/2020/001',
-    faculty: 'Faculty of Sciences',
-    department: 'Computer Science',
-    programme: 'HND Computer Science',
     stage: 'Topic Proposal',
     title: 'Project Proposal Document',
     version: 'v1.0',
@@ -151,11 +118,8 @@ const seedSubmissions = (): ProjectSubmission[] => [
     plagiarism: null
   },
   {
-    id: 'sa-sub-2',
+    id: 'sub-2',
     studentMatric: 'CS/2020/001',
-    faculty: 'Faculty of Sciences',
-    department: 'Computer Science',
-    programme: 'HND Computer Science',
     stage: 'Chapter 1',
     title: 'Chapter 1 - Introduction',
     version: 'v1.0',
@@ -174,11 +138,8 @@ const seedSubmissions = (): ProjectSubmission[] => [
     }
   },
   {
-    id: 'sa-sub-3',
+    id: 'sub-3',
     studentMatric: 'CS/2020/001',
-    faculty: 'Faculty of Sciences',
-    department: 'Computer Science',
-    programme: 'HND Computer Science',
     stage: 'Chapter 2',
     title: 'Chapter 2 - Literature Review',
     version: 'v1.0',
@@ -192,65 +153,47 @@ const seedSubmissions = (): ProjectSubmission[] => [
     plagiarism: null
   },
   {
-    id: 'sa-sub-4',
-    studentMatric: 'AR/2020/015',
-    faculty: 'Faculty of Environmental Sciences',
-    department: 'Architecture',
-    programme: 'HND Architecture',
-    stage: 'Final Draft',
-    title: 'Final Thesis Document',
-    version: 'v1.0',
-    uploadedAt: '2024-03-19T10:30:00.000Z',
-    fileName: 'final_thesis.pdf',
-    fileSize: '6.2 MB',
-    fileType: 'PDF',
-    status: 'Approved',
-    supervisorComment: 'Approved. Ready for defense scheduling.',
-    documentUrl: '#',
-    plagiarism: {
-      similarity: 24,
-      status: 'Review Required',
-      sources: [
-        { name: 'Urban Studies Journal 2021', match: '9%' },
-        { name: 'Wikipedia - Sustainable City', match: '7%' },
-        { name: 'University Archive', match: '8%' }
-      ],
-      checkedAt: '2024-03-19T12:00:00.000Z'
-    }
-  },
-  {
-    id: 'sa-sub-5',
-    studentMatric: 'CS/2020/042',
-    faculty: 'Faculty of Sciences',
-    department: 'Computer Science',
-    programme: 'HND Computer Science',
+    id: 'sub-4',
+    studentMatric: 'CS/2020/015',
     stage: 'Topic Proposal',
     title: 'Project Proposal Document',
-    version: 'v1.2',
-    uploadedAt: '2024-03-18T14:00:00.000Z',
-    fileName: 'proposal_updated.docx',
-    fileSize: '1.0 MB',
-    fileType: 'DOCX',
-    status: 'Pending',
-    supervisorComment: 'Pending review.',
+    version: 'v1.1',
+    uploadedAt: '2024-01-12T12:00:00.000Z',
+    fileName: 'Project_Proposal_Revised.pdf',
+    fileSize: '1.4 MB',
+    fileType: 'PDF',
+    status: 'Approved',
+    supervisorComment: 'Approved. Start Chapter 1.',
     documentUrl: '#',
     plagiarism: null
   },
   {
-    id: 'sa-sub-6',
-    studentMatric: 'EE/2020/008',
-    faculty: 'Faculty of Engineering',
-    department: 'Electrical Engineering',
-    programme: 'B.Eng Electrical Engineering',
+    id: 'sub-5',
+    studentMatric: 'CS/2020/015',
     stage: 'Chapter 1',
     title: 'Chapter 1 - Introduction',
     version: 'v1.0',
-    uploadedAt: '2024-02-22T11:00:00.000Z',
+    uploadedAt: '2024-02-10T10:30:00.000Z',
     fileName: 'Chapter_1_Introduction.pdf',
-    fileSize: '2.2 MB',
+    fileSize: '2.0 MB',
     fileType: 'PDF',
     status: 'Pending',
     supervisorComment: 'Under review.',
+    documentUrl: '#',
+    plagiarism: null
+  },
+  {
+    id: 'sub-6',
+    studentMatric: 'CS/2020/042',
+    stage: 'Topic Proposal',
+    title: 'Project Proposal Document',
+    version: 'v1.0',
+    uploadedAt: '2024-01-20T08:00:00.000Z',
+    fileName: 'Project_Proposal.pdf',
+    fileSize: '1.0 MB',
+    fileType: 'PDF',
+    status: 'Pending',
+    supervisorComment: 'Pending review.',
     documentUrl: '#',
     plagiarism: null
   }
@@ -291,7 +234,7 @@ const verdictFromSimilarity = (similarity: number): PlagiarismResult['status'] =
   return 'Safe';
 };
 
-const ProjectSubmissions = () => {
+const StaffProjectSubmissions = () => {
   const [submissions, setSubmissions] = useState<ProjectSubmission[]>(() => {
     const existing = loadSubmissions();
     if (existing.length > 0) return existing;
@@ -300,16 +243,12 @@ const ProjectSubmissions = () => {
     return seeded;
   });
 
-  const [filterFaculty, setFilterFaculty] = useState<string>('All');
-  const [filterDepartment, setFilterDepartment] = useState<string>('All');
-  const [filterProgramme, setFilterProgramme] = useState<string>('All');
-
-  const [studentSearch, setStudentSearch] = useState('');
-  const [submissionSearch, setSubmissionSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<SubmissionStatus | 'All'>('All');
-
+  const [viewState, setViewState] = useState<ViewState>('select_student');
   const [selectedStudentMatric, setSelectedStudentMatric] = useState<string | null>(null);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<SubmissionStatus | 'All'>('All');
 
   const [commentDraft, setCommentDraft] = useState('');
   const [plagiarismChecking, setPlagiarismChecking] = useState(false);
@@ -318,53 +257,21 @@ const ProjectSubmissions = () => {
     saveSubmissions(submissions);
   }, [submissions]);
 
-  const availableDepartments = useMemo(() => {
-    if (filterFaculty === 'All') return Object.values(departmentsByFaculty).flat();
-    return departmentsByFaculty[filterFaculty] ?? [];
-  }, [filterFaculty]);
-
-  const availableProgrammes = useMemo(() => {
-    if (filterDepartment === 'All') return Object.values(programmesByDepartment).flat();
-    return programmesByDepartment[filterDepartment] ?? [];
-  }, [filterDepartment]);
-
-  const studentsInScope = useMemo(() => {
-    const studentMatricSet = new Set(submissions.map((s) => s.studentMatric));
-    const q = studentSearch.trim().toLowerCase();
-    return seedStudents
-      .filter((st) => studentMatricSet.has(st.matricNumber))
-      .filter((st) => (filterFaculty === 'All' ? true : st.faculty === filterFaculty))
-      .filter((st) => (filterDepartment === 'All' ? true : st.department === filterDepartment))
-      .filter((st) => (filterProgramme === 'All' ? true : st.programme === filterProgramme))
-      .filter((st) => {
-        if (!q) return true;
-        return (
-          st.name.toLowerCase().includes(q) ||
-          st.matricNumber.toLowerCase().includes(q) ||
-          st.topicTitle.toLowerCase().includes(q)
-        );
-      });
-  }, [filterDepartment, filterFaculty, filterProgramme, studentSearch, submissions]);
-
-  useEffect(() => {
-    if (!selectedStudentMatric) return;
-    const stillVisible = studentsInScope.some((s) => s.matricNumber === selectedStudentMatric);
-    if (!stillVisible) {
-      setSelectedStudentMatric(null);
-      setSelectedSubmissionId(null);
-    }
-  }, [selectedStudentMatric, studentsInScope]);
+  const students = useMemo(() => {
+    const inData = new Set(submissions.map((s) => s.studentMatric));
+    return seedStudents.filter((st) => st.supervisor === currentSupervisor && inData.has(st.matricNumber));
+  }, [submissions]);
 
   const selectedStudent = useMemo(() => {
     if (!selectedStudentMatric) return null;
-    return seedStudents.find((s) => s.matricNumber === selectedStudentMatric) ?? null;
-  }, [selectedStudentMatric]);
+    return students.find((s) => s.matricNumber === selectedStudentMatric) ?? null;
+  }, [selectedStudentMatric, students]);
 
   const studentSubmissions = useMemo(() => {
     if (!selectedStudentMatric) return [];
-    const q = submissionSearch.trim().toLowerCase();
-    return submissions
-      .filter((s) => s.studentMatric === selectedStudentMatric)
+    const filtered = submissions.filter((s) => s.studentMatric === selectedStudentMatric);
+    const q = searchQuery.trim().toLowerCase();
+    return filtered
       .filter((s) => (filterStatus === 'All' ? true : s.status === filterStatus))
       .filter((s) => {
         if (!q) return true;
@@ -376,7 +283,7 @@ const ProjectSubmissions = () => {
         );
       })
       .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
-  }, [filterStatus, selectedStudentMatric, submissionSearch, submissions]);
+  }, [filterStatus, searchQuery, selectedStudentMatric, submissions]);
 
   const selectedSubmission = useMemo(() => {
     if (!selectedSubmissionId) return null;
@@ -387,6 +294,12 @@ const ProjectSubmissions = () => {
     if (!selectedSubmission) return;
     setCommentDraft(selectedSubmission.supervisorComment ?? '');
   }, [selectedSubmission]);
+
+  const openStudent = (matric: string) => {
+    setSelectedStudentMatric(matric);
+    setViewState('student_submissions');
+    setSelectedSubmissionId(null);
+  };
 
   const updateSubmission = (id: string, patch: Partial<ProjectSubmission>) => {
     setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
@@ -433,56 +346,9 @@ const ProjectSubmissions = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <FileText className="text-blue-600" />
-            Project Submissions
+            Submissions
           </h1>
-          <p className="text-gray-500 dark:text-gray-400">Filter students and review their project uploads.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <select
-            value={filterFaculty}
-            onChange={(e) => {
-              setFilterFaculty(e.target.value);
-              setFilterDepartment('All');
-              setFilterProgramme('All');
-            }}
-            className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="All">All Faculties</option>
-            {faculties.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filterDepartment}
-            onChange={(e) => {
-              setFilterDepartment(e.target.value);
-              setFilterProgramme('All');
-            }}
-            className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="All">{filterFaculty === 'All' ? 'All Departments' : 'All Departments'}</option>
-            {availableDepartments.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filterProgramme}
-            onChange={(e) => setFilterProgramme(e.target.value)}
-            className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="All">{filterDepartment === 'All' ? 'All Programmes' : 'All Programmes'}</option>
-            {availableProgrammes.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
+          <p className="text-gray-500 dark:text-gray-400">Review project documents uploaded by your assigned students.</p>
         </div>
       </div>
 
@@ -491,33 +357,27 @@ const ProjectSubmissions = () => {
           <div className="p-5 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <User size={18} className="text-blue-600 dark:text-blue-400" />
-              <h2 className="text-sm font-black text-gray-900 dark:text-white">Students</h2>
-              <span className="ml-auto text-xs font-black text-gray-600 dark:text-gray-300 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700">
-                {studentsInScope.length}
-              </span>
+              <h2 className="text-sm font-black text-gray-900 dark:text-white">Assigned Students</h2>
             </div>
             <div className="mt-3 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
-                value={studentSearch}
-                onChange={(e) => setStudentSearch(e.target.value)}
-                placeholder="Search students..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search chapters, files..."
                 className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
           <div className="divide-y divide-gray-100 dark:divide-gray-700">
-            {studentsInScope.map((st) => {
+            {students.map((st) => {
               const isActive = st.matricNumber === selectedStudentMatric;
               const count = submissions.filter((s) => s.studentMatric === st.matricNumber).length;
               return (
                 <button
                   key={st.matricNumber}
-                  onClick={() => {
-                    setSelectedStudentMatric(st.matricNumber);
-                    setSelectedSubmissionId(null);
-                  }}
+                  onClick={() => openStudent(st.matricNumber)}
                   className={`w-full text-left p-5 hover:bg-gray-50 dark:hover:bg-gray-900/40 transition-colors ${
                     isActive ? 'bg-blue-50 dark:bg-blue-900/10' : ''
                   }`}
@@ -537,18 +397,13 @@ const ProjectSubmissions = () => {
                         </div>
                       </div>
                       <div className="mt-2 text-xs text-gray-600 dark:text-gray-300 truncate">{st.topicTitle}</div>
-                      <div className="mt-1 text-[10px] text-gray-400 truncate">
-                        {st.programme} • {st.department}
-                      </div>
                     </div>
                   </div>
                 </button>
               );
             })}
-            {studentsInScope.length === 0 && (
-              <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400 font-bold">
-                No students found for the selected filters.
-              </div>
+            {students.length === 0 && (
+              <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400 font-bold">No assigned students found.</div>
             )}
           </div>
         </div>
@@ -557,28 +412,18 @@ const ProjectSubmissions = () => {
           <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div>
               <div className="text-sm font-black text-gray-900 dark:text-white">
-                {selectedStudent ? `${selectedStudent.name} — Submissions` : 'Select a student'}
+                {viewState === 'student_submissions' && selectedStudent ? `${selectedStudent.name} — Submissions` : 'Select a student'}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {selectedStudent ? selectedStudent.topicTitle : 'Choose a student to review uploaded documents.'}
+                {viewState === 'student_submissions' && selectedStudent ? selectedStudent.topicTitle : 'Choose a student to review uploaded documents.'}
               </div>
             </div>
-            <div className="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
-              <div className="relative w-full md:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  value={submissionSearch}
-                  onChange={(e) => setSubmissionSearch(e.target.value)}
-                  placeholder="Search submissions..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={!selectedStudent}
-                />
-              </div>
+            <div className="flex items-center gap-2">
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as SubmissionStatus | 'All')}
                 className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={!selectedStudent}
+                disabled={viewState !== 'student_submissions'}
               >
                 <option value="All">All</option>
                 <option value="Pending">Pending</option>
@@ -589,7 +434,7 @@ const ProjectSubmissions = () => {
             </div>
           </div>
 
-          {!selectedStudent ? (
+          {viewState !== 'student_submissions' || !selectedStudent ? (
             <div className="p-10 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-900 text-gray-400 mb-4">
                 <User size={28} />
@@ -741,7 +586,9 @@ const ProjectSubmissions = () => {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <div className="text-xs font-black text-gray-500 uppercase tracking-wide">Plagiarism Test</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Run a similarity check and review matched sources.</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      Run a similarity check and review matched sources.
+                    </div>
                   </div>
                   <button
                     onClick={() => runPlagiarismTest(selectedSubmission)}
@@ -804,7 +651,7 @@ const ProjectSubmissions = () => {
               </div>
 
               <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <div className="text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Comment</div>
+                <div className="text-xs font-black text-gray-500 uppercase tracking-wide mb-2">Supervisor Comment</div>
                 <textarea
                   value={commentDraft}
                   onChange={(e) => setCommentDraft(e.target.value)}
@@ -862,4 +709,5 @@ const ProjectSubmissions = () => {
   );
 };
 
-export default ProjectSubmissions;
+export default StaffProjectSubmissions;
+

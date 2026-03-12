@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Archive, 
   Search, 
   Download, 
   Tag 
 } from 'lucide-react';
+import { loadProjectArchive, saveProjectArchive, type ArchivedProject } from '../../../../utils/researchArchive';
 
 const ProjectArchive: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,42 +14,67 @@ const ProjectArchive: React.FC = () => {
   const [filterProgramme, setFilterProgramme] = useState('All');
   const [filterYear, setFilterYear] = useState('All');
 
-  // Mock Filters
-  const faculties = ['Faculty of Sciences', 'Faculty of Engineering', 'Faculty of Arts', 'Faculty of Environmental Sciences'];
-  const departments = ['Computer Science', 'Architecture', 'Biology', 'Physics', 'Mathematics', 'Electrical Engineering'];
-  const programmes = ['HND Computer Science', 'HND Architecture', 'HND Biology', 'B.Eng Electrical Engineering'];
-  const years = ['2024', '2023', '2022', '2021', '2020'];
+  const [archive, setArchive] = useState<ArchivedProject[]>(() => {
+    const existing = loadProjectArchive();
+    if (existing.length > 0) return existing;
 
-  // Mock Data
-  const archive = [
-    {
-      id: 1,
-      title: 'Machine Learning in Agriculture',
-      student: 'David Green',
-      year: '2023',
-      department: 'Computer Science',
-      faculty: 'Faculty of Sciences',
-      programme: 'HND Computer Science',
-      abstract: 'Optimizing crop yield using predictive analytics and IoT sensors.',
-      keywords: ['ML', 'IoT', 'Agriculture'],
-    },
-    {
-      id: 2,
-      title: 'Renewable Energy Systems for Rural Areas',
-      student: 'Emily White',
-      year: '2022',
-      department: 'Electrical Engineering',
-      faculty: 'Faculty of Engineering',
-      programme: 'B.Eng Electrical Engineering',
-      abstract: 'Design and implementation of cost-effective solar-wind hybrid systems.',
-      keywords: ['Solar', 'Wind', 'Rural Electrification'],
-    },
-  ];
+    const seeded: ArchivedProject[] = [
+      {
+        id: 'arch-seed-1',
+        title: 'Machine Learning in Agriculture',
+        student: 'David Green',
+        year: '2023',
+        department: 'Computer Science',
+        faculty: 'Faculty of Sciences',
+        programme: 'HND Computer Science',
+        abstract: 'Optimizing crop yield using predictive analytics and IoT sensors.',
+        keywords: ['ML', 'IoT', 'Agriculture'],
+        archivedAt: new Date().toISOString(),
+        documents: [{ stage: 'Final Draft', fileName: 'final_thesis.pdf', fileType: 'PDF', documentUrl: '#', uploadedAt: '2023-09-01T10:00:00.000Z' }]
+      },
+      {
+        id: 'arch-seed-2',
+        title: 'Renewable Energy Systems for Rural Areas',
+        student: 'Emily White',
+        year: '2022',
+        department: 'Electrical Engineering',
+        faculty: 'Faculty of Engineering',
+        programme: 'B.Eng Electrical Engineering',
+        abstract: 'Design and implementation of cost-effective solar-wind hybrid systems.',
+        keywords: ['Solar', 'Wind', 'Rural Electrification'],
+        archivedAt: new Date().toISOString(),
+        documents: [{ stage: 'Final Draft', fileName: 'final_thesis.pdf', fileType: 'PDF', documentUrl: '#', uploadedAt: '2022-09-01T10:00:00.000Z' }]
+      }
+    ];
+
+    saveProjectArchive(seeded);
+    return seeded;
+  });
+
+  const [archiveTick, setArchiveTick] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setArchiveTick((n) => n + 1), 1500);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const latest = loadProjectArchive();
+    setArchive(latest);
+  }, [archiveTick]);
+
+  const faculties = useMemo(() => Array.from(new Set(archive.map((a) => a.faculty))).sort(), [archive]);
+  const departments = useMemo(() => Array.from(new Set(archive.map((a) => a.department))).sort(), [archive]);
+  const programmes = useMemo(() => Array.from(new Set(archive.map((a) => a.programme))).sort(), [archive]);
+  const years = useMemo(() => Array.from(new Set(archive.map((a) => a.year))).sort().reverse(), [archive]);
 
   const filteredArchive = archive.filter(project => {
-    const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          project.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          project.abstract.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const abstract = project.abstract ?? '';
+    const matchesSearch =
+      project.title.toLowerCase().includes(q) ||
+      project.student.toLowerCase().includes(q) ||
+      abstract.toLowerCase().includes(q);
     const matchesFaculty = filterFaculty === 'All' || project.faculty === filterFaculty;
     const matchesDepartment = filterDepartment === 'All' || project.department === filterDepartment;
     const matchesProgramme = filterProgramme === 'All' || project.programme === filterProgramme;
@@ -132,22 +158,33 @@ const ProjectArchive: React.FC = () => {
                   <p className="text-xs text-gray-400">{project.programme} • {project.department} • {project.faculty}</p>
                 </div>
               </div>
-              <button className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:text-teal-600 transition-colors">
+              <button
+                onClick={() => {
+                  const doc = project.documents?.[0];
+                  if (doc?.documentUrl) window.open(doc.documentUrl, '_blank', 'noopener,noreferrer');
+                }}
+                disabled={!project.documents?.[0]?.documentUrl}
+                className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:text-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Download size={20} />
               </button>
             </div>
             
-            <p className="text-gray-600 dark:text-gray-300 mt-4 text-sm leading-relaxed line-clamp-2">
-              {project.abstract}
-            </p>
+            {project.abstract && (
+              <p className="text-gray-600 dark:text-gray-300 mt-4 text-sm leading-relaxed line-clamp-2">
+                {project.abstract}
+              </p>
+            )}
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {project.keywords.map((keyword, idx) => (
-                <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-md">
-                  <Tag size={12} /> {keyword}
-                </span>
-              ))}
-            </div>
+            {project.keywords && project.keywords.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {project.keywords.map((keyword, idx) => (
+                  <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-md">
+                    <Tag size={12} /> {keyword}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   MessageSquare, 
   MessageCircle,
-  ThumbsUp,
   BookOpen,
   ChevronLeft,
   User,
@@ -34,7 +33,6 @@ const StudentDiscussions: React.FC = () => {
       replies: [
         { id: 101, author: 'Dr. Smith', role: 'Lecturer', content: 'Please refer to the rubric on page 3.', date: '1 hour ago' }
       ],
-      likes: 12,
       content: 'I am a bit confused about the requirements for the third section of the assignment. Can anyone clarify if we need to include UML diagrams for the database schema?'
     },
     {
@@ -45,7 +43,6 @@ const StudentDiscussions: React.FC = () => {
       role: 'Lecturer',
       date: '1 day ago',
       replies: [],
-      likes: 24,
       content: 'Here is a link to a fascinating article I found regarding our discussion on quantum algorithms yesterday. Worth a read! [Link]'
     },
     {
@@ -56,7 +53,6 @@ const StudentDiscussions: React.FC = () => {
       role: 'Admin',
       date: '3 days ago',
       replies: [],
-      likes: 5,
       content: 'Please form groups of 4 for the upcoming lab session.'
     }
   ];
@@ -154,10 +150,6 @@ const StudentDiscussions: React.FC = () => {
                       <MessageCircle size={16} />
                       <span>{discussion.replies.length} Replies</span>
                     </div>
-                    <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                      <ThumbsUp size={16} />
-                      <span>{discussion.likes} Likes</span>
-                    </div>
                   </div>
                 </div>
               ))
@@ -196,9 +188,6 @@ const StudentDiscussions: React.FC = () => {
                   <p>{selectedDiscussion.content}</p>
                 </div>
                 <div className="flex items-center gap-4 mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
-                  <button className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors text-sm font-medium">
-                    <ThumbsUp size={16} /> Like ({selectedDiscussion.likes})
-                  </button>
                   <button className="flex items-center gap-2 text-gray-500 hover:text-green-600 transition-colors text-sm font-medium">
                     <MessageCircle size={16} /> Reply
                   </button>

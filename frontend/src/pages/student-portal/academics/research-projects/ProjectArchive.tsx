@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { 
   Search, 
   Filter, 
@@ -8,40 +8,41 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { loadProjectArchive, type ArchivedProject } from '../../../../utils/researchArchive';
 
 const ProjectArchive = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterYear, setFilterYear] = useState<string>('All');
+  const [archive, setArchive] = useState<ArchivedProject[]>(() => loadProjectArchive());
+  const [archiveTick, setArchiveTick] = useState(0);
 
-  const projects = [
-    {
-      id: 1,
-      title: "AI-Powered Traffic Management System",
-      author: "Sarah Johnson",
-      year: "2023",
-      department: "Computer Science",
-      supervisor: "Dr. A. Ahmed",
-      abstract: "This project proposes an intelligent traffic control system using computer vision and reinforcement learning..."
-    },
-    {
-      id: 2,
-      title: "Blockchain for Supply Chain Transparency",
-      author: "Michael Okon",
-      year: "2023",
-      department: "Information Technology",
-      supervisor: "Prof. B. Sani",
-      abstract: "A decentralized application (DApp) to track product provenance and ensure authenticity in pharmaceutical supply chains..."
-    },
-    {
-      id: 3,
-      title: "Remote Patient Monitoring System using IoT",
-      author: "Grace Peter",
-      year: "2022",
-      department: "Computer Engineering",
-      supervisor: "Engr. C. Obi",
-      abstract: "Design of a wearable device to monitor vital signs and transmit data to healthcare providers in real-time..."
-    }
-  ];
+  useEffect(() => {
+    const id = window.setInterval(() => setArchiveTick((n) => n + 1), 1500);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    setArchive(loadProjectArchive());
+  }, [archiveTick]);
+
+  const years = useMemo(() => Array.from(new Set(archive.map((a) => a.year))).sort().reverse(), [archive]);
+
+  const filteredArchive = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return archive
+      .filter((p) => (filterYear === 'All' ? true : p.year === filterYear))
+      .filter((p) => {
+        if (!q) return true;
+        const abstract = p.abstract ?? '';
+        return (
+          p.title.toLowerCase().includes(q) ||
+          p.student.toLowerCase().includes(q) ||
+          p.department.toLowerCase().includes(q) ||
+          abstract.toLowerCase().includes(q)
+        );
+      });
+  }, [archive, filterYear, searchQuery]);
 
   return (
     <div className="p-6 space-y-6">
@@ -71,10 +72,17 @@ const ProjectArchive = () => {
           />
         </div>
         <div className="flex gap-2">
-          <select className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 outline-none">
-            <option value="">All Years</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
+          <select
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 outline-none"
+          >
+            <option value="All">All Years</option>
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
           </select>
           <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center gap-2 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
             <Filter size={20} />
@@ -85,7 +93,7 @@ const ProjectArchive = () => {
 
       {/* Projects List */}
       <div className="grid grid-cols-1 gap-4">
-        {projects.map((project) => (
+        {filteredArchive.map((project) => (
           <div key={project.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
@@ -99,7 +107,7 @@ const ProjectArchive = () => {
             <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
               <div className="flex items-center gap-1">
                 <User size={16} />
-                <span>{project.author}</span>
+                <span>{project.student}</span>
               </div>
               <div className="flex items-center gap-1">
                 <BookOpen size={16} />
@@ -107,20 +115,29 @@ const ProjectArchive = () => {
               </div>
               <div className="flex items-center gap-1">
                 <User size={16} />
-                <span>Sup: {project.supervisor}</span>
+                <span>Sup: {project.supervisor ?? 'N/A'}</span>
               </div>
             </div>
 
-            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-              {project.abstract}
-            </p>
+            {project.abstract && (
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
+                {project.abstract}
+              </p>
+            )}
 
             <div className="flex items-center gap-3">
               <button className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
                 View Abstract
               </button>
               <span className="text-gray-300 dark:text-gray-600">|</span>
-              <button className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
+              <button
+                onClick={() => {
+                  const doc = project.documents?.[0];
+                  if (doc?.documentUrl) window.open(doc.documentUrl, '_blank', 'noopener,noreferrer');
+                }}
+                disabled={!project.documents?.[0]?.documentUrl}
+                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Download size={16} />
                 Download PDF
               </button>
