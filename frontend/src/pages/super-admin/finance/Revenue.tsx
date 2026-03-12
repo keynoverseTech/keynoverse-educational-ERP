@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Search, 
   Filter, 
@@ -8,28 +8,68 @@ import {
   Eye,
   FileText
 } from 'lucide-react';
+import superAdminService from '../../../services/superAdminApi';
+
+type Row = {
+  id: string;
+  institute: string;
+  amount: number;
+  date: string;
+  status: 'Paid' | 'Pending' | 'Overdue' | 'Unknown';
+  method?: string;
+};
 
 const Revenue: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState('This Month');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [rows, setRows] = useState<Row[]>([]);
 
-  // Mock Data
-  const transactions = [
-    { id: 'INV-001', institute: 'Federal Polytechnic Nekede', amount: 2500000, date: '2024-03-15', status: 'Paid', method: 'Bank Transfer' },
-    { id: 'INV-002', institute: 'University of Lagos', amount: 1200000, date: '2024-03-14', status: 'Paid', method: 'Card' },
-    { id: 'INV-003', institute: 'Covenant University', amount: 2500000, date: '2024-03-12', status: 'Pending', method: 'Bank Transfer' },
-    { id: 'INV-004', institute: 'Yaba College of Tech', amount: 800000, date: '2024-03-10', status: 'Paid', method: 'Card' },
-    { id: 'INV-005', institute: 'Babcock University', amount: 2500000, date: '2024-03-08', status: 'Overdue', method: 'Bank Transfer' },
-    { id: 'INV-006', institute: 'Ahmadu Bello University', amount: 1200000, date: '2024-03-05', status: 'Paid', method: 'Bank Transfer' },
-  ];
+  const formatNaira = (amount: number) => `₦${Number(amount || 0).toLocaleString()}`;
 
-  const filteredTransactions = transactions.filter(tx => {
-    const matchesSearch = tx.institute.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         tx.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'All' || tx.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const statusFromSubscription = (raw: any): Row['status'] => {
+    const s = (raw || '').toString().toLowerCase();
+    if (s.includes('active')) return 'Paid';
+    if (s.includes('pending')) return 'Pending';
+    if (s.includes('expired') || s.includes('expire')) return 'Overdue';
+    return 'Unknown';
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await superAdminService.getSubscriptions();
+        const data = Array.isArray(res) ? res : (res as any)?.data || [];
+        const mapped: Row[] = data.map((it: any) => ({
+          id: String(it.invoice_id ?? it.invoiceId ?? it.reference ?? it.id ?? it.subscription_id ?? ''),
+          institute: String(it.institution?.name ?? it.institution_name ?? it.name ?? 'Institution'),
+          amount: Number(it.amount ?? it.price ?? it.fee ?? 0),
+          date: String(it.paid_at ?? it.payment_date ?? it.updated_at ?? it.created_at ?? it.start_date ?? ''),
+          status: statusFromSubscription(it.status),
+          method: it.method ?? it.payment_method ?? it.channel ?? '',
+        })).filter((r: Row) => r.id);
+        setRows(mapped);
+      } catch (err: any) {
+        console.error('Failed to load revenue', err);
+        setError('Failed to load revenue');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const filteredTransactions = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    const statusOk = (tx: Row) => statusFilter === 'All' || tx.status === statusFilter;
+    const searchOk = (tx: Row) =>
+      !q || tx.institute.toLowerCase().includes(q) || tx.id.toLowerCase().includes(q);
+    return rows.filter(tx => statusOk(tx) && searchOk(tx));
+  }, [rows, searchTerm, statusFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -119,7 +159,23 @@ const Revenue: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-              {filteredTransactions.map((tx) => (
+              {loading && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    Loading revenue...
+                  </td>
+                </tr>
+              )}
+
+              {!loading && error && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-rose-600 dark:text-rose-400">
+                    {error}
+                  </td>
+                </tr>
+              )}
+
+              {!loading && !error && filteredTransactions.map((tx) => (
                 <tr key={tx.id} className="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <td className="px-6 py-4">
                     <span className="font-mono text-sm font-medium text-gray-900 dark:text-white">{tx.id}</span>
@@ -127,14 +183,14 @@ const Revenue: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <span className="font-bold text-gray-900 dark:text-white">{tx.institute}</span>
-                      <span className="text-xs text-gray-500">{tx.method}</span>
+                      <span className="text-xs text-gray-500">{tx.method || '—'}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="font-bold text-gray-900 dark:text-white">₦{tx.amount.toLocaleString()}</span>
+                    <span className="font-bold text-gray-900 dark:text-white">{formatNaira(tx.amount)}</span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {tx.date}
+                    {tx.date || '—'}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(tx.status)}`}>
@@ -154,7 +210,7 @@ const Revenue: React.FC = () => {
                 </tr>
               ))}
               
-              {filteredTransactions.length === 0 && (
+              {!loading && !error && filteredTransactions.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center gap-2">

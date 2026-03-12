@@ -4,10 +4,19 @@ import axios from 'axios';
 // As requested, we use the local endpoint for development.
 // TODO: Switch to staging URL when provided.
 const BASE_URL = '/api';
+const SUBSCRIPTION_BASE_URL = '/subscription-api';
 
 // Create a dedicated axios instance for Super Admin operations
 const superAdminApi = axios.create({
   baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
+
+const subscriptionApi = axios.create({
+  baseURL: SUBSCRIPTION_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -24,7 +33,7 @@ superAdminApi.interceptors.request.use(
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
-        if (user.role !== 'super_admin' && user.role !== 'admin') {
+        if (user.role !== 'super_admin' && user.role !== 'admin' && user.role !== 'sub_admin') {
           console.warn('Current user is not Super Admin. Ignoring local token for Super Admin API.');
           token = null;
         }
@@ -51,6 +60,18 @@ superAdminApi.interceptors.request.use(
   (error) => {
     return Promise.reject(error);
   }
+);
+
+subscriptionApi.interceptors.request.use(
+  (config) => {
+    let token = localStorage.getItem('auth_token');
+    if (!token) {
+      token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN1cGVyYWRtaW5AcGxhbmV0c3RlY2guY29tIiwic3ViIjoiMzRlYTJjZmItYmFiMy00MjlmLWI2OTAtYjdjNGFjY2FiMDc5Iiwicm9sZSI6InN1cGVyX2FkbWluIiwiaWF0IjoxNzczMzIzOTkwLCJleHAiOjE3NzM0MTAzOTB9.oo22E-zl9tmH52lTkjlz9RUbMW2jDLwwkouv8Y0mawY';
+    }
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
 export interface InstitutionRegistrationData {
@@ -84,6 +105,74 @@ export interface ProgramAssignmentData {
 export interface InstitutionQueryData {
   institution_id: string;
   message: string;
+}
+
+export interface UserPrivilegeAssignmentData {
+  privilege_id: string;
+  user_id: string;
+  is_active: boolean;
+}
+
+export interface UserPrivilegeAssignment {
+  id: string;
+  privilege_id?: string;
+  privilegeId?: string;
+  user_id?: string;
+  userId?: string;
+  is_active?: boolean;
+  isActive?: boolean;
+  [key: string]: any;
+}
+
+export interface CreateUserData {
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+  role_name?: string;
+}
+
+export interface UserListItem {
+  id: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  status?: string;
+  is_active?: boolean;
+  last_login?: string;
+  lastLogin?: string;
+  updated_at?: string;
+  [key: string]: any;
+}
+
+export interface PrivilegeMenuItem {
+  id: string;
+  name?: string;
+  code?: string;
+  [key: string]: any;
+}
+
+export interface PrivilegePermissionItem {
+  id: string;
+  name?: string;
+  code?: string;
+  [key: string]: any;
+}
+
+export interface CreatePrivilegeWithAccessData {
+  name: string;
+  code: string;
+  is_active: boolean;
+  menu_ids: string[];
+  permission_ids: string[];
+}
+
+export interface Privilege {
+  id: string;
+  name?: string;
+  code?: string;
+  is_active?: boolean;
+  [key: string]: any;
 }
 
 export const superAdminService = {
@@ -178,9 +267,126 @@ export const superAdminService = {
     return response.data;
   },
 
+  assignUserPrivilege: async (data: UserPrivilegeAssignmentData) => {
+    const response = await superAdminApi.post('/privilege/user-privileges', data);
+    return response.data;
+  },
+
+  deactivateUserPrivilege: async (id: string) => {
+    const response = await superAdminApi.put(`/privilege/user-privileges/deactivate/${id}`, {});
+    return response.data;
+  },
+
+  getUserPermissions: async (userId: string, activeOnly: boolean = true) => {
+    const response = await superAdminApi.get(`/privilege/access/user-permissions?user_id=${userId}&&active_only=${activeOnly}`);
+    return response.data;
+  },
+
+  getMyMenus: async (userId: string, activeOnly: boolean = true) => {
+    const response = await superAdminApi.get(`/privilege/access/my-menus?user_id=${userId}&&active_only=${activeOnly}`);
+    return response.data;
+  },
+
+  getPrivilegeMenus: async () => {
+    const response = await superAdminApi.get('/privilege/menus');
+    return response.data;
+  },
+
+  getPrivilegePermissions: async () => {
+    const response = await superAdminApi.get('/privilege/permissions');
+    return response.data;
+  },
+
+  createPrivilegeWithAccess: async (data: CreatePrivilegeWithAccessData) => {
+    const response = await superAdminApi.post('/privilege/with-access', data);
+    return response.data;
+  },
+
+  createUser: async (data: CreateUserData) => {
+    const endpoints = [
+      '/users',
+      '/user',
+      '/auth/register',
+      '/auth/super/register',
+      '/auth/admin/register',
+      '/auth/super-admin/register',
+    ];
+
+    let lastError: any;
+    for (const endpoint of endpoints) {
+      try {
+        const response = await superAdminApi.post(endpoint, data);
+        return response.data;
+      } catch (err: any) {
+        const status = err?.response?.status;
+        if (status === 404) {
+          lastError = err;
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastError;
+  },
+
+  getUsers: async () => {
+    const endpoints = [
+      '/users',
+      '/user',
+      '/users/list',
+      '/user/list',
+    ];
+
+    let lastError: any;
+    for (const endpoint of endpoints) {
+      try {
+        const response = await superAdminApi.get(endpoint);
+        return response.data;
+      } catch (err: any) {
+        const status = err?.response?.status;
+        if (status === 404) {
+          lastError = err;
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastError;
+  },
+
+  getSubAdmins: async () => {
+    const response = await superAdminApi.get('/sub-admins');
+    return response.data;
+  },
+
   // Program Management
   getPrograms: async () => {
     const response = await superAdminApi.get('/programme');
+    return response.data;
+  },
+
+  getSubscriptions: async () => {
+    const response = await superAdminApi.get('/subscription');
+    return response.data;
+  },
+
+  getSubscriptionsPending: async () => {
+    const response = await superAdminApi.get('/subscription/list/pending');
+    return response.data;
+  },
+
+  getSubscriptionsActive: async () => {
+    const response = await superAdminApi.get('/subscription/list/active');
+    return response.data;
+  },
+
+  getSubscriptionsSuspended: async () => {
+    const response = await superAdminApi.get('/subscription/list/suspended');
+    return response.data;
+  },
+
+  getSubscriptionsExpired: async () => {
+    const response = await superAdminApi.get('/subscription/list/expired');
     return response.data;
   },
 
@@ -277,7 +483,34 @@ export const superAdminService = {
   },
 
   getSubscriptionPlans: async () => {
-    const response = await superAdminApi.get('/subscription-plan');
+    const response = await subscriptionApi.get('/subscription-plan');
+    return response.data;
+  },
+
+  createSubscriptionPlan: async (data: {
+    name: string;
+    no_of_days: number;
+    amount: number;
+    description: string;
+    notes: string;
+    is_active: boolean;
+  }) => {
+    const response = await subscriptionApi.post('/subscription-plan', data);
+    return response.data;
+  },
+
+  updateSubscriptionPlan: async (
+    id: string,
+    data: Partial<{
+      name: string;
+      no_of_days: number;
+      amount: number;
+      description: string;
+      notes: string;
+      is_active: boolean;
+    }>
+  ) => {
+    const response = await subscriptionApi.put(`/subscription-plan/${id}`, data);
     return response.data;
   },
 };

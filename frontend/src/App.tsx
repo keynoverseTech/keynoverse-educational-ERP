@@ -80,6 +80,7 @@ const ReportsLayout = lazy(() => import('./pages/super-admin/reports/ReportsLayo
 const SuperAdminFinanceDashboard = lazy(() => import('./pages/super-admin/finance/FinanceDashboard'));
 const SuperAdminRevenue = lazy(() => import('./pages/super-admin/finance/Revenue'));
 const SuperAdminSubscriptionPlans = lazy(() => import('./pages/super-admin/finance/SubscriptionPlans'));
+const SuperAdminSubscriptions = lazy(() => import('./pages/super-admin/finance/Subscriptions'));
 const SuperAdminAcademicsOverview = lazy(() => import('./pages/super-admin/institution-tabs/academics-overview/AcademicsOverviewDashboard'));
 const SuperAdminHROverview = lazy(() => import('./pages/super-admin/institution-tabs/hr-overview/HROverviewDashboard'));
 const SuperAdminAssesmentAndResult = lazy(() => import('./pages/super-admin/institution-tabs/assesment-and-result/AssesmentAndResultDashboard'));
@@ -923,6 +924,7 @@ function App() {
                             <Route path="/super-admin/finance/dashboard" element={<SuperAdminFinanceDashboard />} />
                             <Route path="/super-admin/finance/revenue" element={<SuperAdminRevenue />} />
                             <Route path="/super-admin/finance/plans" element={<SuperAdminSubscriptionPlans />} />
+                            <Route path="/super-admin/finance/subscriptions" element={<SuperAdminSubscriptions />} />
                             <Route path="/super-admin/reports" element={<ReportsLayout />} />
                           </Route>
 

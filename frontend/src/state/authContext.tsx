@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { AxiosError } from 'axios';
 import api from '../services/api';
+import superAdminService from '../services/superAdminApi';
 
 import type { PermissionSet } from '../utils/permissionCheck';
+import { privilegesToPermissionSet } from '../utils/privilegeToPermissionSet';
 
 export interface User {
   id: string;
@@ -47,7 +49,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (token && savedUser) {
         try {
-          setUser(JSON.parse(savedUser));
+          const restored = JSON.parse(savedUser) as User;
+          if (restored?.role?.toLowerCase().replace(/ /g, '_') === 'sub_admin') {
+            try {
+              const permsResponse = await superAdminService.getUserPermissions(restored.id, true);
+              const permsList = Array.isArray(permsResponse) ? permsResponse : (permsResponse as any)?.data || [];
+              const permissions = privilegesToPermissionSet(permsList);
+              const updated = { ...restored, permissions };
+              localStorage.setItem('auth_user', JSON.stringify(updated));
+              setUser(updated);
+            } catch (err) {
+              console.error('Failed to refresh sub-admin permissions', err);
+              setUser(restored);
+            }
+          } else {
+            setUser(restored);
+          }
           setIsAuthenticated(true);
         } catch (err) {
           console.error('Failed to restore auth state', err);
@@ -67,9 +84,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const { data: { access_token, user: loggedInUser } } = await api.post<LoginResponse>(endpointPath, { email, password });
       
       localStorage.setItem('auth_token', access_token);
-      localStorage.setItem('auth_user', JSON.stringify(loggedInUser));
+      let userToStore: User = loggedInUser;
+      if (loggedInUser?.role?.toLowerCase().replace(/ /g, '_') === 'sub_admin') {
+        try {
+          const permsResponse = await superAdminService.getUserPermissions(loggedInUser.id, true);
+          const permsList = Array.isArray(permsResponse) ? permsResponse : (permsResponse as any)?.data || [];
+          userToStore = { ...loggedInUser, permissions: privilegesToPermissionSet(permsList) };
+        } catch (err) {
+          console.error('Failed to load sub-admin permissions during login', err);
+        }
+      }
+      localStorage.setItem('auth_user', JSON.stringify(userToStore));
       
-      setUser(loggedInUser);
+      setUser(userToStore);
       setIsAuthenticated(true);
     } catch (err: unknown) {
       console.error('Login failed', err);

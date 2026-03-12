@@ -109,7 +109,35 @@ const AcademicConfiguration: React.FC<AcademicConfigurationProps> = ({ configura
 
             {/* Modal Content - Render the actual component */}
             <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50 p-4">
-               {renderModuleContent(selectedModule)}
+               <div className="mb-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-xl p-4">
+                 <div className="text-sm font-bold text-blue-900 dark:text-blue-200">Read-only preview</div>
+                 <div className="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                   Actions are disabled here. This does not change the school’s configuration.
+                 </div>
+               </div>
+
+               <style>{`
+                 .superadmin-readonly button,
+                 .superadmin-readonly a,
+                 .superadmin-readonly [role="button"] {
+                   display: none !important;
+                 }
+
+                 .superadmin-readonly input,
+                 .superadmin-readonly select,
+                 .superadmin-readonly textarea,
+                 .superadmin-readonly [contenteditable="true"] {
+                   pointer-events: none !important;
+                 }
+
+                 .superadmin-readonly form {
+                   pointer-events: none !important;
+                 }
+               `}</style>
+
+               <div className="superadmin-readonly">
+                 {renderModuleContent(selectedModule)}
+               </div>
             </div>
           </div>
         </div>

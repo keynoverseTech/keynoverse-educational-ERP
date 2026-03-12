@@ -1,34 +1,76 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Shield, Activity } from 'lucide-react';
+import { Plus, Edit, Activity } from 'lucide-react';
+import superAdminService, { type UserListItem } from '../../services/superAdminApi';
 
-// Mock Data for Sub-Admins
-const mockSubAdmins = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'sub_admin', lastLogin: '2024-03-05 10:00 AM', status: 'Active' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'sub_admin', lastLogin: '2024-03-04 02:30 PM', status: 'Inactive' },
-];
-
-const mockActivityLogs = [
-  { id: 1, user: 'John Doe', action: 'Viewed Institute: ABC University', time: '10 mins ago' },
-  { id: 2, user: 'Jane Smith', action: 'Generated Finance Report', time: '1 hour ago' },
-  { id: 3, user: 'John Doe', action: 'Approved Registration: XYZ College', time: '2 hours ago' },
-];
+type SubAdminRow = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  lastLogin: string;
+  status: 'Active' | 'Inactive';
+};
 
 const SubAdminList: React.FC = () => {
   const navigate = useNavigate();
-  const [subAdmins, setSubAdmins] = useState(mockSubAdmins);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [subAdmins, setSubAdmins] = useState<SubAdminRow[]>([]);
 
-  const handleDelete = (id: number) => {
-    if (confirm('Are you sure you want to delete this Sub-Admin?')) {
-      setSubAdmins(subAdmins.filter(admin => admin.id !== id));
-    }
-  };
+  const normalizeRole = (role: any) => (role || '').toString().toLowerCase().replace(/ /g, '_');
 
-  const handleToggleStatus = (id: number) => {
-    setSubAdmins(subAdmins.map(admin => 
-      admin.id === id ? { ...admin, status: admin.status === 'Active' ? 'Inactive' : 'Active' } : admin
-    ));
-  };
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await superAdminService.getSubAdmins();
+        const data: UserListItem[] = Array.isArray(res) ? res : (res as any)?.data || [];
+
+        const rows = data
+          .filter((u: any) => normalizeRole(u.role) === 'sub_admin')
+          .map((u: any) => {
+            const status: SubAdminRow['status'] =
+              u.is_active === false || (u.status || '').toString().toLowerCase().includes('inactive')
+                ? 'Inactive'
+                : 'Active';
+            const lastLogin =
+              u.last_login ||
+              u.lastLogin ||
+              u.updated_at ||
+              '—';
+            return {
+              id: String(u.id),
+              name: String(u.name || '—'),
+              email: String(u.email || '—'),
+              role: String(u.role || 'sub_admin'),
+              lastLogin: String(lastLogin),
+              status,
+            };
+          })
+          .filter(r => r.id);
+
+        setSubAdmins(rows as SubAdminRow[]);
+      } catch (err: any) {
+        console.error('Failed to load sub-admins', err);
+        const status = err?.response?.status;
+        if (status === 403) setError('Forbidden: backend must allow super_admin to access GET /api/sub-admins.');
+        else if (status === 404) setError('Not found: backend must implement GET /api/sub-admins for listing sub-admin users.');
+        else setError('Failed to load sub-admins');
+        setSubAdmins([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const emptyText = useMemo(() => {
+    if (loading) return '';
+    if (error) return '';
+    return 'No sub-admins found.';
+  }, [loading, error]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -63,7 +105,28 @@ const SubAdminList: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {subAdmins.map((admin) => (
+                {loading && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                      Loading sub-admins...
+                    </td>
+                  </tr>
+                )}
+                {!loading && error && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-10 text-center text-sm text-rose-600 dark:text-rose-400">
+                      {error}
+                    </td>
+                  </tr>
+                )}
+                {!loading && !error && subAdmins.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                      {emptyText}
+                    </td>
+                  </tr>
+                )}
+                {!loading && !error && subAdmins.map((admin) => (
                   <tr key={admin.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -91,29 +154,11 @@ const SubAdminList: React.FC = () => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button 
-                          onClick={() => handleToggleStatus(admin.id)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            admin.status === 'Active' 
-                              ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20' 
-                              : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                          }`}
-                          title={admin.status === 'Active' ? 'Deactivate' : 'Activate'}
-                        >
-                          <Shield size={18} />
-                        </button>
-                        <button 
                           onClick={() => navigate(`/super-admin/sub-admins/edit/${admin.id}`)}
                           className="p-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                           title="Edit Permissions"
                         >
                           <Edit size={18} />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(admin.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 size={18} />
                         </button>
                       </div>
                     </td>
@@ -130,19 +175,8 @@ const SubAdminList: React.FC = () => {
             <Activity size={18} className="text-gray-500" />
             <h2 className="font-bold text-gray-900 dark:text-white">Recent Activity</h2>
           </div>
-          <div className="divide-y divide-gray-100 dark:divide-gray-800">
-            {mockActivityLogs.map((log) => (
-              <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                <div className="flex justify-between items-start mb-1">
-                  <span className="font-semibold text-sm text-gray-900 dark:text-white">{log.user}</span>
-                  <span className="text-xs text-gray-400">{log.time}</span>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{log.action}</p>
-              </div>
-            ))}
-          </div>
-          <div className="p-3 bg-gray-50 dark:bg-gray-900/50 text-center">
-            <button className="text-sm text-blue-600 hover:underline">View Full Logs</button>
+          <div className="p-6 text-sm text-gray-500 dark:text-gray-400">
+            Activity logs will appear here when the backend provides an audit/activity endpoint for sub-admin actions.
           </div>
         </div>
       </div>

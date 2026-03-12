@@ -333,9 +333,9 @@ const GlobalModules: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredModules.map((module) => (
+            {filteredModules.map((module, index) => (
               <div 
-                key={module.id} 
+                key={`${module.id}-${module.title}-${index}`} 
                 className={`
                   relative overflow-hidden rounded-2xl border transition-all duration-300 flex flex-col h-full group
                   ${module.active 
