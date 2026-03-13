@@ -56,6 +56,8 @@ const Overview: React.FC = () => {
       navigate('/super-admin/admissions-overview');
     } else if (module.id === 'academics') {
       navigate('/super-admin/academics-overview');
+    } else if (module.id === 'lms') {
+      navigate('/super-admin/lms-overview');
     } else if (module.id === 'finance') {
       navigate('/super-admin/finance-overview');
     } else if (module.id === 'assesment-and-result') {
@@ -125,6 +127,20 @@ const Overview: React.FC = () => {
         { label: 'Active Sessions', value: '2', trend: 'Current' },
         { label: 'Departments', value: '12' },
         { label: 'Total Courses', value: '145', trend: '+5%', trendUp: true }
+      ]
+    },
+    {
+      id: 'lms',
+      title: 'LMS',
+      description: 'Courses, content delivery, assignments, quizzes, and submissions.',
+      icon: LayoutGrid,
+      color: 'bg-indigo-600',
+      active: true,
+      lastSync: '15 mins ago',
+      stats: [
+        { label: 'Active Courses', value: '31' },
+        { label: 'Open Assignments', value: '14' },
+        { label: 'Submissions', value: '3,420', trend: '+6%', trendUp: true }
       ]
     },
     {

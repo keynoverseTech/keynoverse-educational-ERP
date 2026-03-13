@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Clock, BarChart2, TrendingUp, TrendingDown, Users, Settings, List, Calendar, ArrowLeft, GraduationCap, School, ChevronRight, Activity, ClipboardCheck } from 'lucide-react';
+import { BookOpen, Clock, BarChart2, TrendingUp, TrendingDown, Users, Settings, List, Calendar, ArrowLeft, GraduationCap, School, ChevronRight, Activity, ClipboardCheck, FileText } from 'lucide-react';
 import { academicsOverviewService } from './service';
 import type { AcademicsOverviewData } from './types';
 import { Bar } from 'react-chartjs-2';
@@ -8,6 +8,7 @@ import AcademicConfiguration from './AcademicConfiguration';
 import CoursesList from './CoursesList';
 import TimetableView from './TimetableView';
 import AttendanceReport from './AttendanceReport';
+import ResearchProjectsOverview from './ResearchProjectsOverview';
 import { useNavigate } from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
@@ -16,7 +17,7 @@ const AcademicsOverviewDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<AcademicsOverviewData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'config' | 'courses' | 'timetable' | 'attendance'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'config' | 'courses' | 'timetable' | 'attendance' | 'research'>('overview');
 
   useEffect(() => {
     academicsOverviewService.getAcademicsOverviewData().then(res => {
@@ -158,6 +159,7 @@ const AcademicsOverviewDashboard: React.FC = () => {
                 { id: 'courses', label: 'All Courses', icon: BookOpen },
                 { id: 'timetable', label: 'Timetable', icon: Calendar },
                 { id: 'attendance', label: 'Attendance', icon: ClipboardCheck },
+                { id: 'research', label: 'Research & Projects', icon: FileText },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -370,6 +372,12 @@ const AcademicsOverviewDashboard: React.FC = () => {
           {activeTab === 'config' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <AcademicConfiguration configurations={data.modules} />
+            </div>
+          )}
+
+          {activeTab === 'research' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <ResearchProjectsOverview />
             </div>
           )}
 

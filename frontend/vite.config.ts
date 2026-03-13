@@ -19,12 +19,19 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/subscription-api': {
-        target: 'http://localhost:4000',
+      '/admin-api': {
+        target: 'https://erp-api-production-024c.up.railway.app',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/subscription-api/, '/api'),
+        rewrite: (path) => path.replace(/^\/admin-api/, '/api'),
       },
+      '/privilege-api': {
+        target: 'https://erp-api-production-024c.up.railway.app',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/privilege-api/, '/api'),
+      },
+      
     },
   },
 })

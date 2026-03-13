@@ -92,6 +92,7 @@ const SuperAdminResultDetails = lazy(() => import('./pages/super-admin/instituti
 const SuperAdminFinanceOverview = lazy(() => import('./pages/super-admin/institution-tabs/finance-overview/FinanceOverviewDashboard'));
 const SuperAdminAdmissionsOverview = lazy(() => import('./pages/super-admin/institution-tabs/admissions-overview/AdmissionsOverviewDashboard.tsx'));
 const SuperAdminAdmissionsApplicantDetails = lazy(() => import('./pages/super-admin/institution-tabs/admissions-overview/ApplicantDetails.tsx'));
+const SuperAdminLMSOverview = lazy(() => import('./pages/super-admin/institution-tabs/lms-overview/LMSOverviewDashboard'));
 const SuperAdminStudentsOverview = lazy(() => import('./pages/super-admin/institution-tabs/students-overview/StudentsOverviewDashboard.tsx'));
 const SuperAdminStudentDetails = lazy(() => import('./pages/super-admin/institution-tabs/students-overview/StudentDetails.tsx'));
 
@@ -1014,6 +1015,14 @@ function App() {
                                 <SuperAdminAdmissionsOverview />
                               </FullScreenLayout>
                             } 
+                          />
+                          <Route
+                            path="/super-admin/lms-overview"
+                            element={
+                              <FullScreenLayout title="LMS Overview">
+                                <SuperAdminLMSOverview />
+                              </FullScreenLayout>
+                            }
                           />
                           <Route 
                             path="/super-admin/admissions-overview/applicant-details" 
