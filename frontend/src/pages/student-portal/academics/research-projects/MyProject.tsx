@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const MyProject = () => {
+const MyProject = ({ embedded }: { embedded?: boolean }) => {
   const navigate = useNavigate();
 
   const projectDetails = {
@@ -32,19 +32,21 @@ const MyProject = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-        >
-          <ArrowLeft size={20} className="text-gray-500 dark:text-gray-400" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Project</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Project details and supervisor information</p>
+    <div className={`${embedded ? '' : 'p-6 '}space-y-6`}>
+      {!embedded && (
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <ArrowLeft size={20} className="text-gray-500 dark:text-gray-400" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Project</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Project details and supervisor information</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Project Details */}

@@ -6,56 +6,51 @@ import {
   Reply
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { appendFeedbackMessage, getStudentFeedbackThreads, type FeedbackThreadStatus } from '../../../../utils/researchSupervisorFeedback';
 
 const SupervisorFeedback = () => {
   const navigate = useNavigate();
 
-  const feedbackThreads = [
-    {
-      id: 1,
-      submission: "Chapter 2 - Literature Review (v1.0)",
-      date: "2024-03-02",
-      status: "revision_required",
-      supervisor: {
-        name: "Dr. Musa Ibrahim",
-        avatar: "MI"
-      },
-      messages: [
-        {
-          sender: "supervisor",
-          text: "I've reviewed your Chapter 2. The content is generally good, but you need to include more recent citations from the last 5 years. Also, the section on 'Related Works' needs to be more critical, not just descriptive.",
-          time: "10:30 AM"
-        },
-        {
-          sender: "student",
-          text: "Thank you Dr. I will update the citations and revise the Related Works section. Should I focus on any specific journals?",
-          time: "11:15 AM"
-        },
-        {
-          sender: "supervisor",
-          text: "Yes, look at IEEE Transactions and recent conference proceedings on the topic.",
-          time: "02:00 PM"
-        }
-      ]
-    },
-    {
-      id: 2,
-      submission: "Chapter 1 - Introduction (v1.0)",
-      date: "2024-02-06",
-      status: "approved",
-      supervisor: {
-        name: "Dr. Musa Ibrahim",
-        avatar: "MI"
-      },
-      messages: [
-        {
-          sender: "supervisor",
-          text: "Excellent introduction. The problem statement is clear and the objectives are well-defined. You can proceed to Chapter 2.",
-          time: "09:00 AM"
-        }
-      ]
+  const studentMatric = useMemo(() => {
+    const proposalRaw = localStorage.getItem('student_research_topic_proposal');
+    if (proposalRaw) {
+      try {
+        const parsed = JSON.parse(proposalRaw) as { student?: { matricNumber?: string } };
+        if (parsed?.student?.matricNumber) return parsed.student.matricNumber;
+      } catch {
+        return 'CS/2020/001';
+      }
     }
-  ];
+    return 'CS/2020/001';
+  }, []);
+
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((n) => n + 1), 1500);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const feedbackThreads = useMemo(() => getStudentFeedbackThreads(studentMatric), [studentMatric, tick]);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+
+  const setDraft = (threadId: string, value: string) => {
+    setDrafts((prev) => ({ ...prev, [threadId]: value }));
+  };
+
+  const sendReply = (threadId: string, currentStatus: FeedbackThreadStatus) => {
+    const text = (drafts[threadId] ?? '').trim();
+    if (!text) return;
+    appendFeedbackMessage({
+      studentMatric,
+      threadId,
+      sender: 'student',
+      text,
+      nextStatus: currentStatus
+    });
+    setDrafts((prev) => ({ ...prev, [threadId]: '' }));
+    setTick((n) => n + 1);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -73,6 +68,12 @@ const SupervisorFeedback = () => {
       </div>
 
       <div className="space-y-6">
+        {feedbackThreads.length === 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-10 text-center">
+            <div className="text-sm font-black text-gray-900 dark:text-white">No feedback yet</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">When your supervisor reviews a submission, it will appear here.</div>
+          </div>
+        )}
         {feedbackThreads.map((thread) => (
           <div key={thread.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center flex-wrap gap-4">
@@ -89,9 +90,17 @@ const SupervisorFeedback = () => {
                   <span className="flex items-center gap-1 text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full">
                     <CheckCircle size={14} /> Approved
                   </span>
-                ) : (
+                ) : thread.status === 'rejected' ? (
+                  <span className="flex items-center gap-1 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded-full">
+                    <AlertCircle size={14} /> Rejected
+                  </span>
+                ) : thread.status === 'revision_required' ? (
                   <span className="flex items-center gap-1 text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-3 py-1 rounded-full">
                     <AlertCircle size={14} /> Revision Required
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full">
+                    <AlertCircle size={14} /> Under Review
                   </span>
                 )}
               </div>
@@ -117,7 +126,7 @@ const SupervisorFeedback = () => {
                     <p className={`text-[10px] mt-2 text-right ${
                       msg.sender === 'student' ? 'text-blue-100' : 'text-gray-400'
                     }`}>
-                      {msg.time}
+                      {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>
@@ -129,9 +138,17 @@ const SupervisorFeedback = () => {
                 <input 
                   type="text" 
                   placeholder="Type your reply..."
+                  value={drafts[String(thread.id)] ?? ''}
+                  onChange={(e) => setDraft(String(thread.id), e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') sendReply(String(thread.id), thread.status);
+                  }}
                   className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
                 />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <button
+                  onClick={() => sendReply(String(thread.id), thread.status)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
                   <Reply size={16} />
                 </button>
               </div>

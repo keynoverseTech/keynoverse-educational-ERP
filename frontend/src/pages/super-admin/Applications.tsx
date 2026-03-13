@@ -9,7 +9,10 @@ import {
   CheckCircle2, 
   ClipboardList,
   History,
-  TrendingUp
+  TrendingUp,
+  FileSpreadsheet,
+  FileText,
+  Printer
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BarChart, Bar, ResponsiveContainer } from 'recharts';
@@ -45,6 +48,14 @@ const Applications: React.FC = () => {
   // --- Filtering & Pagination ---
   const [filterStatus, setFilterStatus] = useState('All'); 
   const [searchTerm, setSearchTerm] = useState('');
+  const [reportMenuOpen, setReportMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!reportMenuOpen) return;
+    const onClick = () => setReportMenuOpen(false);
+    window.addEventListener('click', onClick);
+    return () => window.removeEventListener('click', onClick);
+  }, [reportMenuOpen]);
 
   // Update fetch function to handle different endpoints based on filter
   useEffect(() => {
@@ -131,6 +142,7 @@ const Applications: React.FC = () => {
             id: inst.id,
             institution: inst.name,
             location: inst.address || 'N/A',
+            raw: inst,
             logo: (() => {
               const cleaned = sanitizeUrl(inst.logo);
               if (isHttpUrl(cleaned)) return cleaned;
@@ -165,6 +177,222 @@ const Applications: React.FC = () => {
     fetchApplications();
   }, [filterStatus]); // Re-fetch when filter changes
 
+  const normalizeStatus = (s: any) => (s || '').toString().trim();
+
+  const extractState = (inst: any) => {
+    if (!inst) return '';
+    const state =
+      inst.state?.name ??
+      inst.state?.label ??
+      inst.state_name ??
+      inst.stateName ??
+      inst.state ??
+      inst.state_of_establishment ??
+      inst.stateOfEstablishment ??
+      '';
+    if (typeof state === 'string') return state;
+    return '';
+  };
+
+  const extractTier = (inst: any) => {
+    if (!inst) return '';
+    const tier =
+      inst.registered_students_tier ??
+      inst.registeredStudentsTier ??
+      inst.students_tier ??
+      inst.studentsTier ??
+      inst.tier ??
+      inst.tier_of_students ??
+      inst.tierOfStudents ??
+      inst.subscription_tier ??
+      inst.subscriptionTier ??
+      '';
+    if (typeof tier === 'string') return tier;
+    if (typeof tier === 'number') return String(tier);
+    return '';
+  };
+
+  const extractIctDirector = (inst: any) => {
+    const rawName =
+      inst?.ict_director_name ??
+      inst?.ictDirectorName ??
+      inst?.director_ict_name ??
+      inst?.directorIctName ??
+      inst?.director_ict ??
+      inst?.directorIct ??
+      '';
+
+    const rawEmail =
+      inst?.ict_director_email ??
+      inst?.ictDirectorEmail ??
+      inst?.director_ict_email ??
+      inst?.directorIctEmail ??
+      inst?.ict_email ??
+      inst?.ictEmail ??
+      '';
+
+    const rawPhone =
+      inst?.ict_director_phone_number ??
+      inst?.ictDirectorPhoneNumber ??
+      inst?.ict_director_phone ??
+      inst?.ictDirectorPhone ??
+      inst?.director_ict_phone_number ??
+      inst?.directorIctPhoneNumber ??
+      inst?.director_ict_phone ??
+      inst?.directorIctPhone ??
+      inst?.ict_phone_number ??
+      inst?.ictPhoneNumber ??
+      inst?.ict_phone ??
+      inst?.ictPhone ??
+      '';
+
+    return {
+      name: typeof rawName === 'string' ? rawName : '',
+      email: typeof rawEmail === 'string' ? rawEmail : '',
+      phone: typeof rawPhone === 'string' ? rawPhone : ''
+    };
+  };
+
+  const escapeCsv = (value: any) => {
+    const s = value === null || value === undefined ? '' : String(value);
+    const needsQuotes = /[",\n\r]/.test(s);
+    const escaped = s.replace(/"/g, '""');
+    return needsQuotes ? `"${escaped}"` : escaped;
+  };
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const buildReportRows = (rows: any[]) => {
+    return rows.map((inst) => {
+      const ict = extractIctDirector(inst);
+      return {
+        schoolName: inst?.name ?? '',
+        state: extractState(inst),
+        address: inst?.address ?? '',
+        status: normalizeStatus(inst?.status) || 'pending',
+        studentsTier: extractTier(inst),
+        rectorName: inst?.rector ?? '',
+        rectorPhone: inst?.rector_phone_number ?? inst?.rectorPhoneNumber ?? '',
+        rectorEmail: inst?.rector_email ?? inst?.rectorEmail ?? '',
+        ictDirectorName: ict.name,
+        ictDirectorPhone: ict.phone,
+        ictDirectorEmail: ict.email
+      };
+    });
+  };
+
+  const reportHeaders = [
+    { key: 'schoolName', label: 'School Name' },
+    { key: 'state', label: 'State' },
+    { key: 'address', label: 'Address' },
+    { key: 'status', label: 'Status' },
+    { key: 'studentsTier', label: 'Students Tier' },
+    { key: 'rectorName', label: 'Rector Name' },
+    { key: 'rectorPhone', label: 'Rector Phone' },
+    { key: 'rectorEmail', label: 'Rector Email' },
+    { key: 'ictDirectorName', label: 'ICT Director Name' },
+    { key: 'ictDirectorPhone', label: 'ICT Director Phone' },
+    { key: 'ictDirectorEmail', label: 'ICT Director Email' }
+  ] as const;
+
+  const reportFilenameBase = () => {
+    const d = new Date().toISOString().slice(0, 10);
+    const f = filterStatus.toLowerCase().replace(/\s+/g, '-');
+    return `registrations_${f}_${d}`;
+  };
+
+  const exportCsv = (rows: any[]) => {
+    const data = buildReportRows(rows);
+    const headerLine = reportHeaders.map((h) => escapeCsv(h.label)).join(',');
+    const lines = data.map((r) => reportHeaders.map((h) => escapeCsv((r as any)[h.key])).join(','));
+    const csv = [headerLine, ...lines].join('\r\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), `${reportFilenameBase()}.csv`);
+  };
+
+  const exportExcel = (rows: any[]) => {
+    const data = buildReportRows(rows);
+    const title = `New Registrations Report (${filterStatus})`;
+    const tableHead = reportHeaders.map((h) => `<th style="border:1px solid #e5e7eb;padding:8px;background:#f8fafc;text-align:left;font-weight:700;font-size:12px;">${h.label}</th>`).join('');
+    const tableRows = data
+      .map((r) => {
+        const cells = reportHeaders
+          .map((h) => `<td style="border:1px solid #e5e7eb;padding:8px;font-size:12px;">${String((r as any)[h.key] ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`)
+          .join('');
+        return `<tr>${cells}</tr>`;
+      })
+      .join('');
+
+    const html = `
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>${title}</title>
+        </head>
+        <body>
+          <h2 style="font-family:Arial, sans-serif;">${title}</h2>
+          <p style="font-family:Arial, sans-serif;font-size:12px;color:#475569;margin-top:-8px;">Generated: ${new Date().toLocaleString()}</p>
+          <table style="border-collapse:collapse;width:100%;font-family:Arial, sans-serif;">
+            <thead><tr>${tableHead}</tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </body>
+      </html>
+    `;
+    downloadBlob(new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' }), `${reportFilenameBase()}.xls`);
+  };
+
+  const openPrintWindow = (rows: any[], mode: 'print' | 'pdf') => {
+    const data = buildReportRows(rows);
+    const title = `New Registrations Report (${filterStatus})`;
+    const win = window.open('', '_blank', 'noopener,noreferrer');
+    if (!win) return;
+
+    const headCells = reportHeaders.map((h) => `<th>${h.label}</th>`).join('');
+    const bodyRows = data
+      .map((r) => `<tr>${reportHeaders.map((h) => `<td>${String((r as any)[h.key] ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`).join('')}</tr>`)
+      .join('');
+
+    win.document.write(`
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>${title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; }
+            h2 { margin: 0; }
+            .meta { margin-top: 6px; color: #475569; font-size: 12px; }
+            .hint { margin-top: 12px; font-size: 12px; color: #475569; }
+            table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
+            th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; vertical-align: top; }
+            th { background: #f8fafc; font-weight: 700; }
+            @media print { .hint { display: none; } }
+          </style>
+        </head>
+        <body>
+          <h2>${title}</h2>
+          <div class="meta">Generated: ${new Date().toLocaleString()} • Filter: ${filterStatus} • Records: ${data.length}</div>
+          ${mode === 'pdf' ? '<div class="hint">Tip: Use your browser print dialog and select “Save as PDF”.</div>' : ''}
+          <table>
+            <thead><tr>${headCells}</tr></thead>
+            <tbody>${bodyRows}</tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    win.print();
+  };
+
   const filteredApplications = applications.filter(app => {
     // Status is already filtered by API endpoint, so we only filter by search term locally
     // unless we are in 'All' mode where we might want client side filtering if needed, 
@@ -180,6 +408,8 @@ const Applications: React.FC = () => {
       
     return matchesSearch;
   });
+
+  const reportRowsRaw = filteredApplications.map((a) => a.raw).filter(Boolean);
 
   if (loading) {
     return (
@@ -229,10 +459,71 @@ const Applications: React.FC = () => {
             <Plus size={18} />
             <span>Register New Institution</span>
           </Link>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
-            <ClipboardList size={18} />
-            <span>Generate Report</span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setReportMenuOpen((v) => !v);
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+            >
+              <ClipboardList size={18} />
+              <span>Generate Report</span>
+            </button>
+
+            {reportMenuOpen && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-50"
+              >
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                  <div className="text-xs font-black text-gray-900 dark:text-white">Export ({reportRowsRaw.length})</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400">Filter: {filterStatus}</div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    exportCsv(reportRowsRaw);
+                    setReportMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <FileText size={16} />
+                  CSV
+                </button>
+                <button
+                  onClick={() => {
+                    exportExcel(reportRowsRaw);
+                    setReportMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <FileSpreadsheet size={16} />
+                  Excel
+                </button>
+                <button
+                  onClick={() => {
+                    openPrintWindow(reportRowsRaw, 'pdf');
+                    setReportMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <FileText size={16} />
+                  PDF
+                </button>
+                <button
+                  onClick={() => {
+                    openPrintWindow(reportRowsRaw, 'print');
+                    setReportMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <Printer size={16} />
+                  Print
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
