@@ -267,12 +267,10 @@ const StudentSubmissions = lazy(() => import('./pages/student-portal/lms/Student
 // Student Portal - Research & Projects
 const StudentResearchDashboard = lazy(() => import('./pages/student-portal/academics/research-projects/ResearchDashboard'));
 const StudentTopicProposal = lazy(() => import('./pages/student-portal/academics/research-projects/TopicProposal'));
-const StudentMyProject = lazy(() => import('./pages/student-portal/academics/research-projects/MyProject'));
 const StudentProjectSubmissions = lazy(() => import('./pages/student-portal/academics/research-projects/ProjectSubmissions'));
 const StudentSupervisorFeedback = lazy(() => import('./pages/student-portal/academics/research-projects/SupervisorFeedback'));
 const StudentPlagiarismReport = lazy(() => import('./pages/student-portal/academics/research-projects/PlagiarismReport'));
 const StudentDefenseSchedule = lazy(() => import('./pages/student-portal/academics/research-projects/DefenseSchedule'));
-const StudentProjectArchive = lazy(() => import('./pages/student-portal/academics/research-projects/ProjectArchive'));
 
 const StudentFeesDashboard = lazy(() => import('./pages/student-portal/fees/FeesDashboard'));
 const StudentInvoiceDetails = lazy(() => import('./pages/student-portal/fees/StudentInvoiceDetailsPage'));
@@ -339,7 +337,6 @@ const StaffResearchDashboard = lazy(() => import('./pages/staff-portal/academics
 const StaffProjectTopics = lazy(() => import('./pages/staff-portal/academics/research-projects/ProjectTopics'));
 const StaffAssignedStudents = lazy(() => import('./pages/staff-portal/academics/research-projects/AssignedStudents'));
 const StaffProjectSubmissions = lazy(() => import('./pages/staff-portal/academics/research-projects/ProjectSubmissions'));
-const StaffProjectReviews = lazy(() => import('./pages/staff-portal/academics/research-projects/ProjectReviews'));
 const StaffPlagiarismCheck = lazy(() => import('./pages/staff-portal/academics/research-projects/PlagiarismCheck'));
 const StaffDefenseSchedule = lazy(() => import('./pages/staff-portal/academics/research-projects/DefenseSchedule'));
 
@@ -391,12 +388,12 @@ const schoolAdminItems = [
         name: 'Research & Projects',
         subItems: [
           { name: 'Dashboard', path: '/school-admin/academics/research/dashboard' },
+          { name: 'Supervisor Allocation', path: '/school-admin/academics/research/supervisors' },
           { name: 'Project Topics', path: '/school-admin/academics/research/topics' },
-          { name: 'Supervisor', path: '/school-admin/academics/research/supervisors' },
-          { name: 'Submissions', path: '/school-admin/academics/research/submissions' },
+          { name: 'Project Submissions', path: '/school-admin/academics/research/submissions' },
           { name: 'Plagiarism Check', path: '/school-admin/academics/research/plagiarism' },
-          { name: 'Defense Schedule', path: '/school-admin/academics/research/defense' },
-          { name: 'Archive', path: '/school-admin/academics/research/archive' }
+          { name: 'Defence Scheduling', path: '/school-admin/academics/research/defense' },
+          { name: 'Project Archive', path: '/school-admin/academics/research/archive' }
         ]
       }
     ]
@@ -626,13 +623,12 @@ const studentItems = [
       {
         name: 'Research & Projects',
         subItems: [
-          { name: 'Overview', path: '/student/academics/research/dashboard' },
+          { name: 'Dashboard', path: '/student/academics/research/dashboard' },
           { name: 'Topic Proposal', path: '/student/academics/research/proposal' },
-          { name: 'My Project', path: '/student/academics/research/project' },
-          { name: 'Submissions', path: '/student/academics/research/submissions' },
+          { name: 'Project Submissions', path: '/student/academics/research/submissions' },
           { name: 'Supervisor Feedback', path: '/student/academics/research/feedback' },
           { name: 'Plagiarism Report', path: '/student/academics/research/plagiarism' },
-          { name: 'Defense Schedule', path: '/student/academics/research/defense' }
+          { name: 'Defence Scheduling', path: '/student/academics/research/defense' }
         ]
       }
     ]
@@ -713,12 +709,11 @@ const staffItems = [
         name: 'Research & Projects',
         subItems: [
           { name: 'Dashboard', path: '/staff/academics/research/dashboard' },
-          { name: 'Project Topics', path: '/staff/academics/research/topics' },
           { name: 'Assigned Students', path: '/staff/academics/research/students' },
-          { name: 'Submissions', path: '/staff/academics/research/submissions' },
-          { name: 'Project Reviews', path: '/staff/academics/research/reviews' },
+          { name: 'Project Topics', path: '/staff/academics/research/topics' },
+          { name: 'Project Submissions', path: '/staff/academics/research/submissions' },
           { name: 'Plagiarism Check', path: '/staff/academics/research/plagiarism' },
-          { name: 'Defense Schedule', path: '/staff/academics/research/defense' },
+          { name: 'Defence Scheduling', path: '/staff/academics/research/defense' },
         ]
       },
     ]
@@ -1245,12 +1240,12 @@ function App() {
                         {/* Student Research & Projects */}
                         <Route path="/student/academics/research/dashboard" element={<StudentResearchGuard><StudentResearchDashboard /></StudentResearchGuard>} />
                         <Route path="/student/academics/research/proposal" element={<StudentResearchGuard><StudentTopicProposal /></StudentResearchGuard>} />
-                        <Route path="/student/academics/research/project" element={<StudentResearchGuard><StudentMyProject /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/project" element={<Navigate to="/student/academics/research/dashboard?tab=project" replace />} />
                         <Route path="/student/academics/research/submissions" element={<StudentResearchGuard><StudentProjectSubmissions /></StudentResearchGuard>} />
                         <Route path="/student/academics/research/feedback" element={<StudentResearchGuard><StudentSupervisorFeedback /></StudentResearchGuard>} />
                         <Route path="/student/academics/research/plagiarism" element={<StudentResearchGuard><StudentPlagiarismReport /></StudentResearchGuard>} />
                         <Route path="/student/academics/research/defense" element={<StudentResearchGuard><StudentDefenseSchedule /></StudentResearchGuard>} />
-                        <Route path="/student/academics/research/archive" element={<StudentResearchGuard><StudentProjectArchive /></StudentResearchGuard>} />
+                        <Route path="/student/academics/research/archive" element={<Navigate to="/student/academics/research/dashboard" replace />} />
 
                         <Route path="/student/courses" element={<Navigate to="/student/academics/courses" replace />} />
                         <Route path="/student/results" element={<Navigate to="/student/academics/results" replace />} />
@@ -1321,7 +1316,6 @@ function App() {
                         <Route path="academics/research/topics" element={<StaffProjectTopics />} />
                         <Route path="academics/research/students" element={<StaffAssignedStudents />} />
                         <Route path="academics/research/submissions" element={<StaffProjectSubmissions />} />
-                        <Route path="academics/research/reviews" element={<StaffProjectReviews />} />
                         <Route path="academics/research/plagiarism" element={<StaffPlagiarismCheck />} />
                         <Route path="academics/research/defense" element={<StaffDefenseSchedule />} />
 

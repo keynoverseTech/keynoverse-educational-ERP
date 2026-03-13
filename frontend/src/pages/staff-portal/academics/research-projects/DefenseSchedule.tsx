@@ -60,9 +60,9 @@ const StaffDefenseSchedule = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Calendar className="text-orange-600" />
-            Defense Schedule
+            Defence Scheduling
           </h1>
-          <p className="text-gray-500 dark:text-gray-400">View upcoming defenses where you are assigned as a panel member.</p>
+          <p className="text-gray-500 dark:text-gray-400">View upcoming defences where you are assigned as a panel member.</p>
         </div>
       </div>
 

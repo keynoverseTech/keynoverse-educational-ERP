@@ -470,9 +470,9 @@ const DefenseScheduling = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Calendar className="text-orange-600" />
-            Defense Scheduling
+            Defence Scheduling
           </h1>
-          <p className="text-gray-500 dark:text-gray-400">Schedule and manage project defense sessions.</p>
+          <p className="text-gray-500 dark:text-gray-400">Schedule and manage project defence sessions.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">

@@ -68,8 +68,8 @@ const DefenseSchedule = () => {
           <ArrowLeft size={20} className="text-gray-500 dark:text-gray-400" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Defense Schedule</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Upcoming project defense details</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Defence Scheduling</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Upcoming project defence details</p>
         </div>
       </div>
 

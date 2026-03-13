@@ -12,6 +12,7 @@ import {
   X,
   XCircle
 } from 'lucide-react';
+import { appendFeedbackMessage, ensureSubmissionThread, type FeedbackThreadStatus } from '../../../../utils/researchSupervisorFeedback';
 
 type SubmissionStatus = 'Pending' | 'Approved' | 'Rejected' | 'Revision Required';
 
@@ -69,6 +70,13 @@ const saveSubmissions = (submissions: ProjectSubmission[]) => {
   } catch {
     return;
   }
+};
+
+const feedbackStatusFromSubmissionStatus = (status: SubmissionStatus): FeedbackThreadStatus => {
+  if (status === 'Approved') return 'approved';
+  if (status === 'Rejected') return 'rejected';
+  if (status === 'Revision Required') return 'revision_required';
+  return 'pending';
 };
 
 const seedStudents: StudentProfile[] = [
@@ -305,6 +313,27 @@ const StaffProjectSubmissions = () => {
     setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
   };
 
+  const notifyReviewOpened = (submission: ProjectSubmission, student: StudentProfile) => {
+    const thread = ensureSubmissionThread({
+      studentMatric: submission.studentMatric,
+      threadId: submission.id,
+      submissionLabel: `${submission.stage} (${submission.version})`,
+      supervisorName: currentSupervisor,
+      status: feedbackStatusFromSubmissionStatus(submission.status)
+    });
+
+    if (thread.messages.length === 0) {
+      appendFeedbackMessage({
+        studentMatric: submission.studentMatric,
+        threadId: submission.id,
+        sender: 'supervisor',
+        text: `Hi ${student.name}, I have opened your submission for review.`,
+        nextStatus: feedbackStatusFromSubmissionStatus(submission.status),
+        supervisorName: currentSupervisor
+      });
+    }
+  };
+
   const runPlagiarismTest = async (submission: ProjectSubmission) => {
     setPlagiarismChecking(true);
     await new Promise<void>((resolve) => {
@@ -480,7 +509,10 @@ const StaffProjectSubmissions = () => {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => setSelectedSubmissionId(s.id)}
+                            onClick={() => {
+                              if (selectedStudent) notifyReviewOpened(s, selectedStudent);
+                              setSelectedSubmissionId(s.id);
+                            }}
                             className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-500 dark:text-gray-400"
                             title="View Details"
                           >
@@ -661,7 +693,26 @@ const StaffProjectSubmissions = () => {
                 />
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <button
-                    onClick={() => updateSubmission(selectedSubmission.id, { supervisorComment: commentDraft })}
+                    onClick={() => {
+                      updateSubmission(selectedSubmission.id, { supervisorComment: commentDraft });
+                      if (commentDraft.trim()) {
+                        ensureSubmissionThread({
+                          studentMatric: selectedSubmission.studentMatric,
+                          threadId: selectedSubmission.id,
+                          submissionLabel: `${selectedSubmission.stage} (${selectedSubmission.version})`,
+                          supervisorName: currentSupervisor,
+                          status: feedbackStatusFromSubmissionStatus(selectedSubmission.status)
+                        });
+                        appendFeedbackMessage({
+                          studentMatric: selectedSubmission.studentMatric,
+                          threadId: selectedSubmission.id,
+                          sender: 'supervisor',
+                          text: commentDraft.trim(),
+                          nextStatus: feedbackStatusFromSubmissionStatus(selectedSubmission.status),
+                          supervisorName: currentSupervisor
+                        });
+                      }
+                    }}
                     className="px-4 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
                   >
                     <MessageSquare size={16} />
@@ -671,6 +722,21 @@ const StaffProjectSubmissions = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => {
+                        ensureSubmissionThread({
+                          studentMatric: selectedSubmission.studentMatric,
+                          threadId: selectedSubmission.id,
+                          submissionLabel: `${selectedSubmission.stage} (${selectedSubmission.version})`,
+                          supervisorName: currentSupervisor,
+                          status: 'rejected'
+                        });
+                        appendFeedbackMessage({
+                          studentMatric: selectedSubmission.studentMatric,
+                          threadId: selectedSubmission.id,
+                          sender: 'supervisor',
+                          text: commentDraft.trim() ? `Rejected: ${commentDraft.trim()}` : 'Rejected.',
+                          nextStatus: 'rejected',
+                          supervisorName: currentSupervisor
+                        });
                         updateSubmission(selectedSubmission.id, { status: 'Rejected', supervisorComment: commentDraft });
                         setSelectedSubmissionId(null);
                       }}
@@ -681,6 +747,21 @@ const StaffProjectSubmissions = () => {
                     </button>
                     <button
                       onClick={() => {
+                        ensureSubmissionThread({
+                          studentMatric: selectedSubmission.studentMatric,
+                          threadId: selectedSubmission.id,
+                          submissionLabel: `${selectedSubmission.stage} (${selectedSubmission.version})`,
+                          supervisorName: currentSupervisor,
+                          status: 'approved'
+                        });
+                        appendFeedbackMessage({
+                          studentMatric: selectedSubmission.studentMatric,
+                          threadId: selectedSubmission.id,
+                          sender: 'supervisor',
+                          text: commentDraft.trim() ? `Approved: ${commentDraft.trim()}` : 'Approved.',
+                          nextStatus: 'approved',
+                          supervisorName: currentSupervisor
+                        });
                         updateSubmission(selectedSubmission.id, { status: 'Approved', supervisorComment: commentDraft });
                         setSelectedSubmissionId(null);
                       }}
@@ -710,4 +791,3 @@ const StaffProjectSubmissions = () => {
 };
 
 export default StaffProjectSubmissions;
-

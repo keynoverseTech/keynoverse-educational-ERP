@@ -150,7 +150,7 @@ const Supervisor: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Users className="text-purple-600" />
-            Supervisor
+            Supervisor Allocation
           </h1>
           <p className="text-gray-500 dark:text-gray-400">Manage supervisor workload and assignments.</p>
         </div>
@@ -489,4 +489,3 @@ const Supervisor: React.FC = () => {
 };
 
 export default Supervisor;
-
