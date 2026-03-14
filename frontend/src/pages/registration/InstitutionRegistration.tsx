@@ -19,13 +19,12 @@ const InstitutionRegistration = () => {
     instituteName: '',
     institutionType: '',
     headName: '',
+    directorIctName: '',
     directorIctEmail: '',
     directorIctPhone: '',
     registeredStudentsTier: '',
-    subscriptionPlan: '',
     portalAdminEmail: '',
     portalAdminPassword: '',
-    rectorName: '',
     rectorEmail: '',
     rectorPhone: '',
     customSubdomain: '',
@@ -38,11 +37,8 @@ const InstitutionRegistration = () => {
   const [accreditationFile, setAccreditationFile] = useState<File | null>(null);
 
   const institutionTypes = [
-    'Polytechnic',
-    'Monotechnic',
-    'College of Education',
-    'Vocational Institute',
-    'Innovation Enterprise Institution',
+    'Private',
+    'Government',
   ];
 
   const studentTiers = [
@@ -51,12 +47,6 @@ const InstitutionRegistration = () => {
     { id: 'tier-3', label: '2,001 - 5,000' },
     { id: 'tier-4', label: '5,001 - 10,000' },
     { id: 'tier-5', label: '10,001+' },
-  ];
-
-  const subscriptionPlans = [
-    { id: 'starter', label: 'Starter' },
-    { id: 'standard', label: 'Standard' },
-    { id: 'enterprise', label: 'Enterprise' },
   ];
 
   const states = [
@@ -116,13 +106,13 @@ const InstitutionRegistration = () => {
       form.address.trim().length > 3 &&
       form.institutionType.trim().length > 0 &&
       form.headName.trim().length > 1 &&
+      form.rectorEmail.trim().length > 3 &&
+      form.directorIctName.trim().length > 1 &&
       form.directorIctEmail.trim().length > 3 &&
       form.directorIctPhone.trim().length > 3 &&
       form.registeredStudentsTier.trim().length > 0 &&
-      form.subscriptionPlan.trim().length > 0 &&
       form.portalAdminEmail.trim().length > 3 &&
       form.portalAdminPassword.trim().length > 0 &&
-      form.rectorEmail.trim().length > 3 &&
       form.rectorPhone.trim().length > 3 &&
       form.state.trim().length > 0 &&
       Boolean(logoFile) &&
@@ -210,237 +200,223 @@ const InstitutionRegistration = () => {
         <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Name of Institute</label>
-                <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    value={form.instituteName}
-                    onChange={(e) => setForm((p) => ({ ...p, instituteName: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g. Federal Polytechnic, Nekede"
-                    required
-                  />
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Name of Institute</label>
+                  <div className="relative">
+                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      value={form.instituteName}
+                      onChange={(e) => setForm((p) => ({ ...p, instituteName: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g. Federal Polytechnic, Nekede"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Name of Rector / Head of Institution</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    value={form.headName}
-                    onChange={(e) => setForm((p) => ({ ...p, headName: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Full Name"
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Type of Institute</label>
+                  <select
+                    value={form.institutionType}
+                    onChange={(e) => setForm((p) => ({ ...p, institutionType: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Type of Institute</label>
-                <select
-                  value={form.institutionType}
-                  onChange={(e) => setForm((p) => ({ ...p, institutionType: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Select type</option>
-                  {institutionTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Email ID of Rector</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="email"
-                    value={form.directorIctEmail}
-                    onChange={(e) => setForm((p) => ({ ...p, directorIctEmail: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="superadmin@planestech.com"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Number of registered students</label>
-                <select
-                  value={form.registeredStudentsTier}
-                  onChange={(e) => setForm((p) => ({ ...p, registeredStudentsTier: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Select tier</option>
-                  {studentTiers.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Phone Number of Director ICT</label>
-                <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    value={form.directorIctPhone}
-                    onChange={(e) => setForm((p) => ({ ...p, directorIctPhone: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="+234..."
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Estimated Annual Subscription</label>
-                <select
-                  value={form.subscriptionPlan}
-                  onChange={(e) => setForm((p) => ({ ...p, subscriptionPlan: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Select Plan</option>
-                  {subscriptionPlans.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Portal Admin Email ID</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="email"
-                    value={form.portalAdminEmail}
-                    onChange={(e) => setForm((p) => ({ ...p, portalAdminEmail: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="admin@portal.edu.ng"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Name of Rector</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    value={form.rectorName}
-                    onChange={(e) => setForm((p) => ({ ...p, rectorName: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Full Name"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Portal Admin Password Desired</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={form.portalAdminPassword}
-                    onChange={(e) => setForm((p) => ({ ...p, portalAdminPassword: e.target.value }))}
-                    className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="••••••••••••"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
+                    <option value="">Select type</option>
+                    {institutionTypes.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <div className="mt-3 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Password must contain:</div>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 size={14} className={passwordChecks.length ? 'text-green-600' : 'text-gray-300'} />
-                      <span className={passwordChecks.length ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
-                        Minimum 8 characters
-                      </span>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Number of registered students</label>
+                  <select
+                    value={form.registeredStudentsTier}
+                    onChange={(e) => setForm((p) => ({ ...p, registeredStudentsTier: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select tier</option>
+                    {studentTiers.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Portal Admin Email ID</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="email"
+                      value={form.portalAdminEmail}
+                      onChange={(e) => setForm((p) => ({ ...p, portalAdminEmail: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="admin@portal.edu.ng"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={form.portalAdminPassword}
+                      onChange={(e) => setForm((p) => ({ ...p, portalAdminPassword: e.target.value }))}
+                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="••••••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  <div className="mt-3 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Password must contain:</div>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={14} className={passwordChecks.length ? 'text-green-600' : 'text-gray-300'} />
+                        <span className={passwordChecks.length ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
+                          Minimum 8 characters
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={14} className={passwordChecks.uppercase ? 'text-green-600' : 'text-gray-300'} />
+                        <span className={passwordChecks.uppercase ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
+                          At least one uppercase letter (A-Z)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={14} className={passwordChecks.lowercase ? 'text-green-600' : 'text-gray-300'} />
+                        <span className={passwordChecks.lowercase ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
+                          At least one lowercase letter (a-z)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={14} className={passwordChecks.number ? 'text-green-600' : 'text-gray-300'} />
+                        <span className={passwordChecks.number ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
+                          At least one number (0-9)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 size={14} className={passwordChecks.special ? 'text-green-600' : 'text-gray-300'} />
+                        <span className={passwordChecks.special ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
+                          At least one special character
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 size={14} className={passwordChecks.uppercase ? 'text-green-600' : 'text-gray-300'} />
-                      <span className={passwordChecks.uppercase ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
-                        At least one uppercase letter (A-Z)
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 size={14} className={passwordChecks.lowercase ? 'text-green-600' : 'text-gray-300'} />
-                      <span className={passwordChecks.lowercase ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
-                        At least one lowercase letter (a-z)
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 size={14} className={passwordChecks.number ? 'text-green-600' : 'text-gray-300'} />
-                      <span className={passwordChecks.number ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
-                        At least one number (0-9)
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 size={14} className={passwordChecks.special ? 'text-green-600' : 'text-gray-300'} />
-                      <span className={passwordChecks.special ? 'text-green-700 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}>
-                        At least one special character
-                      </span>
-                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="relative">
+                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      value={form.customSubdomain}
+                      onChange={(e) => setForm((p) => ({ ...p, customSubdomain: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g. schoolname"
+                    />
                   </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Email ID of Rector</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="email"
-                    value={form.rectorEmail}
-                    onChange={(e) => setForm((p) => ({ ...p, rectorEmail: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="rector@example.com"
-                    required
-                  />
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Name of Rector</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      value={form.headName}
+                      onChange={(e) => setForm((p) => ({ ...p, headName: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Full Name"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Desired Custom Subdomain (optional)</label>
-                <div className="relative">
-                  <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    value={form.customSubdomain}
-                    onChange={(e) => setForm((p) => ({ ...p, customSubdomain: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g. schoolname"
-                  />
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Email ID of Rector</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="email"
+                      value={form.rectorEmail}
+                      onChange={(e) => setForm((p) => ({ ...p, rectorEmail: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="rector@example.com"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Phone Number of Rector</label>
-                <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    value={form.rectorPhone}
-                    onChange={(e) => setForm((p) => ({ ...p, rectorPhone: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="+234..."
-                    required
-                  />
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Phone Number of Rector</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      value={form.rectorPhone}
+                      onChange={(e) => setForm((p) => ({ ...p, rectorPhone: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="+234..."
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Name of ICT Director</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      value={form.directorIctName}
+                      onChange={(e) => setForm((p) => ({ ...p, directorIctName: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Full Name"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Email ID of ICT Director</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="email"
+                      value={form.directorIctEmail}
+                      onChange={(e) => setForm((p) => ({ ...p, directorIctEmail: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="ictdirector@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Phone Number of ICT Director</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      value={form.directorIctPhone}
+                      onChange={(e) => setForm((p) => ({ ...p, directorIctPhone: e.target.value }))}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="+234..."
+                      required
+                    />
+                  </div>
                 </div>
               </div>
             </div>
