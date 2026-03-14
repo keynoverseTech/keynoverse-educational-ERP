@@ -29,7 +29,10 @@ const SubAdminList: React.FC = () => {
         const data: UserListItem[] = Array.isArray(res) ? res : (res as any)?.data || [];
 
         const rows = data
-          .filter((u: any) => normalizeRole(u.role) === 'sub_admin')
+          .filter((u: any) => {
+            const r = normalizeRole(u.role);
+            return r !== 'super_admin';
+          })
           .map((u: any) => {
             const status: SubAdminRow['status'] =
               u.is_active === false || (u.status || '').toString().toLowerCase().includes('inactive')
@@ -44,7 +47,7 @@ const SubAdminList: React.FC = () => {
               id: String(u.id),
               name: String(u.name || '—'),
               email: String(u.email || '—'),
-              role: String(u.role || 'sub_admin'),
+              role: String(u.role || 'admin'),
               lastLogin: String(lastLogin),
               status,
             };
@@ -55,8 +58,9 @@ const SubAdminList: React.FC = () => {
       } catch (err: any) {
         console.error('Failed to load sub-admins', err);
         const status = err?.response?.status;
-        if (status === 403) setError('Forbidden: backend must allow super_admin to access GET /api/sub-admins.');
-        else if (status === 404) setError('Not found: backend must implement GET /api/sub-admins for listing sub-admin users.');
+        if (status === 401) setError('Unauthorized: please login as super admin so the Authorization token is attached.');
+        else if (status === 403) setError('Forbidden: your token does not have permission to access /api/users/admins.');
+        else if (status === 404) setError('Not found: /api/users/admins is not available on the backend.');
         else setError('Failed to load sub-admins');
         setSubAdmins([]);
       } finally {

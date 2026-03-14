@@ -4,7 +4,8 @@ import axios from 'axios';
 // As requested, we use the local endpoint for development.
 // TODO: Switch to staging URL when provided.
 const BASE_URL = '/api';
-const SUBSCRIPTION_BASE_URL = '/subscription-api';
+const ADMIN_BASE_URL = '/admin-api';
+const PRIVILEGE_BASE_URL = '/privilege-api';
 
 // Create a dedicated axios instance for Super Admin operations
 const superAdminApi = axios.create({
@@ -15,8 +16,16 @@ const superAdminApi = axios.create({
   },
 });
 
-const subscriptionApi = axios.create({
-  baseURL: SUBSCRIPTION_BASE_URL,
+const adminApi = axios.create({
+  baseURL: ADMIN_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
+
+const privilegeApi = axios.create({
+  baseURL: PRIVILEGE_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -42,17 +51,9 @@ superAdminApi.interceptors.request.use(
       }
     }
 
-    // If no local token (or ignored), use the hardcoded test token as a fallback (dev/test mode)
-    if (!token) {
-      console.warn('Using hardcoded test token for Super Admin API');
-      token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN1cGVyYWRtaW5AcGxhbmV0c3RlY2guY29tIiwic3ViIjoiZjNiNmNmMDEtOWExYy00ZWYwLTgxN2YtN2Q5MWQ1YzljZDBkIiwicm9sZSI6InN1cGVyX2FkbWluIiwiaWF0IjoxNzcyOTU5NzY3LCJleHAiOjE3NzMwNDYxNjd9.E1OgdZteXb7iBLhxA8FL9ozsx6jJjvUqFOg_43do6q8';
-    }
-
-    // Always attach the token if it exists
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-        // Log warning if token is somehow missing even when hardcoded
         console.warn('No authorization token available for Super Admin API');
     }
     return config;
@@ -62,12 +63,18 @@ superAdminApi.interceptors.request.use(
   }
 );
 
-subscriptionApi.interceptors.request.use(
+adminApi.interceptors.request.use(
   (config) => {
-    let token = localStorage.getItem('auth_token');
-    if (!token) {
-      token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InN1cGVyYWRtaW5AcGxhbmV0c3RlY2guY29tIiwic3ViIjoiMzRlYTJjZmItYmFiMy00MjlmLWI2OTAtYjdjNGFjY2FiMDc5Iiwicm9sZSI6InN1cGVyX2FkbWluIiwiaWF0IjoxNzczMzIzOTkwLCJleHAiOjE3NzM0MTAzOTB9.oo22E-zl9tmH52lTkjlz9RUbMW2jDLwwkouv8Y0mawY';
-    }
+    const token = localStorage.getItem('auth_token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+privilegeApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('auth_token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
@@ -130,6 +137,12 @@ export interface CreateUserData {
   password: string;
   role?: string;
   role_name?: string;
+}
+
+export interface CreateAdminUserData {
+  name: string;
+  email: string;
+  privilege_id: string;
 }
 
 export interface UserListItem {
@@ -268,37 +281,57 @@ export const superAdminService = {
   },
 
   assignUserPrivilege: async (data: UserPrivilegeAssignmentData) => {
-    const response = await superAdminApi.post('/privilege/user-privileges', data);
+    const response = await privilegeApi.post('/privilege/user-privileges', data);
     return response.data;
   },
 
   deactivateUserPrivilege: async (id: string) => {
-    const response = await superAdminApi.put(`/privilege/user-privileges/deactivate/${id}`, {});
+    const response = await privilegeApi.put(`/privilege/user-privileges/deactivate/${id}`, {});
     return response.data;
   },
 
   getUserPermissions: async (userId: string, activeOnly: boolean = true) => {
-    const response = await superAdminApi.get(`/privilege/access/user-permissions?user_id=${userId}&&active_only=${activeOnly}`);
+    const response = await privilegeApi.get(`/privilege/access/user-permissions?user_id=${userId}&active_only=${activeOnly}`);
     return response.data;
   },
 
   getMyMenus: async (userId: string, activeOnly: boolean = true) => {
-    const response = await superAdminApi.get(`/privilege/access/my-menus?user_id=${userId}&&active_only=${activeOnly}`);
+    const response = await privilegeApi.get(`/privilege/access/my-menus?user_id=${userId}&active_only=${activeOnly}`);
     return response.data;
   },
 
   getPrivilegeMenus: async () => {
-    const response = await superAdminApi.get('/privilege/menus');
+    const response = await privilegeApi.get('/privilege/menus');
     return response.data;
   },
 
   getPrivilegePermissions: async () => {
-    const response = await superAdminApi.get('/privilege/permissions');
+    const response = await privilegeApi.get('/privilege/permissions');
     return response.data;
   },
 
   createPrivilegeWithAccess: async (data: CreatePrivilegeWithAccessData) => {
-    const response = await superAdminApi.post('/privilege/with-access', data);
+    const response = await privilegeApi.post('/privilege/with-access', data);
+    return response.data;
+  },
+
+  getAdminPrivilegeMenus: async () => {
+    const response = await privilegeApi.get('/privilege/menus');
+    return response.data;
+  },
+
+  getAdminPrivilegePermissions: async () => {
+    const response = await privilegeApi.get('/privilege/permissions');
+    return response.data;
+  },
+
+  createAdminPrivilegeWithAccess: async (data: CreatePrivilegeWithAccessData) => {
+    const response = await privilegeApi.post('/privilege/with-access', data);
+    return response.data;
+  },
+
+  createAdminUser: async (data: CreateAdminUserData) => {
+    const response = await adminApi.post('/users/create-admin', data);
     return response.data;
   },
 
@@ -355,7 +388,7 @@ export const superAdminService = {
   },
 
   getSubAdmins: async () => {
-    const response = await superAdminApi.get('/sub-admins');
+    const response = await superAdminApi.get('/users/admins');
     return response.data;
   },
 
@@ -483,7 +516,7 @@ export const superAdminService = {
   },
 
   getSubscriptionPlans: async () => {
-    const response = await subscriptionApi.get('/subscription-plan');
+    const response = await superAdminApi.get('/subscription-plan');
     return response.data;
   },
 
@@ -495,7 +528,7 @@ export const superAdminService = {
     notes: string;
     is_active: boolean;
   }) => {
-    const response = await subscriptionApi.post('/subscription-plan', data);
+    const response = await superAdminApi.post('/subscription-plan', data);
     return response.data;
   },
 
@@ -510,7 +543,7 @@ export const superAdminService = {
       is_active: boolean;
     }>
   ) => {
-    const response = await subscriptionApi.put(`/subscription-plan/${id}`, data);
+    const response = await superAdminApi.put(`/subscription-plan/${id}`, data);
     return response.data;
   },
 };

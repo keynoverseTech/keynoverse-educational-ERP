@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Search, ToggleLeft, ToggleRight } from 'lucide-react';
+import { ArrowLeft, Save, Search } from 'lucide-react';
 import superAdminService, { type PrivilegeMenuItem, type PrivilegePermissionItem } from '../../services/superAdminApi';
 
 const CreateSubAdmin: React.FC = () => {
@@ -8,13 +8,14 @@ const CreateSubAdmin: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
     roleName: 'Sub-Admin'
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [privilegeMode, setPrivilegeMode] = useState<'create' | 'existing'>('create');
+  const [existingPrivilegeId, setExistingPrivilegeId] = useState('');
   const [privilegeName, setPrivilegeName] = useState('Sub-Admin');
   const [privilegeCode, setPrivilegeCode] = useState('SUB');
   const [manualIdsMode, setManualIdsMode] = useState(false);
@@ -42,8 +43,8 @@ const CreateSubAdmin: React.FC = () => {
       setError('');
       try {
         const [menusRes, permsRes] = await Promise.all([
-          superAdminService.getPrivilegeMenus(),
-          superAdminService.getPrivilegePermissions(),
+          superAdminService.getAdminPrivilegeMenus(),
+          superAdminService.getAdminPrivilegePermissions(),
         ]);
         const menusList = Array.isArray(menusRes) ? menusRes : (menusRes as any)?.data || [];
         const permsList = Array.isArray(permsRes) ? permsRes : (permsRes as any)?.data || [];
@@ -56,7 +57,7 @@ const CreateSubAdmin: React.FC = () => {
         setPermissions([]);
         setManualIdsMode(true);
         setError(
-          'Failed to load menus/permissions from backend. If the backend has a route like GET /api/privilege/:id, it may be capturing /menus and /permissions. You can paste menu_ids and permission_ids manually below as a workaround.'
+          'Failed to load menus/permissions from local admin backend. You can paste menu_ids and permission_ids manually below as a workaround.'
         );
       } finally {
         setLoading(false);
@@ -118,18 +119,6 @@ const CreateSubAdmin: React.FC = () => {
     });
   };
 
-  const extractCreatedUserId = (response: any): string | null => {
-    const candidates = [
-      response?.id,
-      response?.user?.id,
-      response?.data?.id,
-      response?.data?.user?.id,
-      response?.result?.id,
-    ];
-    const id = candidates.find((v) => typeof v === 'string' && v.length > 0);
-    return id || null;
-  };
-
   const extractCreatedPrivilegeId = (response: any): string | null => {
     const candidates = [
       response?.id,
@@ -142,45 +131,65 @@ const CreateSubAdmin: React.FC = () => {
     return id || null;
   };
 
+  const isDuplicateKeyError = (err: any) => {
+    const message = (err?.response?.data?.message || err?.message || '').toString().toLowerCase();
+    return message.includes('duplicate key value') || message.includes('unique constraint');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError('');
     try {
-      const created = await superAdminService.createUser({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        role: 'sub_admin',
-        role_name: formData.roleName,
-      });
+      let privilegeIdToAssign = existingPrivilegeId.trim();
+      if (privilegeMode === 'create') {
+        const menu_ids = manualIdsMode ? parseIds(manualMenuIds) : Array.from(selectedMenuIds);
+        const permission_ids = manualIdsMode ? parseIds(manualPermissionIds) : Array.from(selectedPermissionIds);
 
-      const createdUserId = extractCreatedUserId(created);
-      if (!createdUserId) {
-        throw new Error('User created but no user id returned by API');
+        try {
+          const createdPrivilege = await superAdminService.createAdminPrivilegeWithAccess({
+            name: privilegeName || formData.roleName || 'Sub-Admin',
+            code: privilegeCode || 'SUB',
+            is_active: true,
+            menu_ids,
+            permission_ids,
+          });
+
+          const createdPrivilegeId = extractCreatedPrivilegeId(createdPrivilege);
+          if (!createdPrivilegeId) {
+            throw new Error('Privilege created but no privilege id returned by API');
+          }
+          privilegeIdToAssign = createdPrivilegeId;
+        } catch (err: any) {
+          if (isDuplicateKeyError(err)) {
+            setError('Privilege code/name already exists on the backend. Change Privilege Code (and/or Name), or switch to "Use Existing Privilege ID".');
+            setSaving(false);
+            return;
+          }
+          throw err;
+        }
+      } else {
+        if (!privilegeIdToAssign) {
+          setError('Privilege ID is required when using existing privilege.');
+          setSaving(false);
+          return;
+        }
       }
 
-      const menu_ids = manualIdsMode ? parseIds(manualMenuIds) : Array.from(selectedMenuIds);
-      const permission_ids = manualIdsMode ? parseIds(manualPermissionIds) : Array.from(selectedPermissionIds);
-
-      const createdPrivilege = await superAdminService.createPrivilegeWithAccess({
-        name: privilegeName || formData.roleName || 'Sub-Admin',
-        code: privilegeCode || 'SUB',
-        is_active: true,
-        menu_ids,
-        permission_ids,
-      });
-
-      const createdPrivilegeId = extractCreatedPrivilegeId(createdPrivilege);
-      if (!createdPrivilegeId) {
-        throw new Error('Privilege created but no privilege id returned by API');
+      try {
+        await superAdminService.createAdminUser({
+          name: formData.name,
+          email: formData.email,
+          privilege_id: privilegeIdToAssign,
+        });
+      } catch (err: any) {
+        if (isDuplicateKeyError(err)) {
+          setError('This email (or another unique field) already exists in the backend. Use a different email, or ask backend to return a clearer error.');
+          setSaving(false);
+          return;
+        }
+        throw err;
       }
-
-      await superAdminService.assignUserPrivilege({
-        privilege_id: createdPrivilegeId,
-        user_id: createdUserId,
-        is_active: true,
-      });
 
       alert('Sub-Admin created successfully!');
       navigate('/super-admin/sub-admins');
@@ -242,16 +251,6 @@ const CreateSubAdmin: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-              <input 
-                type="password" 
-                required
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                value={formData.password}
-                onChange={e => setFormData({...formData, password: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Role Label (Optional)</label>
               <input 
                 type="text" 
@@ -283,34 +282,74 @@ const CreateSubAdmin: React.FC = () => {
 
           {loading ? (
             <div className="py-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading menus and permissions...</div>
-          ) : manualIdsMode ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Menu IDs (comma/space separated)</label>
-                  <textarea
-                    value={manualMenuIds}
-                    onChange={(e) => setManualMenuIds(e.target.value)}
-                    className="w-full min-h-[120px] px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm"
-                    placeholder="301452b3-d037-4d2b-b4fe-9e9a33185d7a, 255049d4-b51e-4488-94ee-e17bf24068b0"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Permission IDs (comma/space separated)</label>
-                  <textarea
-                    value={manualPermissionIds}
-                    onChange={(e) => setManualPermissionIds(e.target.value)}
-                    className="w-full min-h-[120px] px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm"
-                    placeholder="d3e9eb93-7388-4d38-ae57-fa2d61ef5e85 8a8c4044-b547-4c6e-9795-58d25592a70d"
-                  />
-                </div>
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                This uses POST /api/privilege/with-access with menu_ids and permission_ids exactly as provided.
-              </div>
-            </div>
           ) : (
             <div className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPrivilegeMode('create')}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors w-fit ${
+                    privilegeMode === 'create'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white dark:bg-[#151e32] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900/40'
+                  }`}
+                >
+                  Create New Privilege
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrivilegeMode('existing')}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors w-fit ${
+                    privilegeMode === 'existing'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white dark:bg-[#151e32] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900/40'
+                  }`}
+                >
+                  Use Existing Privilege ID
+                </button>
+              </div>
+
+              {privilegeMode === 'existing' ? (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Privilege ID</label>
+                  <input
+                    value={existingPrivilegeId}
+                    onChange={(e) => setExistingPrivilegeId(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono"
+                    placeholder="baa07091-a385-4c64-b8d6-0344366e59c6"
+                  />
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    This will skip creating a new privilege and assign the existing privilege_id to the new sub-admin.
+                  </div>
+                </div>
+              ) : manualIdsMode ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Menu IDs (comma/space separated)</label>
+                      <textarea
+                        value={manualMenuIds}
+                        onChange={(e) => setManualMenuIds(e.target.value)}
+                        className="w-full min-h-[120px] px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm"
+                        placeholder="301452b3-d037-4d2b-b4fe-9e9a33185d7a, 255049d4-b51e-4488-94ee-e17bf24068b0"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Permission IDs (comma/space separated)</label>
+                      <textarea
+                        value={manualPermissionIds}
+                        onChange={(e) => setManualPermissionIds(e.target.value)}
+                        className="w-full min-h-[120px] px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm"
+                        placeholder="d3e9eb93-7388-4d38-ae57-fa2d61ef5e85 8a8c4044-b547-4c6e-9795-58d25592a70d"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    This uses POST /api/privilege/with-access with menu_ids and permission_ids exactly as provided.
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Privilege Name</label>
@@ -347,18 +386,15 @@ const CreateSubAdmin: React.FC = () => {
                             <div className="text-sm font-bold text-gray-900 dark:text-white truncate">{row.label}</div>
                             {row.code && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{row.code}</div>}
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => toggleMenuSelected(row.id)}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                              isSelected
-                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
-                            } hover:opacity-90`}
-                          >
-                            {isSelected ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+                          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 select-none">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleMenuSelected(row.id)}
+                              className="h-4 w-4"
+                            />
                             {isSelected ? 'Enabled' : 'Disabled'}
-                          </button>
+                          </label>
                         </div>
                       );
                     })}
@@ -382,18 +418,15 @@ const CreateSubAdmin: React.FC = () => {
                             <div className="text-sm font-bold text-gray-900 dark:text-white truncate">{row.label}</div>
                             {row.code && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{row.code}</div>}
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => togglePermissionSelected(row.id)}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                              isSelected
-                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
-                            } hover:opacity-90`}
-                          >
-                            {isSelected ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+                          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 select-none">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => togglePermissionSelected(row.id)}
+                              className="h-4 w-4"
+                            />
                             {isSelected ? 'Enabled' : 'Disabled'}
-                          </button>
+                          </label>
                         </div>
                       );
                     })}
@@ -403,6 +436,8 @@ const CreateSubAdmin: React.FC = () => {
                   </div>
                 </div>
               </div>
+                </div>
+              )}
             </div>
           )}
         </div>
