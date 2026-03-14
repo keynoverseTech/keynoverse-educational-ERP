@@ -177,11 +177,20 @@ const CreateSubAdmin: React.FC = () => {
       }
 
       try {
-        await superAdminService.createAdminUser({
+        const createdAdmin = await superAdminService.createAdminUser({
           name: formData.name,
           email: formData.email,
           privilege_id: privilegeIdToAssign,
         });
+        const generatedPassword =
+          createdAdmin?.password ||
+          createdAdmin?.temporary_password ||
+          createdAdmin?.temp_password ||
+          createdAdmin?.data?.password ||
+          createdAdmin?.data?.temporary_password;
+        if (generatedPassword) {
+          alert(`Sub-Admin created.\n\nEmail: ${formData.email}\nPassword: ${generatedPassword}`);
+        }
       } catch (err: any) {
         if (isDuplicateKeyError(err)) {
           setError('This email (or another unique field) already exists in the backend. Use a different email, or ask backend to return a clearer error.');

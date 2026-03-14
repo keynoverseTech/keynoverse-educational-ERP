@@ -26,8 +26,22 @@ const SuperAdminLogin: React.FC = () => {
     e.preventDefault();
     try {
       await login(email, password, '/auth/super/login');
-      // Navigation handled by useEffect
     } catch (err) {
+      const message = (err as any)?.message || '';
+      const shouldTryAdminLogin =
+        typeof message === 'string' &&
+        (message.toLowerCase().includes('invalid user data for token generation') ||
+          message.toLowerCase().includes('required role') ||
+          message.toLowerCase().includes('insufficient permissions'));
+      if (shouldTryAdminLogin) {
+        try {
+          await login(email, password, '/auth/admin/login');
+          return;
+        } catch (e2) {
+          console.error('Login failed', e2);
+          return;
+        }
+      }
       console.error('Login failed', err);
     }
   };

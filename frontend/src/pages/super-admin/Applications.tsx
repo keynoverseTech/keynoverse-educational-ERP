@@ -42,6 +42,7 @@ const Applications: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<any[]>([]);
+  const [institutionTypeMap, setInstitutionTypeMap] = useState<Record<string, string>>({});
 
   const [error, setError] = useState('');
 
@@ -49,6 +50,39 @@ const Applications: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('All'); 
   const [searchTerm, setSearchTerm] = useState('');
   const [reportMenuOpen, setReportMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchInstitutionTypes = async () => {
+      try {
+        const response = await superAdminService.getInstitutionTypes();
+        const data = Array.isArray(response) ? response : (response as any)?.data || [];
+        const map: Record<string, string> = {};
+        for (const t of data) {
+          const id =
+            t?.id ??
+            t?.institution_type_id ??
+            t?.institutionTypeId ??
+            t?.type_id ??
+            t?.typeId ??
+            t?.value;
+          const label =
+            t?.name ??
+            t?.title ??
+            t?.label ??
+            t?.type ??
+            t?.code;
+          if (id && label) {
+            map[String(id)] = String(label);
+          }
+        }
+        setInstitutionTypeMap(map);
+      } catch (err) {
+        console.error('Failed to fetch institution types', err);
+        setInstitutionTypeMap({});
+      }
+    };
+    fetchInstitutionTypes();
+  }, []);
 
   useEffect(() => {
     if (!reportMenuOpen) return;
@@ -138,6 +172,30 @@ const Applications: React.FC = () => {
         const mapped = data.map((inst: any) => {
           const statusNormalized = toStatusNormalized(inst.status);
           const statusMeta = getStatusMeta(statusNormalized);
+          const resolveInstitutionType = () => {
+            const typeId =
+              inst?.institution_type_id ??
+              inst?.institutionTypeId ??
+              inst?.institution_type?.id ??
+              inst?.institutionType?.id ??
+              '';
+            if (typeId && institutionTypeMap[String(typeId)]) {
+              return institutionTypeMap[String(typeId)];
+            }
+            const name =
+              inst?.institution_type?.name ??
+              inst?.institution_type?.title ??
+              inst?.institutionType?.name ??
+              inst?.institutionType?.title ??
+              inst?.institution_type_name ??
+              inst?.institutionTypeName ??
+              inst?.institution_type ??
+              inst?.type ??
+              '';
+            if (typeof name === 'string' && name.trim()) return name;
+            if (typeof typeId === 'string' && typeId.trim()) return typeId;
+            return 'Unknown';
+          };
           return {
             id: inst.id,
             institution: inst.name,
@@ -150,7 +208,7 @@ const Applications: React.FC = () => {
             })(),
             logoColor: 'bg-blue-600',
             dateSubmitted: new Date(inst.created_at || Date.now()).toLocaleDateString(),
-            type: inst.institution_type_id ? 'Institution' : 'Unknown',
+            type: resolveInstitutionType(),
             contactName: inst.rector || 'N/A',
             contactAvatar: '',
             status: statusMeta.label,
@@ -175,7 +233,7 @@ const Applications: React.FC = () => {
     };
 
     fetchApplications();
-  }, [filterStatus]); // Re-fetch when filter changes
+  }, [filterStatus, institutionTypeMap]); // Re-fetch when filter changes (and when institution types are loaded)
 
   const normalizeStatus = (s: any) => (s || '').toString().trim();
 
