@@ -24,21 +24,23 @@ const SidebarMenuItem: React.FC<{
   onToggle: (name: string) => void;
   isPathActive: (path?: string) => boolean;
   isSubItemActive: (subItems?: SidebarItem[]) => boolean;
-}> = ({ item, level = 0, openDropdowns, onToggle, isPathActive, isSubItemActive }) => {
+  isCollapsed: boolean;
+}> = ({ item, level = 0, openDropdowns, onToggle, isPathActive, isSubItemActive, isCollapsed }) => {
   const isActive = isPathActive(item.path);
   const hasSubItems = item.subItems && item.subItems.length > 0;
   const isDropdownOpen = openDropdowns.includes(item.name);
   const isParentActive = isActive || isSubItemActive(item.subItems);
   
   // Padding based on nesting level
-  const paddingLeft = level === 0 ? 'px-3' : level === 1 ? 'pl-9 pr-3' : 'pl-12 pr-3';
+  const paddingLeft = isCollapsed ? 'px-3' : level === 0 ? 'px-3' : level === 1 ? 'pl-9 pr-3' : 'pl-12 pr-3';
 
   if (hasSubItems) {
     return (
       <div className="space-y-1">
         <button
           onClick={() => onToggle(item.name)}
-          className={`w-full flex items-center justify-between ${paddingLeft} py-3 rounded-2xl transition-all duration-300 group ${
+          title={isCollapsed ? item.name : undefined}
+          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} ${paddingLeft} py-3 rounded-2xl transition-all duration-300 group ${
             isParentActive
               ? 'bg-blue-50/50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 font-bold'
               : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
@@ -51,13 +53,15 @@ const SidebarMenuItem: React.FC<{
             {!item.icon && level > 0 && (
                <span className={`w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${isParentActive ? 'bg-blue-600 dark:bg-blue-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
             )}
-            <span className={`whitespace-nowrap text-sm ${level > 0 ? 'text-xs' : ''} ${isParentActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>
+            {!isCollapsed && (
+              <span className={`whitespace-nowrap text-sm ${level > 0 ? 'text-xs' : ''} ${isParentActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>
+            )}
           </div>
-          {isDropdownOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          {!isCollapsed && (isDropdownOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}
         </button>
         
         {/* Dropdown Items */}
-        {isDropdownOpen && (
+        {!isCollapsed && isDropdownOpen && (
           <div className="space-y-1 animate-in slide-in-from-top-2 duration-200 pl-2">
             {item.subItems!.map((subItem) => (
               <SidebarMenuItem 
@@ -68,6 +72,7 @@ const SidebarMenuItem: React.FC<{
                 onToggle={onToggle}
                 isPathActive={isPathActive}
                 isSubItemActive={isSubItemActive}
+                isCollapsed={isCollapsed}
               />
             ))}
           </div>
@@ -79,6 +84,7 @@ const SidebarMenuItem: React.FC<{
   return (
     <Link
       to={item.path!}
+      title={isCollapsed ? item.name : undefined}
       className={`flex items-center gap-3 ${paddingLeft} py-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
         isActive
           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
@@ -94,7 +100,9 @@ const SidebarMenuItem: React.FC<{
       {!item.icon && level > 0 && (
          <span className={`w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${isActive ? 'bg-white' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
       )}
-      <span className={`whitespace-nowrap text-sm ${level > 0 ? 'text-xs' : ''} ${isActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>
+      {!isCollapsed && (
+        <span className={`whitespace-nowrap text-sm ${level > 0 ? 'text-xs' : ''} ${isActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>
+      )}
     </Link>
   );
 };
@@ -102,6 +110,7 @@ const SidebarMenuItem: React.FC<{
 const Sidebar: React.FC<SidebarProps> = ({ items, isOpen, onClose, title = "Keynoverse", logo }) => {
   const location = useLocation();
   const [openDropdowns, setOpenDropdowns] = useState<string[]>([]);
+  const [isHoverExpanded, setIsHoverExpanded] = useState(false);
 
   // Auto-expand active menu on mount and route change
   React.useEffect(() => {
@@ -146,6 +155,9 @@ const Sidebar: React.FC<SidebarProps> = ({ items, isOpen, onClose, title = "Keyn
     return subItems.some(item => isPathActive(item.path) || isSubItemActive(item.subItems));
   };
 
+  const isCollapsed = !isOpen && !isHoverExpanded;
+  const desktopExpanded = isOpen || isHoverExpanded;
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -156,52 +168,70 @@ const Sidebar: React.FC<SidebarProps> = ({ items, isOpen, onClose, title = "Keyn
         />
       )}
 
-      <div className={`
+      <div
+        onMouseEnter={() => {
+          if (!isOpen) setIsHoverExpanded(true);
+        }}
+        onMouseLeave={() => setIsHoverExpanded(false)}
+        className={`
         bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex flex-col
         fixed top-0 left-0 h-screen z-40 transition-all duration-300 ease-in-out
-        lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]
+        lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:overflow-visible
         lg:rounded-3xl lg:border-0
         border-r border-gray-200 dark:border-gray-700
         ${isOpen 
           ? 'translate-x-0 w-72 lg:w-72 lg:m-4 lg:shadow-2xl' 
-          : '-translate-x-full w-72 lg:w-0 lg:m-0 lg:p-0 lg:translate-x-0 lg:overflow-hidden lg:shadow-none'}
-      `}>
-        {/* Logo Section */}
-        <div className="p-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-500/20">
-                {logo || <Hexagon className="w-6 h-6 fill-current" />}
+          : '-translate-x-full w-72 lg:translate-x-0 lg:w-20 lg:m-4 lg:shadow-2xl'}
+      `}
+      >
+        <div
+          className={`
+            flex flex-col h-full
+            ${!isOpen && isHoverExpanded ? 'lg:absolute lg:left-0 lg:top-0 lg:w-72 lg:z-50 lg:rounded-3xl lg:shadow-2xl bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700' : ''}
+          `}
+        >
+          {/* Logo Section */}
+          <div className={`${isCollapsed ? 'p-4' : 'p-6'} flex items-center justify-between`}>
+            <div className={`flex items-center ${isCollapsed ? 'justify-center w-full' : 'gap-3'}`}>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-500/20">
+                  {logo || <Hexagon className="w-6 h-6 fill-current" />}
+              </div>
+              {!isCollapsed && (
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
+                  {title}
+                </h1>
+              )}
             </div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
-              {title}
-            </h1>
+            <button 
+              onClick={onClose}
+              className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
+            >
+              <LogOut size={20} className="rotate-180" />
+            </button>
           </div>
-          <button 
-            onClick={onClose}
-            className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
-          >
-            <LogOut size={20} className="rotate-180" />
-          </button>
-        </div>
 
-        {/* Main Menu Label */}
-        <div className="px-6 py-2">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Main Menu</p>
-        </div>
+          {/* Main Menu Label */}
+          {!isCollapsed && (
+            <div className="px-6 py-2">
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Main Menu</p>
+            </div>
+          )}
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4 space-y-2 overflow-y-auto mt-2 custom-scrollbar pb-6">
-          {items.map((item) => (
-            <SidebarMenuItem 
-              key={item.path || item.name} 
-              item={item} 
-              openDropdowns={openDropdowns}
-              onToggle={toggleDropdown}
-              isPathActive={isPathActive}
-              isSubItemActive={isSubItemActive}
-            />
-          ))}
-        </nav>
+          {/* Navigation */}
+          <nav className={`${isCollapsed ? 'px-3' : 'px-4'} flex-1 space-y-2 overflow-y-auto mt-2 custom-scrollbar pb-6`}>
+            {items.map((item) => (
+              <SidebarMenuItem 
+                key={item.path || item.name} 
+                item={item} 
+                openDropdowns={desktopExpanded ? openDropdowns : []}
+                onToggle={toggleDropdown}
+                isPathActive={isPathActive}
+                isSubItemActive={isSubItemActive}
+                isCollapsed={isCollapsed}
+              />
+            ))}
+          </nav>
+        </div>
       </div>
     </>
   );

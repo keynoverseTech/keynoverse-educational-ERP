@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -18,10 +18,45 @@ import {
 } from 'lucide-react';
 import { mockProgrammes } from '../../../data/mockData';
 import {
+  loadAcademicSessions,
   loadAcademicFaculties,
   loadAcademicDepartments,
   loadAcademicLevels,
 } from '../../../state/academics/academicSetupStorage';
+
+const ERP_REGISTRY_KEY = 'global_erp_numbers_registry';
+
+const generateUniqueErpNumber = () => {
+  let existing: string[] = [];
+  try {
+    const raw = localStorage.getItem(ERP_REGISTRY_KEY);
+    existing = raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    existing = [];
+  }
+
+  const registry = new Set(existing);
+
+  const makeCandidate = () => {
+    const c = globalThis.crypto as Crypto | undefined;
+    const id = c?.randomUUID ? c.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    return `ERP-${id}`.toUpperCase();
+  };
+
+  for (let i = 0; i < 10; i += 1) {
+    const candidate = makeCandidate();
+    if (!registry.has(candidate)) {
+      const next = [...existing, candidate];
+      try {
+        localStorage.setItem(ERP_REGISTRY_KEY, JSON.stringify(next));
+      } catch {
+      }
+      return candidate;
+    }
+  }
+
+  return makeCandidate();
+};
 
 const CreateAdmission: React.FC = () => {
   const navigate = useNavigate();
@@ -34,6 +69,7 @@ const CreateAdmission: React.FC = () => {
   });
 
   // Load configuration data
+  const sessions = loadAcademicSessions();
   const faculties = loadAcademicFaculties();
   const departments = loadAcademicDepartments();
   const levels = loadAcademicLevels();
@@ -47,7 +83,7 @@ const CreateAdmission: React.FC = () => {
   // Filter departments based on selected faculty
   const filteredDepartments = departments.filter(d => d.facultyId === bulkConfig.facultyId);
 
-  const [newApplicant, setNewApplicant] = useState({
+  const [newApplicant, setNewApplicant] = useState(() => ({
     firstName: '',
     lastName: '',
     middleName: '',
@@ -65,7 +101,10 @@ const CreateAdmission: React.FC = () => {
     programme: '',
     faculty: '',
     department: '',
+    level: '',
     session: '2024/2025',
+    matricNo: '',
+    erpNumber: generateUniqueErpNumber(),
     entryType: 'UTME',
     admissionDate: new Date().toISOString().split('T')[0],
     programDuration: '4',
@@ -78,7 +117,21 @@ const CreateAdmission: React.FC = () => {
     createPortalAccess: false,
     portalUsername: '',
     portalPassword: '',
-  });
+  }));
+
+  const filteredApplicantDepartments = departments.filter((d) => d.facultyId === newApplicant.faculty);
+  const selectedProgramme = mockProgrammes.find((p) => p.id === newApplicant.programme);
+
+  useEffect(() => {
+    if (!selectedProgramme) return;
+    const duration =
+      selectedProgramme.durationYears ??
+      (selectedProgramme.degreeType?.toUpperCase() === 'ND' ? 2 : selectedProgramme.degreeType?.toUpperCase() === 'HND' ? 2 : undefined);
+    if (!duration) return;
+    const next = String(duration);
+    if (newApplicant.programDuration === next) return;
+    setNewApplicant((prev) => ({ ...prev, programDuration: next }));
+  }, [newApplicant.programDuration, selectedProgramme]);
 
   const handleCreateApplication = () => {
     if (!newApplicant.firstName || !newApplicant.jambNo || !newApplicant.score || !newApplicant.programme) {
@@ -360,28 +413,63 @@ const CreateAdmission: React.FC = () => {
                       value={newApplicant.session}
                       onChange={(e) => setNewApplicant({ ...newApplicant, session: e.target.value })}
                     >
-                      <option>2024/2025</option>
-                      <option>2025/2026</option>
+                      {(sessions.length ? sessions : [{ id: 'fallback-1', name: '2024/2025' }, { id: 'fallback-2', name: '2025/2026' }]).map((s) => (
+                        <option key={s.id} value={s.name}>
+                          {s.name}
+                        </option>
+                      ))}
                     </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Matric No</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-mono"
+                      placeholder="e.g. CSC/2021/042"
+                      value={newApplicant.matricNo}
+                      onChange={(e) => setNewApplicant({ ...newApplicant, matricNo: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">ERP Number</label>
+                    <input
+                      type="text"
+                      readOnly
+                      className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none text-sm font-mono text-gray-700 dark:text-gray-200 cursor-not-allowed"
+                      value={newApplicant.erpNumber}
+                    />
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Faculty</label>
-                    <input
-                      type="text"
+                    <select
                       className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
                       value={newApplicant.faculty}
-                      onChange={(e) => setNewApplicant({ ...newApplicant, faculty: e.target.value })}
-                    />
+                      onChange={(e) => setNewApplicant({ ...newApplicant, faculty: e.target.value, department: '' })}
+                    >
+                      <option value="">Select Faculty</option>
+                      {faculties.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Department</label>
-                    <input
-                      type="text"
+                    <select
                       className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
                       value={newApplicant.department}
                       onChange={(e) => setNewApplicant({ ...newApplicant, department: e.target.value })}
-                    />
+                      disabled={!newApplicant.faculty}
+                    >
+                      <option value="">Select Department</option>
+                      {filteredApplicantDepartments.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
@@ -390,12 +478,34 @@ const CreateAdmission: React.FC = () => {
                     <select
                       className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
                       value={newApplicant.programme}
-                      onChange={(e) => setNewApplicant({ ...newApplicant, programme: e.target.value })}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        const prog = mockProgrammes.find((p) => p.id === id);
+                        const duration =
+                          prog?.durationYears ??
+                          (prog?.degreeType?.toUpperCase() === 'ND' ? 2 : prog?.degreeType?.toUpperCase() === 'HND' ? 2 : undefined);
+                        setNewApplicant({ ...newApplicant, programme: id, programDuration: duration ? String(duration) : newApplicant.programDuration });
+                      }}
                     >
                       <option value="">Select Programme</option>
                       {mockProgrammes.map((prog) => (
-                        <option key={prog.id} value={prog.name}>
+                        <option key={prog.id} value={prog.id}>
                           {prog.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Level</label>
+                    <select
+                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+                      value={newApplicant.level}
+                      onChange={(e) => setNewApplicant({ ...newApplicant, level: e.target.value })}
+                    >
+                      <option value="">Select Level</option>
+                      {levels.map((lvl) => (
+                        <option key={lvl.id} value={lvl.id}>
+                          {lvl.name}
                         </option>
                       ))}
                     </select>
@@ -427,9 +537,9 @@ const CreateAdmission: React.FC = () => {
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Years of Program</label>
                     <input
                       type="number"
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
+                      readOnly
+                      className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none text-sm cursor-not-allowed"
                       value={newApplicant.programDuration}
-                      onChange={(e) => setNewApplicant({ ...newApplicant, programDuration: e.target.value })}
                     />
                   </div>
                 </div>
